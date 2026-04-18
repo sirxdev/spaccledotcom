@@ -1,0 +1,32 @@
+{
+  "name": "com.spaccle.app",
+  "displayName": "Spaccle",
+  "version": "1.0.0",
+  "description": "Spaccle — modern laundry pickup & delivery app",
+  "scripts": {
+    "dev": "cordova prepare browser && concurrently --names \"SYNC,SERVER\" --prefix-colors \"cyan,magenta\" \"chokidar 'www/**/*' -c 'cordova prepare browser'\" \"live-server platforms/browser/www --port=3000 --no-browser --quiet\"",
+    "start": "npm run dev",
+    "build": "cordova build browser"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Apache Cordova Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "pouchdb": "^9.0.0"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^9.2.1",
+    "cordova-android": "^15.0.0",
+    "cordova-browser": "^7.0.0",
+    "live-server": "^1.2.2"
+  },
+  "cordova": {
+    "platforms": [
+      "browser",
+      "android"
+    ]
+  }
+}

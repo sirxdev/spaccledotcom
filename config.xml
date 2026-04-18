@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.spaccle.app" version="1.0.0"
+  xmlns="http://www.w3.org/ns/widgets"
+  xmlns:cdv="http://cordova.apache.org/ns/1.0">
+
+  <name>Spaccle</name>
+  <description>Modern laundry pickup and delivery service</description>
+  <author email="hello@spaccle.com" href="https://spaccle.com">Spaccle Team</author>
+
+  <content src="index.html" />
+
+  <access origin="*" />
+  <allow-intent href="http://*/*" />
+  <allow-intent href="https://*/*" />
+  <allow-intent href="tel:*" />
+  <allow-intent href="sms:*" />
+  <allow-intent href="mailto:*" />
+  <allow-navigation href="https://db.debtrecuva.com/*" />
+  <allow-navigation href="https://js.paystack.co/*" />
+  <allow-navigation href="https://checkout.paystack.com/*" />
+  <allow-navigation href="https://*.paystack.co/*" />
+  <allow-navigation href="https://maps.googleapis.com/*" />
+  <allow-navigation href="https://maps.gstatic.com/*" />
+
+  <preference name="DisallowOverscroll" value="true" />
+  <preference name="android-minSdkVersion" value="22" />
+  <preference name="StatusBarOverlaysWebView" value="false" />
+  <preference name="StatusBarBackgroundColor" value="#5B4FBE" />
+  <preference name="StatusBarStyle" value="lightcontent" />
+  <preference name="ScrollEnabled" value="false" />
+  <preference name="BackupWebStorage" value="local" />
+  <preference name="SplashMaintainAspectRatio" value="true" />
+  <preference name="FadeSplashScreenDuration" value="300" />
+  <preference name="SplashShowOnlyFirstTime" value="false" />
+  <preference name="SplashScreen" value="screen" />
+  <preference name="SplashScreenDelay" value="0" />
+  <preference name="AutoHideSplashScreen" value="true" />
+  <preference name="AndroidPackageType" value="apk" />
+
+  <icon src="res/icon.png" />
+  <platform name="android">
+    <icon src="res/icon/android/icon-ldpi.png"    density="ldpi" />
+    <icon src="res/icon/android/icon-mdpi.png"    density="mdpi" />
+    <icon src="res/icon/android/icon-hdpi.png"    density="hdpi" />
+    <icon src="res/icon/android/icon-xhdpi.png"   density="xhdpi" />
+    <icon src="res/icon/android/icon-xxhdpi.png"  density="xxhdpi" />
+    <icon src="res/icon/android/icon-xxxhdpi.png" density="xxxhdpi" />
+  </platform>
+
+</widget>

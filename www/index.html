@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://js.paystack.co https://checkout.paystack.com; connect-src 'self' https://db.debtrecuva.com https://*.paystack.co https://api.paystack.co https://checkout.paystack.com https://maps.googleapis.com; frame-src 'self' https://js.paystack.co https://checkout.paystack.com; child-src 'self' https://checkout.paystack.com;" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <title>Spaccle</title>
+
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/splash.css" />
+  <link rel="stylesheet" href="css/onboarding.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- Splash Screen -->
+    <div id="page-splash" class="page page--splash active">
+      <div class="splash__bg">
+        <div class="splash__bubble splash__bubble--1"></div>
+        <div class="splash__bubble splash__bubble--2"></div>
+        <div class="splash__bubble splash__bubble--3"></div>
+      </div>
+      <div class="splash__content">
+        <div class="splash__logo">
+          <svg class="splash__icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="38" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+            <circle cx="40" cy="40" r="28" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="40" cy="40" r="20" stroke="white" stroke-width="2.5" fill="none"/>
+            <circle cx="40" cy="40" r="8" stroke="white" stroke-width="2" fill="rgba(255,255,255,0.2)"/>
+            <path d="M28 42 Q31 38 34 42 Q37 46 40 42 Q43 38 46 42 Q49 46 52 42" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <rect x="37" y="22" width="6" height="3" rx="1.5" fill="white"/>
+          </svg>
+          <div class="splash__wordmark">
+            <span class="splash__word-s">S</span><span class="splash__word-rest">paccle</span>
+          </div>
+        </div>
+        <p class="splash__tagline">Clean clothes, zero effort</p>
+      </div>
+      <div class="splash__loader">
+        <div class="splash__loader-bar"></div>
+      </div>
+    </div>
+
+    <!-- Onboarding Screen -->
+    <div id="page-onboarding" class="page page--onboarding">
+      <div class="onboarding__slides" id="onboarding-slides">
+
+        <div class="onboarding__slide active" data-slide="0">
+          <div class="onboarding__illustration">
+            <svg viewBox="0 0 280 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="140" cy="140" rx="110" ry="100" fill="#EDE9FF"/>
+              <path d="M80 160 Q80 200 140 200 Q200 200 200 160 L195 130 Q195 120 140 120 Q85 120 85 130 Z" fill="#5B4FBE"/>
+              <path d="M95 140 Q140 135 185 140" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+              <path d="M90 155 Q140 148 190 155" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+              <path d="M92 170 Q140 163 188 170" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+              <path d="M105 120 Q105 90 140 90 Q175 90 175 120" stroke="#5B4FBE" stroke-width="8" fill="none" stroke-linecap="round"/>
+              <path d="M110 125 Q115 100 125 105 Q120 120 120 125" fill="#06D6A0"/>
+              <path d="M150 122 Q158 98 168 103 Q162 118 160 122" fill="#FF6B6B"/>
+              <circle cx="140" cy="95" r="6" fill="#FFD166"/>
+              <path d="M60 80 L63 73 L66 80 L73 83 L66 86 L63 93 L60 86 L53 83 Z" fill="#FFD166"/>
+              <path d="M210 100 L212 95 L214 100 L219 102 L214 104 L212 109 L210 104 L205 102 Z" fill="#06D6A0" opacity="0.8"/>
+              <circle cx="75" cy="110" r="4" fill="#FF6B6B" opacity="0.6"/>
+              <circle cx="205" cy="75" r="3" fill="#5B4FBE" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="onboarding__text">
+            <h2 class="onboarding__title">Fresh Laundry,<br/>At Your Door</h2>
+            <p class="onboarding__desc">Schedule a pickup in seconds. We collect, clean, and deliver — you relax.</p>
+          </div>
+        </div>
+
+        <div class="onboarding__slide" data-slide="1">
+          <div class="onboarding__illustration">
+            <svg viewBox="0 0 280 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="140" cy="145" rx="105" ry="95" fill="#E6FBF6"/>
+              <rect x="100" y="70" width="80" height="140" rx="12" fill="#1C1B3A"/>
+              <rect x="105" y="85" width="70" height="112" rx="6" fill="#F7F8FF"/>
+              <rect x="125" y="73" width="30" height="8" rx="4" fill="#2D2B50"/>
+              <rect x="108" y="88" width="64" height="60" rx="4" fill="#C8F5EA"/>
+              <path d="M115 108 L172 108" stroke="white" stroke-width="2"/>
+              <path d="M140 95 L140 148" stroke="white" stroke-width="2"/>
+              <circle cx="120" cy="100" r="5" fill="#5B4FBE"/>
+              <circle cx="160" cy="132" r="5" fill="#06D6A0"/>
+              <path d="M120 100 Q120 132 160 132" stroke="#5B4FBE" stroke-width="2" stroke-dasharray="4,3" fill="none"/>
+              <rect x="132" y="112" width="16" height="9" rx="2" fill="#FF6B6B"/>
+              <circle cx="135" cy="121" r="2" fill="#1C1B3A"/>
+              <circle cx="145" cy="121" r="2" fill="#1C1B3A"/>
+              <rect x="108" y="152" width="64" height="14" rx="3" fill="#EDE9FF"/>
+              <rect x="112" y="156" width="40" height="6" rx="3" fill="#5B4FBE" opacity="0.6"/>
+              <rect x="108" y="170" width="64" height="8" rx="3" fill="#E8E6FF"/>
+              <rect x="108" y="182" width="48" height="6" rx="3" fill="#E8E6FF"/>
+              <circle cx="140" cy="117" r="14" stroke="#FF6B6B" stroke-width="1.5" opacity="0.4" fill="none"/>
+              <circle cx="140" cy="117" r="22" stroke="#FF6B6B" stroke-width="1" opacity="0.2" fill="none"/>
+            </svg>
+          </div>
+          <div class="onboarding__text">
+            <h2 class="onboarding__title">Track Every Step,<br/>In Real Time</h2>
+            <p class="onboarding__desc">Know exactly where your clothes are — from pickup to delivery, live on your map.</p>
+          </div>
+        </div>
+
+        <div class="onboarding__slide" data-slide="2">
+          <div class="onboarding__illustration">
+            <svg viewBox="0 0 280 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="140" cy="145" rx="110" ry="95" fill="#FFF3E0"/>
+              <path d="M100 100 L80 130 L105 130 L105 195 L175 195 L175 130 L200 130 L180 100 L160 110 Q140 125 120 110 Z" fill="white" stroke="#E0E0E0" stroke-width="1.5"/>
+              <path d="M120 110 Q140 100 160 110 L140 130 Z" fill="#EDE9FF"/>
+              <path d="M115 150 L115 185" stroke="#E8E6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <path d="M165 150 L165 185" stroke="#E8E6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <circle cx="168" cy="108" r="24" fill="#06D6A0"/>
+              <path d="M157 108 L164 116 L180 100" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <path d="M75 155 L77.5 148 L80 155 L87 157.5 L80 160 L77.5 167 L75 160 L68 157.5 Z" fill="#FFD166"/>
+              <path d="M195 160 L197 155 L199 160 L204 162 L199 164 L197 169 L195 164 L190 162 Z" fill="#5B4FBE" opacity="0.7"/>
+              <circle cx="90" cy="200" r="5" fill="#FF6B6B" opacity="0.5"/>
+              <circle cx="200" cy="195" r="4" fill="#06D6A0" opacity="0.6"/>
+            </svg>
+          </div>
+          <div class="onboarding__text">
+            <h2 class="onboarding__title">Pro Care,<br/>Every Time</h2>
+            <p class="onboarding__desc">Expert handling for every fabric. Stains removed, clothes returned folded and fresh.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="onboarding__dots" id="onboarding-dots">
+        <span class="onboarding__dot active" data-dot="0"></span>
+        <span class="onboarding__dot" data-dot="1"></span>
+        <span class="onboarding__dot" data-dot="2"></span>
+      </div>
+
+      <div class="onboarding__nav">
+        <button class="btn btn--ghost" id="btn-skip">Skip</button>
+        <button class="btn btn--primary btn--pill" id="btn-next">
+          <span id="btn-next-label">Next</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Auth Screen -->
+    <div id="page-auth" class="page page--auth">
+      <div class="auth__header">
+        <div class="auth__header-bg"></div>
+        <div class="auth__header-content">
+          <div class="auth__logo" id="auth-logo-tap">
+            <svg width="36" height="36" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="28" fill="rgba(255,255,255,0.15)"/>
+              <circle cx="40" cy="40" r="20" stroke="white" stroke-width="2.5" fill="none"/>
+              <circle cx="40" cy="40" r="8" stroke="white" stroke-width="2" fill="rgba(255,255,255,0.2)"/>
+              <path d="M28 42 Q31 38 34 42 Q37 46 40 42 Q43 38 46 42 Q49 46 52 42" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <rect x="37" y="22" width="6" height="3" rx="1.5" fill="white"/>
+            </svg>
+            <span class="auth__logo-text">Spaccle</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth__card">
+        <div class="auth__tabs">
+          <button class="auth__tab active" data-tab="login">Sign In</button>
+          <button class="auth__tab" data-tab="register">Create Account</button>
+          <div class="auth__tab-indicator"></div>
+        </div>
+
+        <!-- Login Form -->
+        <form class="auth__form active" id="form-login" data-form="login" novalidate>
+          <div class="auth__greeting">
+            <h2 class="auth__form-title">Welcome back</h2>
+            <p class="auth__form-sub">Sign in to your account</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email address</label>
+            <div class="form-input-wrap">
+              <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+              <input class="form-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email" inputmode="email" />
+            </div>
+            <span class="form-error" id="login-email-err"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <div class="form-input-wrap">
+              <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+              </svg>
+              <input class="form-input" type="password" id="login-password" placeholder="Your password" autocomplete="current-password" />
+              <button type="button" class="form-toggle-pw" data-target="login-password" aria-label="Toggle password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="icon-eye">
+                  <path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </button>
+            </div>
+            <span class="form-error" id="login-password-err"></span>
+          </div>
+
+          <button type="button" class="auth__forgot" id="btn-forgot">Forgot password?</button>
+          <div class="auth__alert" id="login-alert"></div>
+
+          <button type="submit" class="btn btn--primary btn--full btn--lg" id="btn-login">
+            <span class="btn__label">Sign In</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </form>
+
+        <!-- Register Form — 2 steps -->
+        <form class="auth__form" id="form-register" data-form="register" novalidate>
+
+          <!-- Step indicator -->
+          <div class="reg-steps">
+            <div class="reg-step active" id="reg-step-ind-1">
+              <span class="reg-step__num">1</span>
+              <span class="reg-step__label">Account</span>
+            </div>
+            <div class="reg-step__line"><div class="reg-step__line-fill" id="reg-step-line-fill"></div></div>
+            <div class="reg-step" id="reg-step-ind-2">
+              <span class="reg-step__num">2</span>
+              <span class="reg-step__label">Recovery</span>
+            </div>
+          </div>
+
+          <!-- ── Step 1: Account details ── -->
+          <div class="reg-body active" id="reg-body-1">
+            <div class="auth__greeting">
+              <h2 class="auth__form-title">Join Spaccle</h2>
+              <p class="auth__form-sub">Create your free account</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-name">Full name</label>
+              <div class="form-input-wrap">
+                <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                <input class="form-input" type="text" id="reg-name" placeholder="John Doe" autocomplete="name" />
+              </div>
+              <span class="form-error" id="reg-name-err"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-email">Email address</label>
+              <div class="form-input-wrap">
+                <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                  <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+                <input class="form-input" type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" inputmode="email" />
+              </div>
+              <span class="form-error" id="reg-email-err"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-phone">Phone number</label>
+              <div class="form-input-wrap">
+                <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 11.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                <input class="form-input" type="tel" id="reg-phone" placeholder="+1 (555) 000-0000" autocomplete="tel" inputmode="tel" />
+              </div>
+              <span class="form-error" id="reg-phone-err"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-password">Password</label>
+              <div class="form-input-wrap">
+                <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+                </svg>
+                <input class="form-input" type="password" id="reg-password" placeholder="Min. 8 characters" autocomplete="new-password" />
+                <button type="button" class="form-toggle-pw" data-target="reg-password" aria-label="Toggle password">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="icon-eye">
+                    <path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="password-strength" id="pw-strength">
+                <div class="password-strength__bar">
+                  <div class="password-strength__fill" id="pw-strength-fill"></div>
+                </div>
+                <span class="password-strength__label" id="pw-strength-label"></span>
+              </div>
+              <span class="form-error" id="reg-password-err"></span>
+            </div>
+
+            <div class="auth__terms">
+              <label class="checkbox-label">
+                <input type="checkbox" id="reg-terms" class="checkbox-input" />
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-text">I agree to the <a href="#" class="auth__link">Terms</a> and <a href="#" class="auth__link">Privacy Policy</a></span>
+              </label>
+              <span class="form-error" id="reg-terms-err"></span>
+            </div>
+
+            <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-reg-continue">
+              Continue
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- ── Step 2: Recovery question ── -->
+          <div class="reg-body" id="reg-body-2">
+            <div class="auth__greeting">
+              <h2 class="auth__form-title">Recovery Setup</h2>
+              <p class="auth__form-sub">Choose a question only you can answer</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-question">Security question</label>
+              <div class="form-select-wrap">
+                <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="12" cy="17" r="1" fill="currentColor"/>
+                </svg>
+                <select class="form-input form-select" id="reg-question">
+                  <option value="">Choose a question…</option>
+                </select>
+                <svg class="form-select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="form-error" id="reg-question-err"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-answer">Your answer</label>
+              <div class="form-input-wrap">
+                <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input class="form-input" type="text" id="reg-answer" placeholder="Type your answer…" autocomplete="off" autocorrect="off" spellcheck="false" />
+              </div>
+              <div class="form-hint">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+                  <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                </svg>
+                Not case-sensitive. Minor typos are forgiven.
+              </div>
+              <span class="form-error" id="reg-answer-err"></span>
+            </div>
+
+            <div class="auth__alert" id="register-alert"></div>
+
+            <div class="reg-step2-nav">
+              <button type="button" class="btn btn--ghost" id="btn-reg-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back
+              </button>
+              <button type="submit" class="btn btn--primary btn--lg" id="btn-register">
+                <span class="btn__label">Create Account</span>
+                <div class="btn__spinner"></div>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="auth__divider"><span>or continue with</span></div>
+
+      <div class="auth__social">
+        <button class="btn btn--social">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Google
+        </button>
+        <button class="btn btn--social">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Facebook
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Forgot Password Bottom Sheet ──────────────────────────── -->
+  <div id="forgot-overlay" class="forgot-overlay" role="dialog" aria-modal="true" aria-label="Reset password">
+    <div class="forgot-backdrop" id="forgot-backdrop"></div>
+    <div class="forgot-sheet">
+      <div class="forgot-handle"></div>
+
+      <div class="forgot-header">
+        <div class="forgot-header-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <h3 class="forgot-title">Reset Password</h3>
+        <button class="forgot-close" id="btn-forgot-close" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Progress dots -->
+      <div class="forgot-progress">
+        <div class="forgot-progress__dot active" data-step="1"></div>
+        <div class="forgot-progress__line"><div class="forgot-progress__line-fill" id="fp-line-1"></div></div>
+        <div class="forgot-progress__dot" data-step="2"></div>
+        <div class="forgot-progress__line"><div class="forgot-progress__line-fill" id="fp-line-2"></div></div>
+        <div class="forgot-progress__dot" data-step="3"></div>
+      </div>
+
+      <!-- Step 1: Enter email -->
+      <div class="forgot-step active" id="fp-step-1">
+        <p class="forgot-step__desc">Enter the email address associated with your account.</p>
+        <div class="form-group">
+          <label class="form-label" for="fp-email">Email address</label>
+          <div class="form-input-wrap">
+            <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+              <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            </svg>
+            <input class="form-input" type="email" id="fp-email" placeholder="you@example.com" inputmode="email" autocomplete="email" />
+          </div>
+          <span class="form-error" id="fp-email-err"></span>
+        </div>
+        <div class="auth__alert" id="fp-step1-alert"></div>
+        <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-find">
+          <span class="btn__label">Find Account</span>
+          <div class="btn__spinner"></div>
+        </button>
+      </div>
+
+      <!-- Step 2: Answer security question -->
+      <div class="forgot-step" id="fp-step-2">
+        <p class="forgot-step__desc">Answer your security question to verify it's you.</p>
+        <div class="forgot-question-card" id="fp-question-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="forgot-q-icon">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="17" r="1" fill="currentColor"/>
+          </svg>
+          <span id="fp-question-text">Loading…</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fp-answer">Your answer</label>
+          <div class="form-input-wrap">
+            <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input class="form-input" type="text" id="fp-answer" placeholder="Type your answer…" autocomplete="off" autocorrect="off" spellcheck="false" />
+          </div>
+          <div class="form-hint">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+              <circle cx="12" cy="16" r="1" fill="currentColor"/>
+              <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Capitals and minor typos won't lock you out.
+          </div>
+          <span class="form-error" id="fp-answer-err"></span>
+        </div>
+        <div class="auth__alert" id="fp-step2-alert"></div>
+        <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-verify">
+          <span class="btn__label">Verify Answer</span>
+          <div class="btn__spinner"></div>
+        </button>
+      </div>
+
+      <!-- Step 3: New password -->
+      <div class="forgot-step" id="fp-step-3">
+        <p class="forgot-step__desc">Choose a new password for your account.</p>
+        <div class="form-group">
+          <label class="form-label" for="fp-newpw">New password</label>
+          <div class="form-input-wrap">
+            <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+            </svg>
+            <input class="form-input" type="password" id="fp-newpw" placeholder="Min. 8 characters" autocomplete="new-password" />
+            <button type="button" class="form-toggle-pw" data-target="fp-newpw" aria-label="Toggle password">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="icon-eye">
+                <path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+            </button>
+          </div>
+          <span class="form-error" id="fp-newpw-err"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fp-confirmpw">Confirm password</label>
+          <div class="form-input-wrap">
+            <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+            </svg>
+            <input class="form-input" type="password" id="fp-confirmpw" placeholder="Repeat your password" autocomplete="new-password" />
+          </div>
+          <span class="form-error" id="fp-confirmpw-err"></span>
+        </div>
+        <div class="auth__alert" id="fp-step3-alert"></div>
+        <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-reset">
+          <span class="btn__label">Reset Password</span>
+          <div class="btn__spinner"></div>
+        </button>
+      </div>
+
+      <!-- Step 4: Success -->
+      <div class="forgot-step" id="fp-step-4">
+        <div class="forgot-success">
+          <div class="forgot-success__icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="forgot-success__title">Password Reset!</h3>
+          <p class="forgot-success__desc">Your password has been updated. You can now sign in with your new password.</p>
+          <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-done">Sign In Now</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Home Dashboard ─────────────────────────────────────────── -->
+  <div id="page-home" class="page page--home">
+
+    <!-- Top bar -->
+    <header class="home-topbar">
+      <div class="home-greeting">
+        <p class="home-greeting__sub" id="home-greeting-sub">Good morning,</p>
+        <h1 class="home-greeting__name" id="home-greeting-name">there</h1>
+      </div>
+      <div class="home-topbar__right">
+        <button class="home-icon-btn" id="btn-home-notify" aria-label="Notifications">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="home-badge" id="home-notify-badge">2</span>
+        </button>
+        <button class="home-avatar" id="btn-home-avatar" aria-label="Profile">
+          <span id="home-avatar-letter">?</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab content area -->
+    <div class="home-content">
+
+      <!-- ── HOME TAB ── -->
+      <div class="home-tab active" id="tab-home">
+        <div class="home-scroll">
+
+          <!-- Hero pickup card -->
+          <div class="hero-card">
+            <div class="hero-card__body">
+              <p class="hero-card__eyebrow">Free pickup & delivery</p>
+              <h2 class="hero-card__title">Ready for fresh<br/>laundry today?</h2>
+              <button class="btn btn--accent btn--pill hero-card__cta" id="btn-schedule-pickup">
+                Schedule Pickup
+              </button>
+            </div>
+            <div class="hero-card__illo">
+              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Machine body -->
+                <rect x="10" y="20" width="100" height="85" rx="10" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+                <!-- Door circle -->
+                <circle cx="60" cy="68" r="28" stroke="rgba(255,255,255,0.5)" stroke-width="2.5" fill="rgba(255,255,255,0.08)"/>
+                <circle cx="60" cy="68" r="18" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="rgba(255,255,255,0.12)"/>
+                <!-- Water wave inside drum -->
+                <path d="M46 70 Q50 65 54 70 Q58 75 62 70 Q66 65 70 70 Q74 75 78 70" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/>
+                <!-- Control panel dots -->
+                <circle cx="30" cy="38" r="5" fill="rgba(255,255,255,0.6)"/>
+                <circle cx="46" cy="38" r="5" fill="rgba(255,255,255,0.3)"/>
+                <rect x="60" y="33" width="35" height="10" rx="5" fill="rgba(255,255,255,0.2)"/>
+                <!-- Handle -->
+                <rect x="55" y="41" width="10" height="4" rx="2" fill="rgba(255,255,255,0.6)"/>
+                <!-- Bubbles floating -->
+                <circle cx="88" cy="55" r="4" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="95" cy="42" r="3" fill="rgba(255,255,255,0.2)"/>
+                <circle cx="18" cy="60" r="3" fill="rgba(255,255,255,0.2)"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Active order section -->
+          <div class="home-section">
+            <div class="home-section__head">
+              <h3 class="home-section__title">Active Order</h3>
+              <button class="home-section__link" id="btn-view-orders">View all</button>
+            </div>
+
+            <!-- Empty state (shown when no active order) -->
+            <div class="order-empty" id="order-empty-state">
+              <div class="order-empty__illo">
+                <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="15" y="20" width="70" height="50" rx="8" fill="#EDE9FF"/>
+                  <rect x="22" y="28" width="56" height="6" rx="3" fill="#C8C1F5"/>
+                  <rect x="22" y="38" width="40" height="5" rx="2.5" fill="#DDD8F8"/>
+                  <rect x="22" y="47" width="50" height="5" rx="2.5" fill="#DDD8F8"/>
+                  <circle cx="75" cy="22" r="12" fill="#06D6A0"/>
+                  <path d="M69 22l4 4 7-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <p class="order-empty__title">No active orders</p>
+              <p class="order-empty__sub">Schedule a pickup and we'll handle the rest</p>
+            </div>
+
+            <!-- Active order card (shown when order exists) -->
+            <div class="order-card" id="order-active-card" style="display:none">
+              <div class="order-card__status">
+                <div class="order-card__status-dot"></div>
+                <span id="order-status-label">In Progress</span>
+              </div>
+              <div class="order-card__info">
+                <div class="order-card__row">
+                  <span class="order-card__label">Order ID</span>
+                  <span class="order-card__val" id="order-id-val">#SP-0001</span>
+                </div>
+                <div class="order-card__row">
+                  <span class="order-card__label">Pickup</span>
+                  <span class="order-card__val" id="order-pickup-val">Today, 2:00 PM</span>
+                </div>
+                <div class="order-card__row">
+                  <span class="order-card__label">Service</span>
+                  <span class="order-card__val" id="order-items-val">8 items</span>
+                </div>
+              </div>
+              <div class="order-card__track">
+                <div class="order-track-steps">
+                  <div class="order-track-step done">
+                    <div class="order-track-step__dot"></div>
+                    <span>Picked up</span>
+                  </div>
+                  <div class="order-track-step active">
+                    <div class="order-track-step__dot"></div>
+                    <span>Cleaning</span>
+                  </div>
+                  <div class="order-track-step">
+                    <div class="order-track-step__dot"></div>
+                    <span>Ready</span>
+                  </div>
+                  <div class="order-track-step">
+                    <div class="order-track-step__dot"></div>
+                    <span>Delivered</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Services grid -->
+          <div class="home-section">
+            <div class="home-section__head">
+              <h3 class="home-section__title">Our Services</h3>
+            </div>
+            <div class="services-grid">
+
+              <button class="service-card" data-service="wash-fold">
+                <div class="service-card__icon" style="background:#E8F4FF">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 6h18M3 12h18M3 18h18" stroke="#4A90E2" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="7" cy="6" r="2" fill="#4A90E2"/>
+                    <circle cx="7" cy="12" r="2" fill="#4A90E2" opacity="0.6"/>
+                    <circle cx="7" cy="18" r="2" fill="#4A90E2" opacity="0.3"/>
+                  </svg>
+                </div>
+                <span class="service-card__name">Wash &amp; Fold</span>
+                <span class="service-card__price">₦900/item</span>
+              </button>
+
+              <button class="service-card" data-service="dry-clean">
+                <div class="service-card__icon" style="background:#F0EEFF">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L8 6H5l1 14h12L19 6h-3L12 2z" stroke="#5B4FBE" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+                    <path d="M9 6V5a3 3 0 0 1 6 0v1" stroke="#5B4FBE" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M9 12h6" stroke="#5B4FBE" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                  </svg>
+                </div>
+                <span class="service-card__name">Dry Cleaning</span>
+                <span class="service-card__price">₦900/item</span>
+              </button>
+
+              <button class="service-card" data-service="iron-press">
+                <div class="service-card__icon" style="background:#E6FBF6">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 17h18l-2-8H7L5 5H3" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <path d="M5 17v2" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M19 17v2" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M9 12h8" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                  </svg>
+                </div>
+                <span class="service-card__name">Iron &amp; Press</span>
+                <span class="service-card__price">₦900/item</span>
+              </button>
+
+              <button class="service-card" data-service="duvet">
+                <div class="service-card__icon" style="background:#FFF3E0">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="8" width="20" height="12" rx="3" stroke="#FF9800" stroke-width="1.8" fill="none"/>
+                    <path d="M2 12h20" stroke="#FF9800" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                    <path d="M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" stroke="#FF9800" stroke-width="1.8" stroke-linecap="round"/>
+                    <circle cx="8" cy="15" r="1.5" fill="#FF9800" opacity="0.5"/>
+                    <circle cx="12" cy="15" r="1.5" fill="#FF9800" opacity="0.5"/>
+                    <circle cx="16" cy="15" r="1.5" fill="#FF9800" opacity="0.5"/>
+                  </svg>
+                </div>
+                <span class="service-card__name">Duvet &amp; Bedding</span>
+                <span class="service-card__price">From ₦7,500</span>
+              </button>
+
+              <button class="service-card" data-service="alteration">
+                <div class="service-card__icon" style="background:#FFF0F5">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L9 7H5l3.5 3L7 15l5-3 5 3-1.5-5L19 7h-4L12 2z" stroke="#E91E8C" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+                    <path d="M12 15v7" stroke="#E91E8C" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M9 19h6" stroke="#E91E8C" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                  </svg>
+                </div>
+                <span class="service-card__name">Alterations</span>
+                <span class="service-card__price">From ₦1,200/item</span>
+              </button>
+
+              <button class="service-card" data-service="shoe-clean">
+                <div class="service-card__icon" style="background:#F0F8FF">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path d="M2 17c0 0 2-5 6-5h3l5-6h2l2 4-6 2-2 5H2z" stroke="#1565C0" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+                    <path d="M8 17l1-3" stroke="#1565C0" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                    <path d="M13 17l1-3" stroke="#1565C0" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                  </svg>
+                </div>
+                <span class="service-card__name">Shoe Cleaning</span>
+                <span class="service-card__price">From ₦3,500/pair</span>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- Promo banner -->
+          <div class="promo-banner">
+            <div class="promo-banner__text">
+              <p class="promo-banner__tag">New customer offer</p>
+              <h4 class="promo-banner__title">First order 20% off</h4>
+              <p class="promo-banner__sub">Use code <strong>WELCOME20</strong> at checkout</p>
+            </div>
+            <div class="promo-banner__illo">
+              <svg viewBox="0 0 70 70" fill="none">
+                <circle cx="35" cy="35" r="32" fill="rgba(255,255,255,0.15)"/>
+                <path d="M20 35 L30 45 L50 25" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="52" cy="20" r="6" fill="rgba(255,255,255,0.25)"/>
+                <text x="49" y="24" font-size="7" fill="white" font-weight="700">%</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- How it works -->
+          <div class="home-section" style="margin-bottom: 12px">
+            <div class="home-section__head">
+              <h3 class="home-section__title">How It Works</h3>
+            </div>
+            <div class="how-steps">
+              <div class="how-step">
+                <div class="how-step__num">1</div>
+                <div class="how-step__body">
+                  <p class="how-step__title">Schedule</p>
+                  <p class="how-step__desc">Pick a time that works for you</p>
+                </div>
+              </div>
+              <div class="how-step__connector"></div>
+              <div class="how-step">
+                <div class="how-step__num">2</div>
+                <div class="how-step__body">
+                  <p class="how-step__title">We collect</p>
+                  <p class="how-step__desc">Door-to-door pickup at your chosen time</p>
+                </div>
+              </div>
+              <div class="how-step__connector"></div>
+              <div class="how-step">
+                <div class="how-step__num">3</div>
+                <div class="how-step__body">
+                  <p class="how-step__title">We clean</p>
+                  <p class="how-step__desc">Expert care for every garment</p>
+                </div>
+              </div>
+              <div class="how-step__connector"></div>
+              <div class="how-step">
+                <div class="how-step__num">4</div>
+                <div class="how-step__body">
+                  <p class="how-step__title">Delivered</p>
+                  <p class="how-step__desc">Back at your door, fresh and folded</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- .home-scroll -->
+      </div><!-- #tab-home -->
+
+      <!-- ── ORDERS TAB ── -->
+      <div class="home-tab" id="tab-orders">
+        <div class="home-scroll">
+          <div class="tab-head">
+            <div>
+              <h2 class="tab-title">Orders</h2>
+              <p class="tab-subtitle">Track your laundry from pickup to delivery.</p>
+            </div>
+            <button class="btn btn--primary btn--pill tab-action" id="btn-orders-new">New Order</button>
+          </div>
+
+          <div class="orders-empty" id="orders-empty">
+            <div class="orders-empty__icon" style="background:#EDE9FF">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#5B4FBE" stroke-width="1.8" fill="none"/>
+                <polyline points="14,2 14,8 20,8" stroke="#5B4FBE" stroke-width="1.8"/>
+                <line x1="8" y1="13" x2="16" y2="13" stroke="#5B4FBE" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="8" y1="17" x2="13" y2="17" stroke="#5B4FBE" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>No orders yet</h3>
+            <p>Schedule a pickup and your orders will show up here.</p>
+            <button class="btn btn--primary btn--pill" id="btn-orders-empty-cta">Schedule Pickup</button>
+          </div>
+
+          <div class="orders-list" id="orders-list"></div>
+        </div>
+      </div>
+
+      <!-- ── TRACK TAB ── -->
+      <div class="home-tab" id="tab-track">
+        <div class="home-scroll">
+          <div class="tab-head">
+            <div>
+              <h2 class="tab-title">Tracking</h2>
+              <p class="tab-subtitle">See when your laundry will be ready.</p>
+            </div>
+            <button class="btn btn--ghost btn--pill tab-action-secondary" id="btn-track-support">Support</button>
+          </div>
+
+          <div class="track-empty" id="track-empty">
+            <div class="track-empty__icon" style="background:#E6FBF6">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#06D6A0" stroke-width="1.8" fill="none"/>
+                <circle cx="12" cy="10" r="3" stroke="#06D6A0" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <h3>No active order</h3>
+            <p>Once you schedule a pickup, tracking will appear here.</p>
+            <button class="btn btn--primary btn--pill" id="btn-track-empty-cta">Schedule Pickup</button>
+          </div>
+
+          <div class="track-card" id="track-card" style="display:none">
+            <div class="track-card__top">
+              <div>
+                <p class="track-card__eyebrow" id="track-order-id">SP-000000</p>
+                <h3 class="track-card__title" id="track-status-title">Cleaning</h3>
+                <p class="track-card__sub" id="track-status-sub">We’re taking care of your garments.</p>
+              </div>
+              <div class="track-card__pill" id="track-status-pill">In Progress</div>
+            </div>
+
+            <div class="track-meta">
+              <div class="track-meta__row">
+                <span class="track-meta__label">Pickup</span>
+                <span class="track-meta__val" id="track-pickup">Today, 2:00 PM</span>
+              </div>
+              <div class="track-meta__row">
+                <span class="track-meta__label">Est. ready</span>
+                <span class="track-meta__val" id="track-ready">—</span>
+              </div>
+            </div>
+
+            <div class="track-timeline" id="track-timeline"></div>
+
+            <div class="track-actions">
+              <button class="btn btn--ghost btn--pill" id="btn-track-details">View Details</button>
+              <button class="btn btn--ghost btn--pill" id="btn-track-map">Map</button>
+              <button class="btn btn--primary btn--pill" id="btn-track-advance">Update Status</button>
+            </div>
+
+            <div class="track-map" id="track-map" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROFILE TAB ── -->
+      <div class="home-tab" id="tab-profile">
+        <div class="home-scroll">
+
+          <div class="profile-header" id="profile-header">
+            <div class="profile-avatar-lg" id="profile-avatar-lg">A</div>
+            <h2 class="profile-name" id="profile-name">Austin</h2>
+            <p class="profile-email" id="profile-email">austin@example.com</p>
+          </div>
+
+          <div class="profile-menu">
+
+            <div class="profile-menu__section">
+              <p class="profile-menu__label">Account</p>
+              <button class="profile-menu__item" id="btn-open-profile-info">
+                <div class="profile-menu__item-icon" style="background:#EDE9FF">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#5B4FBE" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="#5B4FBE" stroke-width="1.8"/></svg>
+                </div>
+                <span>Personal Information</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-profile-addresses">
+                <div class="profile-menu__item-icon" style="background:#E6FBF6">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#06D6A0" stroke-width="1.8" fill="none"/><circle cx="12" cy="10" r="3" stroke="#06D6A0" stroke-width="1.8"/></svg>
+                </div>
+                <span>Saved Addresses</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-profile-payment">
+                <div class="profile-menu__item-icon" style="background:#FFF3E0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#FF9800" stroke-width="1.8" fill="none"/><line x1="2" y1="10" x2="22" y2="10" stroke="#FF9800" stroke-width="1.5"/></svg>
+                </div>
+                <span>Payment Methods</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+
+            <div class="profile-menu__section">
+              <p class="profile-menu__label">Preferences</p>
+              <button class="profile-menu__item" id="btn-open-profile-notifications">
+                <div class="profile-menu__item-icon" style="background:#F0EEFF">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#5B4FBE" stroke-width="1.8"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#5B4FBE" stroke-width="1.8"/></svg>
+                </div>
+                <span>Notifications</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-profile-settings">
+                <div class="profile-menu__item-icon" style="background:#E8F4FF">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#4A90E2" stroke-width="1.8"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span>App Settings</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+
+            <div class="profile-menu__section">
+              <p class="profile-menu__label">Support</p>
+              <button class="profile-menu__item" id="btn-open-support">
+                <div class="profile-menu__item-icon" style="background:#E6FBF6">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#06D6A0" stroke-width="1.8" fill="none"/></svg>
+                </div>
+                <span>Help &amp; Support</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+
+            <button class="profile-logout" id="btn-logout">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              Sign Out
+            </button>
+
+          </div>
+        </div><!-- .home-scroll -->
+      </div><!-- #tab-profile -->
+
+    </div><!-- .home-content -->
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="bottom-nav__item active" data-tab="home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        <span>Home</span>
+      </button>
+      <button class="bottom-nav__item" data-tab="orders">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="1.8"/>
+          <line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="8" y1="17" x2="13" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Orders</span>
+      </button>
+      <button class="bottom-nav__item bottom-nav__item--center" data-tab="new-order" id="btn-nav-new">
+        <div class="bottom-nav__fab">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <line x1="12" y1="5" x2="12" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="5" y1="12" x2="19" y2="12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </button>
+      <button class="bottom-nav__item" data-tab="track">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        <span>Track</span>
+      </button>
+      <button class="bottom-nav__item" data-tab="profile">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+    <div class="sheet-overlay" id="sheet-overlay" aria-hidden="true"></div>
+
+    <div class="sheet" id="sheet-schedule" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">New Order</p>
+          <h3 class="sheet__title">Schedule Pickup</h3>
+        </div>
+        <button class="sheet__close" id="btn-schedule-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="sheet__content">
+        <div class="sheet-block">
+          <p class="sheet-block__label">Service</p>
+          <div class="service-pills" id="service-pills">
+            <button class="service-pill active" data-service="wash-fold">Wash &amp; Fold</button>
+            <button class="service-pill" data-service="dry-clean">Dry Cleaning</button>
+            <button class="service-pill" data-service="iron-press">Iron &amp; Press</button>
+            <button class="service-pill" data-service="duvet">Bedding</button>
+            <button class="service-pill" data-service="alteration">Alterations</button>
+            <button class="service-pill" data-service="shoe-clean">Shoes</button>
+          </div>
+        </div>
+
+        <div class="sheet-block">
+          <p class="sheet-block__label">Billing</p>
+          <div class="admin-tabs" id="billing-tabs">
+            <button class="admin-tab active" id="btn-billing-payg" data-billing="payg">Pay As You Go</button>
+            <button class="admin-tab" id="btn-billing-sub" data-billing="subscription">Monthly Plan</button>
+          </div>
+        </div>
+
+        <div class="sheet-block" id="subscription-block" style="display:none">
+          <p class="sheet-block__label">Monthly Plans (₦/month)</p>
+          <div class="plan-cards" id="plan-cards"></div>
+          <div class="orders-empty" id="subscription-required" style="display:none;margin-top:14px">
+            <h3>No active subscription</h3>
+            <p>Subscribe to a plan to use monthly benefits.</p>
+            <button class="btn btn--primary btn--pill" id="btn-open-subscribe">Subscribe</button>
+          </div>
+        </div>
+
+        <div class="form-group" id="items-count-group">
+          <label class="form-label" for="pickup-items">
+            <span id="items-count-label">Estimated items count</span>
+            <span class="form-label-hint" id="items-payg-rate" style="display:none">₦900/item</span>
+          </label>
+          <input class="form-input" id="pickup-items" inputmode="numeric" placeholder="e.g. 8" />
+        </div>
+
+        <div class="sheet-block">
+          <p class="sheet-block__label">Pickup date</p>
+          <div class="date-picker" id="date-picker" role="group" aria-label="Select pickup date"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pickup-time">Time window</label>
+          <div class="select-wrap">
+            <select class="form-input" id="pickup-time">
+              <option value="9:00 AM – 11:00 AM">9:00 AM – 11:00 AM</option>
+              <option value="11:00 AM – 1:00 PM">11:00 AM – 1:00 PM</option>
+              <option value="2:00 PM – 4:00 PM" selected>2:00 PM – 4:00 PM</option>
+              <option value="5:00 PM – 7:00 PM">5:00 PM – 7:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pickup-address">Pickup address</label>
+          <input class="form-input" id="pickup-address" placeholder="Apartment, street, city" autocomplete="street-address" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pickup-notes">Notes (optional)</label>
+          <textarea class="form-input form-textarea" id="pickup-notes" rows="3" placeholder="Gate code, instructions, preferred drop-off…"></textarea>
+        </div>
+
+        <div class="sheet__footer">
+          <button class="btn btn--primary btn--full btn--lg" id="btn-schedule-confirm">
+            <span class="btn__label">Confirm Pickup</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="sheet-subscription" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Subscription</p>
+          <h3 class="sheet__title">Choose a plan</h3>
+        </div>
+        <button class="sheet__close" id="btn-subscription-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="tab-subtitle" id="sub-current"></div>
+        <div class="plan-cards" id="sub-plan-cards"></div>
+        <div class="sheet__footer sheet__footer--split">
+          <button class="btn btn--ghost btn--pill" id="btn-subscribe-cancel">Cancel</button>
+          <button class="btn btn--primary btn--pill" id="btn-subscribe-pay">
+            <span class="btn__label">Subscribe</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="sheet-order" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Order</p>
+          <h3 class="sheet__title" id="order-sheet-title">SP-000000</h3>
+        </div>
+        <button class="sheet__close" id="btn-order-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="order-detail" id="order-detail"></div>
+        <div class="sheet__footer sheet__footer--split">
+          <button class="btn btn--ghost btn--pill" id="btn-order-support">Support</button>
+          <button class="btn btn--primary btn--pill" id="btn-order-track">Go to Tracking</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="sheet-support" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Support</p>
+          <h3 class="sheet__title">Help &amp; Support</h3>
+        </div>
+        <button class="sheet__close" id="btn-support-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="support-quick">
+          <div class="support-quick__card">
+            <p class="support-quick__label">Email</p>
+            <p class="support-quick__val" id="support-email">support@spaccle.com</p>
+            <button class="btn btn--ghost btn--pill support-quick__btn" id="btn-copy-support-email">Copy</button>
+          </div>
+          <div class="support-quick__card">
+            <p class="support-quick__label">Hours</p>
+            <p class="support-quick__val">8am–8pm daily</p>
+            <p class="support-quick__hint">Fast replies for active orders</p>
+          </div>
+        </div>
+
+        <div class="support-faq">
+          <p class="sheet-block__label">FAQ</p>
+          <details class="faq-item">
+            <summary>When will my clothes be ready?</summary>
+            <div class="faq-item__body">Your Tracking tab shows the current step and estimated ready time. We also notify you when the order becomes Ready.</div>
+          </details>
+          <details class="faq-item">
+            <summary>Can I change my pickup time?</summary>
+            <div class="faq-item__body">Open your order details and contact support. We can usually adjust the pickup window if the driver hasn’t arrived yet.</div>
+          </details>
+          <details class="faq-item">
+            <summary>What if I’m missing an item?</summary>
+            <div class="faq-item__body">Send us a message with your order number and a description. We’ll investigate and follow up.</div>
+          </details>
+        </div>
+
+        <div class="support-form">
+          <p class="sheet-block__label">Send a message</p>
+          <div class="form-group">
+            <label class="form-label" for="support-subject">Subject</label>
+            <input class="form-input" id="support-subject" placeholder="e.g. Order ready time, address change…" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="support-message">Message</label>
+            <textarea class="form-input form-textarea" id="support-message" rows="4" placeholder="Tell us what you need help with…"></textarea>
+          </div>
+          <button class="btn btn--primary btn--full btn--lg" id="btn-support-send">
+            <span class="btn__label">Send</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile: Personal Information -->
+    <div class="sheet" id="sheet-profile-info" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Profile</p>
+          <h3 class="sheet__title">Personal Information</h3>
+        </div>
+        <button class="sheet__close" id="btn-profile-info-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="form-group">
+          <label class="form-label" for="pi-name">Full Name</label>
+          <input class="form-input" id="pi-name" type="text" placeholder="Your full name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pi-email">Email</label>
+          <input class="form-input" id="pi-email" type="email" disabled style="opacity:0.6;cursor:not-allowed" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pi-phone">Phone Number</label>
+          <input class="form-input" id="pi-phone" type="tel" placeholder="e.g. 08012345678" />
+        </div>
+        <div class="sheet__footer">
+          <button class="btn btn--primary btn--full btn--lg" id="btn-profile-info-save">
+            <span class="btn__label">Save Changes</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile: Saved Addresses -->
+    <div class="sheet" id="sheet-profile-addresses" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Profile</p>
+          <h3 class="sheet__title">Saved Addresses</h3>
+        </div>
+        <button class="sheet__close" id="btn-profile-addresses-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div id="addresses-list"></div>
+        <div class="sheet-block" id="address-add-form" style="display:none">
+          <p class="sheet-block__label">Add New Address</p>
+          <div class="form-group">
+            <label class="form-label" for="addr-label">Label (e.g. Home, Work)</label>
+            <input class="form-input" id="addr-label" placeholder="Home" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addr-street">Street Address</label>
+            <input class="form-input" id="addr-street" placeholder="12 Allen Avenue, Ikeja" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addr-city">City</label>
+            <input class="form-input" id="addr-city" placeholder="Lagos" value="Lagos" />
+          </div>
+          <label class="toggle-row" style="margin-top:8px">
+            <span>Set as default</span>
+            <input type="checkbox" id="addr-default" class="toggle-input" />
+            <span class="toggle-thumb"></span>
+          </label>
+          <div class="sheet__footer sheet__footer--split" style="margin-top:16px">
+            <button class="btn btn--ghost btn--pill" id="btn-addr-cancel">Cancel</button>
+            <button class="btn btn--primary btn--pill" id="btn-addr-save">
+              <span class="btn__label">Save Address</span>
+              <div class="btn__spinner"></div>
+            </button>
+          </div>
+        </div>
+        <button class="btn btn--ghost btn--full" id="btn-addr-add" style="margin-top:4px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right:6px"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Add Address
+        </button>
+      </div>
+    </div>
+
+    <!-- Profile: Payment Methods -->
+    <div class="sheet" id="sheet-profile-payment" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Profile</p>
+          <h3 class="sheet__title">Payment Methods</h3>
+        </div>
+        <button class="sheet__close" id="btn-profile-payment-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="payment-methods-info">
+          <div class="payment-method-card">
+            <div class="payment-method-card__icon" style="background:#E8FFE8">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#2E7D32" stroke-width="1.8" fill="none"/><line x1="2" y1="10" x2="22" y2="10" stroke="#2E7D32" stroke-width="1.5"/></svg>
+            </div>
+            <div class="payment-method-card__text">
+              <p class="payment-method-card__name">Paystack</p>
+              <p class="payment-method-card__sub">Cards, bank transfer &amp; USSD</p>
+            </div>
+            <span class="payment-method-card__badge">Active</span>
+          </div>
+          <p class="tab-subtitle" style="margin-top:16px">Payment is processed securely via Paystack. Your card details are never stored on this device.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile: Notifications -->
+    <div class="sheet" id="sheet-profile-notifications" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Profile</p>
+          <h3 class="sheet__title">Notifications</h3>
+        </div>
+        <button class="sheet__close" id="btn-profile-notifications-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="sheet-block">
+          <p class="sheet-block__label">Order Updates</p>
+          <label class="toggle-row">
+            <span>Pickup &amp; delivery alerts</span>
+            <input type="checkbox" id="notif-order-updates" class="toggle-input" checked />
+            <span class="toggle-thumb"></span>
+          </label>
+          <label class="toggle-row">
+            <span>Order ready notifications</span>
+            <input type="checkbox" id="notif-order-ready" class="toggle-input" checked />
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+        <div class="sheet-block">
+          <p class="sheet-block__label">Marketing</p>
+          <label class="toggle-row">
+            <span>Promotions &amp; offers</span>
+            <input type="checkbox" id="notif-promos" class="toggle-input" />
+            <span class="toggle-thumb"></span>
+          </label>
+          <label class="toggle-row">
+            <span>Subscription reminders</span>
+            <input type="checkbox" id="notif-sub-reminders" class="toggle-input" checked />
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+        <div class="sheet__footer">
+          <button class="btn btn--primary btn--full btn--lg" id="btn-notif-save">
+            <span class="btn__label">Save Preferences</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile: App Settings -->
+    <div class="sheet" id="sheet-profile-settings" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Profile</p>
+          <h3 class="sheet__title">App Settings</h3>
+        </div>
+        <button class="sheet__close" id="btn-profile-settings-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="sheet-block">
+          <p class="sheet-block__label">Display</p>
+          <label class="toggle-row">
+            <span>Show order prices</span>
+            <input type="checkbox" id="setting-show-prices" class="toggle-input" checked />
+            <span class="toggle-thumb"></span>
+          </label>
+          <label class="toggle-row">
+            <span>Compact order list</span>
+            <input type="checkbox" id="setting-compact-list" class="toggle-input" />
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+        <div class="sheet-block">
+          <p class="sheet-block__label">Behaviour</p>
+          <label class="toggle-row">
+            <span>Confirm before scheduling</span>
+            <input type="checkbox" id="setting-confirm-schedule" class="toggle-input" checked />
+            <span class="toggle-thumb"></span>
+          </label>
+          <label class="toggle-row">
+            <span>Auto-fill last address</span>
+            <input type="checkbox" id="setting-autofill-addr" class="toggle-input" checked />
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+        <div class="sheet__footer">
+          <button class="btn btn--primary btn--full btn--lg" id="btn-settings-save">
+            <span class="btn__label">Save Settings</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- #page-home -->
+
+  <!-- ── Admin Dashboard ───────────────────────────────────────── -->
+  <div id="page-admin" class="page page--admin">
+
+    <!-- Top bar -->
+    <div class="admin-topbar">
+      <div class="admin-topbar__left">
+        <div class="admin-logo">S</div>
+        <div>
+          <div class="admin-topbar__title">Spaccle Admin</div>
+          <div class="admin-topbar__sub" id="admin-topbar-sub">Loading...</div>
+        </div>
+      </div>
+      <button class="admin-topbar__logout" id="btn-admin-logout" aria-label="Logout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Tab nav (scrollable) -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="dashboard">Dashboard</button>
+      <button class="admin-tab" data-tab="orders">Orders</button>
+      <button class="admin-tab" data-tab="users">Users</button>
+      <button class="admin-tab" data-tab="support">Support</button>
+      <button class="admin-tab" data-tab="plans">Plans</button>
+      <button class="admin-tab" data-tab="config">Config</button>
+    </div>
+
+    <!-- Tab bodies -->
+    <div class="admin-content">
+
+      <!-- Dashboard tab -->
+      <div class="admin-panel active" id="admin-panel-dashboard">
+        <div class="admin-stats-grid">
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon" style="background:#EDE9FD">₦</div>
+            <div class="admin-stat-value" id="stat-revenue">—</div>
+            <div class="admin-stat-label">Total Revenue</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon" style="background:#E8F5E9">♻</div>
+            <div class="admin-stat-value" id="stat-subs">—</div>
+            <div class="admin-stat-label">Active Subscriptions</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon" style="background:#E3F2FD">📦</div>
+            <div class="admin-stat-value" id="stat-orders-month">—</div>
+            <div class="admin-stat-label">Orders This Month</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon" style="background:#FFF3E0">💬</div>
+            <div class="admin-stat-value" id="stat-open-tickets">—</div>
+            <div class="admin-stat-label">Open Tickets</div>
+          </div>
+        </div>
+
+        <div class="admin-stat-rows" id="admin-stat-rows"></div>
+
+        <div class="admin-panel-header" style="margin-top:16px">
+          <h2 class="admin-panel-title">Recent Orders</h2>
+          <button class="btn btn--ghost btn--sm" id="btn-admin-dash-refresh">Refresh</button>
+        </div>
+        <div id="admin-recent-orders" class="admin-list"></div>
+      </div>
+
+      <!-- Orders tab -->
+      <div class="admin-panel" id="admin-panel-orders">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">All Orders</h2>
+          <button class="btn btn--ghost btn--sm" id="btn-admin-orders-refresh">Refresh</button>
+        </div>
+        <div class="admin-filter-pills" id="admin-orders-filter">
+          <button class="admin-filter-pill active" data-filter="all">All</button>
+          <button class="admin-filter-pill" data-filter="scheduled">Scheduled</button>
+          <button class="admin-filter-pill" data-filter="picked_up">Picked Up</button>
+          <button class="admin-filter-pill" data-filter="processing">Processing</button>
+          <button class="admin-filter-pill" data-filter="ready">Ready</button>
+          <button class="admin-filter-pill" data-filter="delivered">Delivered</button>
+          <button class="admin-filter-pill" data-filter="cancelled">Cancelled</button>
+        </div>
+        <div id="admin-orders-list" class="admin-list"></div>
+      </div>
+
+      <!-- Users tab -->
+      <div class="admin-panel" id="admin-panel-users">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">All Users</h2>
+          <button class="btn btn--ghost btn--sm" id="btn-admin-users-refresh">Refresh</button>
+        </div>
+        <div id="admin-users-list" class="admin-list"></div>
+      </div>
+
+      <!-- Support tab -->
+      <div class="admin-panel" id="admin-panel-support">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">Support Tickets</h2>
+          <button class="btn btn--ghost btn--sm" id="btn-admin-support-refresh">Refresh</button>
+        </div>
+        <div class="admin-filter-pills" id="admin-support-filter">
+          <button class="admin-filter-pill active" data-filter="all">All</button>
+          <button class="admin-filter-pill" data-filter="open">Open</button>
+          <button class="admin-filter-pill" data-filter="resolved">Resolved</button>
+        </div>
+        <div id="admin-tickets-list" class="admin-list"></div>
+      </div>
+
+      <!-- Plans tab -->
+      <div class="admin-panel" id="admin-panel-plans">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">Subscription Plans</h2>
+          <button class="btn btn--primary btn--sm" id="btn-admin-add-plan">+ New Plan</button>
+        </div>
+        <div id="admin-plans-list" class="admin-list"></div>
+      </div>
+
+      <!-- Config tab -->
+      <div class="admin-panel" id="admin-panel-config">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">Integrations</h2>
+        </div>
+        <div class="admin-config-form">
+          <label class="form-label">Paystack Public Key</label>
+          <input type="text" class="form-input" id="admin-cfg-paystack-pk" placeholder="pk_live_...">
+          <label class="form-label">CouchDB Remote URL</label>
+          <input type="text" class="form-input" id="admin-cfg-couch-url" placeholder="https://db.example.com">
+          <label class="form-label">CouchDB Database Name</label>
+          <input type="text" class="form-input" id="admin-cfg-couch-db" placeholder="spacclelaundry_spaccle">
+          <label class="form-label">CouchDB Username</label>
+          <input type="text" class="form-input" id="admin-cfg-couch-user" placeholder="admin">
+          <label class="form-label">CouchDB Password</label>
+          <input type="password" class="form-input" id="admin-cfg-couch-pass" placeholder="••••••••">
+          <button class="btn btn--primary btn--full" id="btn-admin-cfg-save">Save Configuration</button>
+          <button class="btn btn--ghost btn--full" id="btn-admin-sync-start" style="margin-top:8px">Start / Restart Sync</button>
+          <div class="admin-sync-status" id="admin-sync-status"></div>
+        </div>
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Service Prices (PAYG)</h2>
+        </div>
+        <div class="admin-config-form" id="admin-services-form"></div>
+        <button class="btn btn--primary btn--full" id="btn-admin-services-save" style="margin-top:12px">Save Service Prices</button>
+      </div>
+
+    </div><!-- .admin-content -->
+
+    <!-- ── Sheets ──────────────────────────────────────────────── -->
+
+    <!-- Plan editor -->
+    <div class="admin-overlay" id="admin-plan-editor-overlay">
+      <div class="admin-overlay__backdrop" id="admin-plan-editor-backdrop"></div>
+      <div class="admin-sheet" id="admin-plan-editor">
+        <div class="admin-sheet__handle"></div>
+        <div class="admin-sheet__header">
+          <h3 class="admin-sheet__title" id="admin-plan-editor-title">Edit Plan</h3>
+          <button class="admin-sheet__close" id="btn-admin-plan-editor-close">✕</button>
+        </div>
+        <div class="admin-sheet__body">
+          <input type="hidden" id="pe-id">
+          <label class="form-label">Plan Name</label>
+          <input type="text" class="form-input" id="pe-name" placeholder="e.g. Basic">
+          <label class="form-label">Badge (optional)</label>
+          <input type="text" class="form-input" id="pe-badge" placeholder="e.g. Most Popular">
+          <label class="form-label">Price / month (₦)</label>
+          <input type="number" class="form-input" id="pe-price" placeholder="18000">
+          <label class="form-label">Waitlist Price / month (₦)</label>
+          <input type="number" class="form-input" id="pe-price-disc" placeholder="15300">
+          <label class="form-label">Max Items per Month</label>
+          <input type="number" class="form-input" id="pe-items" placeholder="20">
+          <label class="form-label">Pickups per Month (blank = unlimited)</label>
+          <input type="number" class="form-input" id="pe-pickups" placeholder="2">
+          <label class="form-label">Turnaround Time</label>
+          <input type="text" class="form-input" id="pe-turnaround" placeholder="3-5 Days">
+          <label class="form-label">Rollover Items</label>
+          <input type="number" class="form-input" id="pe-rollover" placeholder="5">
+          <label class="form-label">Free Express Per Month</label>
+          <input type="number" class="form-input" id="pe-express" placeholder="0">
+          <label class="form-label">Savings</label>
+          <input type="text" class="form-input" id="pe-savings" placeholder="20-25%">
+          <label class="form-label">Features (one per line)</label>
+          <textarea class="form-input" id="pe-features" rows="4" placeholder="Up to 20 items&#10;1-2 pickups per month"></textarea>
+          <div class="admin-toggle-row" style="margin-top:12px">
+            <span class="form-label" style="margin:0">Active</span>
+            <label class="toggle-input"><input type="checkbox" id="pe-active" checked><span class="toggle-thumb"></span></label>
+          </div>
+          <button class="btn btn--primary btn--full" id="btn-admin-plan-save" style="margin-top:20px">Save Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order detail -->
+    <div class="admin-overlay" id="admin-order-overlay">
+      <div class="admin-overlay__backdrop" id="admin-order-backdrop"></div>
+      <div class="admin-sheet" id="admin-order-sheet">
+        <div class="admin-sheet__handle"></div>
+        <div class="admin-sheet__header">
+          <h3 class="admin-sheet__title" id="admin-order-title">Order</h3>
+          <button class="admin-sheet__close" id="btn-admin-order-close">✕</button>
+        </div>
+        <div class="admin-sheet__body">
+          <div class="admin-detail-rows" id="admin-order-details"></div>
+          <div class="admin-panel-header" style="margin-top:16px;margin-bottom:8px">
+            <span class="form-label" style="margin:0">Update Status</span>
+          </div>
+          <div class="admin-status-actions" id="admin-order-status-actions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User detail -->
+    <div class="admin-overlay" id="admin-user-overlay">
+      <div class="admin-overlay__backdrop" id="admin-user-backdrop"></div>
+      <div class="admin-sheet" id="admin-user-sheet">
+        <div class="admin-sheet__handle"></div>
+        <div class="admin-sheet__header">
+          <h3 class="admin-sheet__title" id="admin-user-title">User</h3>
+          <button class="admin-sheet__close" id="btn-admin-user-close">✕</button>
+        </div>
+        <div class="admin-sheet__body">
+          <div class="admin-detail-rows" id="admin-user-details"></div>
+          <div class="admin-panel-header" style="margin-top:16px;margin-bottom:8px">
+            <span class="form-label" style="margin:0">Recent Orders</span>
+          </div>
+          <div id="admin-user-orders" class="admin-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticket detail -->
+    <div class="admin-overlay" id="admin-ticket-overlay">
+      <div class="admin-overlay__backdrop" id="admin-ticket-backdrop"></div>
+      <div class="admin-sheet" id="admin-ticket-sheet">
+        <div class="admin-sheet__handle"></div>
+        <div class="admin-sheet__header">
+          <h3 class="admin-sheet__title" id="admin-ticket-subject">Support Message</h3>
+          <button class="admin-sheet__close" id="btn-admin-ticket-close">✕</button>
+        </div>
+        <div class="admin-sheet__body">
+          <div class="admin-ticket-meta" id="admin-ticket-meta"></div>
+          <div class="admin-ticket-message" id="admin-ticket-message"></div>
+          <button class="btn btn--primary btn--full" id="btn-admin-ticket-resolve" style="margin-top:20px">Mark as Resolved</button>
+          <button class="btn btn--ghost btn--full" id="btn-admin-ticket-reopen" style="margin-top:8px;display:none">Reopen Ticket</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- #page-admin -->
+
+  <script src="js/paystack_inline.js"></script>
+  <script src="js/config.js"></script>
+  <script src="cordova.js"></script>
+  <script src="js/pouchdb.min.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/pages/splash.js"></script>
+  <script src="js/pages/onboarding.js"></script>
+  <script src="js/pages/auth.js"></script>
+  <script src="js/pages/home.js"></script>
+  <script src="js/pages/admin.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
