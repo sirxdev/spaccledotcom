@@ -513,3 +513,109 @@
   font-weight: 600;
 }
 .btn--ghost:hover { background: #F4F0FF; }
+
+/* ── Admin search bar ────────────────────────────────────────────── */
+.admin-search-bar { padding: 0 0 4px; }
+.admin-search-bar .form-input { width: 100%; box-sizing: border-box; }
+
+/* ── Revenue chart ───────────────────────────────────────────────── */
+#admin-revenue-chart {
+  background: #F7F5FF;
+  border-radius: 12px;
+  padding: 12px 16px;
+  overflow: hidden;
+}
+#admin-revenue-chart svg { display: block; }
+
+/* ── Export buttons ──────────────────────────────────────────────── */
+#btn-admin-export-csv,
+#btn-admin-export-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Admin config grid ───────────────────────────────────────────── */
+.admin-config-form { display: flex; flex-direction: column; gap: 4px; }
+.admin-config-form .form-input  { margin-bottom: 4px; }
+.admin-config-form select.form-input { background: #fff; }
+
+/* ── Ticket thread (admin) ───────────────────────────────────────── */
+.ticket-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0 8px;
+}
+.ticket-bubble-wrap         { display: flex; flex-direction: column; max-width: 82%; }
+.ticket-bubble-wrap--user   { align-self: flex-start; }
+.ticket-bubble-wrap--admin  { align-self: flex-end; }
+.ticket-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.ticket-bubble--user  { background: #F0EEFF; color: #1C1B3A; border-bottom-left-radius: 4px; }
+.ticket-bubble--admin { background: #5B4FBE; color: #fff;     border-bottom-right-radius: 4px; }
+.ticket-bubble__tag   { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.55; margin-bottom: 4px; }
+.ticket-bubble__time  { font-size: 10px; color: #aaa; margin-top: 4px; }
+.ticket-bubble-wrap--admin .ticket-bubble__time { color: rgba(255,255,255,0.55); }
+
+/* Admin ticket sheet needs full-height flex body */
+#admin-ticket-sheet { display: flex; flex-direction: column; }
+#admin-ticket-sheet .admin-sheet__body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── Admin topbar notification button ────────────────────────────── */
+.admin-topbar__icon-btn {
+  position: relative;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: #1C1B3A;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.admin-topbar__icon-btn:active { background: rgba(91,79,190,0.12); }
+
+.admin-notif-badge {
+  position: absolute;
+  top: 2px; right: 2px;
+  min-width: 16px; height: 16px;
+  background: #E53935;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 99px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── Admin notification panel ────────────────────────────────────── */
+.admin-notif-panel { max-height: 70vh; }
+
+.admin-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #F0F0F8;
+}
+.admin-notif-item:last-child { border-bottom: none; }
+.admin-notif-item--unread .admin-notif-item__title { font-weight: 700; }
+.admin-notif-item--unread { background: #FAFAFE; border-radius: 8px; padding: 10px 8px; }
+
+.admin-notif-item__icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #F0EEFF; border-radius: 50%;
+  font-size: 16px;
+}
+.admin-notif-item__body  { flex: 1; min-width: 0; }
+.admin-notif-item__title { font-size: 13px; font-weight: 500; color: #1C1B3A; }
+.admin-notif-item__sub   { font-size: 12px; color: #666; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-notif-item__time  { font-size: 11px; color: #aaa; margin-top: 4px; }

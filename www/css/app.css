@@ -61,6 +61,55 @@
   }
 }
 
+/* ── Dark Mode ───────────────────────────────────────────────────── */
+body.dark {
+  --bg:        #0F0F1A;
+  --surface:   #1C1B3A;
+  --surface-2: #252445;
+  --text-1:    #E8E6FF;
+  --text-2:    #A8A6C8;
+  --text-3:    #6B6990;
+  --border:    #2D2B50;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+}
+
+body.dark .home-topbar,
+body.dark .bottom-nav,
+body.dark .sheet,
+body.dark .admin-sheet {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+body.dark .form-input {
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-color: var(--border);
+}
+
+body.dark .admin-panel,
+body.dark .admin-topbar {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+body.dark .admin-card {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+body.dark .order-card,
+body.dark .plan-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+body.dark .hero-card {
+  background: linear-gradient(135deg, #3D3490 0%, #5B4FBE 100%);
+}
+
 /* ── Reset ───────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

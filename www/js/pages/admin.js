@@ -18,6 +18,9 @@ const AdminPage = (() => {
     setupTabs();
     setupActions();
     loadTab('dashboard');
+    updateAdminNotifBadge();
+    startAdminNotifWatch();
+    initAdminTheme();
   }
 
   /* ── Tabs ────────────────────────────────────────────────────────── */
@@ -41,6 +44,7 @@ const AdminPage = (() => {
     if (tab === 'orders')    loadOrders(currentOrderFilter);
     if (tab === 'users')     loadUsers();
     if (tab === 'support')   loadSupport(currentSupportFilter);
+    if (tab === 'messages')  loadMessages();
     if (tab === 'plans')     loadPlans();
     if (tab === 'config')    loadConfig();
   }
@@ -48,6 +52,11 @@ const AdminPage = (() => {
   /* ── Actions ─────────────────────────────────────────────────────── */
   function setupActions() {
     document.getElementById('btn-admin-logout').addEventListener('click', handleLogout);
+    document.getElementById('btn-admin-theme').addEventListener('click', handleAdminThemeToggle);
+    document.getElementById('btn-admin-notif').addEventListener('click', openAdminNotifPanel);
+    document.getElementById('btn-admin-notif-close').addEventListener('click', closeAdminNotifPanel);
+    document.getElementById('admin-notif-backdrop').addEventListener('click', closeAdminNotifPanel);
+    document.getElementById('btn-admin-notif-clear').addEventListener('click', clearAdminNotifs);
 
     // Dashboard
     document.getElementById('btn-admin-dash-refresh').addEventListener('click', loadDashboard);
@@ -88,6 +97,10 @@ const AdminPage = (() => {
       handleTicketStatus('resolved'));
     document.getElementById('btn-admin-ticket-reopen').addEventListener('click', () =>
       handleTicketStatus('open'));
+    document.getElementById('btn-admin-ticket-reply').addEventListener('click', handleTicketReply);
+    document.getElementById('admin-ticket-reply-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleTicketReply(); }
+    });
 
     // Plans
     document.getElementById('btn-admin-add-plan').addEventListener('click', () =>
@@ -96,10 +109,31 @@ const AdminPage = (() => {
     document.getElementById('admin-plan-editor-backdrop').addEventListener('click', closePlanEditor);
     document.getElementById('btn-admin-plan-save').addEventListener('click', handlePlanSave);
 
+    // Messages
+    document.getElementById('btn-admin-messages-refresh').addEventListener('click', loadMessages);
+    document.getElementById('btn-admin-chat-close').addEventListener('click', closeAdminChat);
+    document.getElementById('admin-chat-backdrop').addEventListener('click', closeAdminChat);
+    document.getElementById('btn-admin-chat-send').addEventListener('click', handleAdminChatSend);
+    document.getElementById('admin-chat-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAdminChatSend(); }
+    });
+
     // Config
     document.getElementById('btn-admin-cfg-save').addEventListener('click', handleConfigSave);
+    document.getElementById('btn-admin-appearance-save').addEventListener('click', handleAdminAppearanceSave);
     document.getElementById('btn-admin-sync-start').addEventListener('click', handleSyncStart);
     document.getElementById('btn-admin-services-save').addEventListener('click', handleServicesSave);
+    document.getElementById('btn-admin-item-pricing-save').addEventListener('click', handleItemPricingSave);
+    document.getElementById('btn-admin-legal-save').addEventListener('click', handleLegalSave);
+    document.getElementById('btn-admin-promo-add').addEventListener('click', handlePromoAdd);
+
+    // Dashboard extras
+    document.getElementById('btn-admin-broadcast-send').addEventListener('click', handleBroadcastSend);
+    document.getElementById('btn-admin-export-csv').addEventListener('click', exportOrdersCSV);
+    document.getElementById('btn-admin-export-pdf').addEventListener('click', exportOrdersPDF);
+
+    // Order overlay: driver assign
+    document.getElementById('btn-admin-driver-assign').addEventListener('click', handleDriverAssign);
   }
 
   function handleLogout() {
@@ -172,16 +206,79 @@ const AdminPage = (() => {
           orders.slice(0, 10).forEach(o => recentEl.appendChild(buildOrderCard(o)));
         }
       }
+
+      renderRevenueChart(orders, subs);
     } catch {
       [revEl, subsEl, ordMoEl, tickEl].forEach(el => { if (el) el.textContent = 'ERR'; });
     }
   }
 
+  function renderRevenueChart(orders, subs) {
+    const el = document.getElementById('admin-revenue-chart');
+    if (!el) return;
+
+    const days = 7;
+    const buckets = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      buckets.push({ label: d.toLocaleDateString('en-NG', { weekday: 'short' }), rev: 0 });
+    }
+
+    orders.forEach(o => {
+      if (!o.createdAt || !o.amountPaid) return;
+      const d   = new Date(o.createdAt);
+      const now = new Date();
+      const diffDays = Math.floor((now - d) / 86400000);
+      if (diffDays < days) buckets[days - 1 - diffDays].rev += Number(o.amountPaid) || 0;
+    });
+    subs.forEach(s => {
+      if (!s.createdAt || !s.pricePaid) return;
+      const d   = new Date(s.createdAt);
+      const now = new Date();
+      const diffDays = Math.floor((now - d) / 86400000);
+      if (diffDays < days) buckets[days - 1 - diffDays].rev += Number(s.pricePaid) || 0;
+    });
+
+    const maxRev = Math.max(...buckets.map(b => b.rev), 1);
+    const W = 300, H = 80, bw = Math.floor(W / days) - 4;
+
+    let bars = '';
+    let labels = '';
+    buckets.forEach((b, i) => {
+      const barH = Math.max(2, Math.round((b.rev / maxRev) * H));
+      const x    = i * (W / days) + 2;
+      const y    = H - barH;
+      bars   += `<rect x="${x}" y="${y}" width="${bw}" height="${barH}" rx="3" fill="#5B4FBE" opacity="0.8"/>`;
+      labels += `<text x="${x + bw / 2}" y="${H + 14}" text-anchor="middle" font-size="9" fill="#888">${b.label}</text>`;
+    });
+
+    el.innerHTML =
+      `<svg viewBox="0 0 ${W} ${H + 18}" style="width:100%;height:${H + 18}px">` +
+      bars + labels + `</svg>`;
+  }
+
   /* ── Orders ─────────────────────────────────────────────────────── */
+  let orderSearchTerm = '';
+
   async function loadOrders(filter) {
     currentOrderFilter = filter || 'all';
     const list = document.getElementById('admin-orders-list');
     list.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const panel = document.getElementById('admin-panel-orders');
+    if (panel && !panel.querySelector('.admin-search-bar')) {
+      const bar = document.createElement('div');
+      bar.className = 'admin-search-bar';
+      bar.innerHTML =
+        `<input class="form-input" id="admin-orders-search" placeholder="Search by ID, address, notes…" style="margin-bottom:8px">`;
+      panel.insertBefore(bar, document.getElementById('admin-orders-filter'));
+      document.getElementById('admin-orders-search').addEventListener('input', e => {
+        orderSearchTerm = e.target.value.toLowerCase();
+        renderFilteredOrders();
+      });
+    }
+
     try {
       allOrders = await SpaccleDB.listAllOrders();
       renderFilteredOrders();
@@ -192,9 +289,19 @@ const AdminPage = (() => {
 
   function renderFilteredOrders() {
     const list = document.getElementById('admin-orders-list');
-    const filtered = currentOrderFilter === 'all'
+    let filtered = currentOrderFilter === 'all'
       ? allOrders
       : allOrders.filter(o => o.status === currentOrderFilter);
+
+    if (orderSearchTerm) {
+      filtered = filtered.filter(o => {
+        const haystack = [
+          o.publicId, o._id, o.address, o.notes, o.status, o.service,
+        ].join(' ').toLowerCase();
+        return haystack.includes(orderSearchTerm);
+      });
+    }
+
     list.innerHTML = '';
     if (!filtered.length) {
       list.innerHTML = '<div class="admin-empty">No orders found.</div>';
@@ -246,7 +353,7 @@ const AdminPage = (() => {
       order.publicId || order._id.slice(-8).toUpperCase();
 
     const detailEl = document.getElementById('admin-order-details');
-    detailEl.innerHTML = [
+    const rows = [
       ['Status',       statusLabel(order.status)],
       ['Service',      serviceLabel(order.service)],
       ['Billing',      order.billingMode === 'subscription' ? 'Subscription' : 'Pay As You Go'],
@@ -258,7 +365,11 @@ const AdminPage = (() => {
       ['Address',      order.address     || '—'],
       ['Notes',        order.notes       || '—'],
       ['Created',      formatDateTime(order.createdAt)],
-    ].map(([l, v]) =>
+    ];
+    if (order.exceedsItems)    rows.push(['⚠ Exceeds Plan', `Yes — ${order.extraItemsCount || 0} extra items`]);
+    if (order.recurring)       rows.push(['Recurring',      'Set as recurring pickup']);
+    if (order.rating)          rows.push(['Rating', '★'.repeat(order.rating) + ' ' + (order.ratingNote || '')]);
+    detailEl.innerHTML = rows.map(([l, v]) =>
       `<div class="admin-detail-row">` +
       `<span class="admin-detail-row__label">${l}</span>` +
       `<span class="admin-detail-row__value">${v}</span></div>`
@@ -305,6 +416,24 @@ const AdminPage = (() => {
       showToast('Order marked ' + statusLabel(newStatus));
     } catch {
       showToast('Could not update order status');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  async function handleDriverAssign() {
+    if (!currentOrderId) return;
+    const input = document.getElementById('admin-driver-input');
+    const name  = (input?.value || '').trim();
+    if (!name) { showToast('Enter a driver name'); return; }
+    const btn = document.getElementById('btn-admin-driver-assign');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.assignDriver(currentOrderId, name);
+      input.value = '';
+      showToast('Driver assigned: ' + name);
+    } catch {
+      showToast('Could not assign driver');
     } finally {
       btn.classList.remove('loading');
     }
@@ -478,24 +607,99 @@ const AdminPage = (() => {
     currentTicketId = t._id;
     document.getElementById('admin-ticket-subject').textContent = t.subject || 'Support message';
 
-    const metaEl = document.getElementById('admin-ticket-meta');
-    const ref = t.orderId ? 'Order: ' + t.orderId : 'No order linked';
-    metaEl.textContent = ref + ' · ' + formatDateTime(t.createdAt) +
-      ' · ' + (t.status === 'resolved' ? 'Resolved' : 'Open');
-
-    document.getElementById('admin-ticket-message').textContent = t.message || '(no message body)';
+    const ref = t.orderId ? 'Order: ' + t.orderId.slice(-8).toUpperCase() : 'No order linked';
+    document.getElementById('admin-ticket-meta').textContent =
+      ref + ' · ' + formatDateTime(t.createdAt);
 
     const resolveBtn = document.getElementById('btn-admin-ticket-resolve');
     const reopenBtn  = document.getElementById('btn-admin-ticket-reopen');
     resolveBtn.style.display = t.status === 'resolved' ? 'none' : '';
     reopenBtn.style.display  = t.status === 'resolved' ? '' : 'none';
 
+    // Hide reply bar if resolved
+    const replyBar = document.getElementById('admin-ticket-reply-bar');
+    if (replyBar) replyBar.style.display = t.status === 'resolved' ? 'none' : '';
+
     document.getElementById('admin-ticket-overlay').classList.add('open');
+    loadTicketThread(t);
+  }
+
+  async function loadTicketThread(t) {
+    const threadEl = document.getElementById('admin-ticket-thread');
+    threadEl.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Loading…</div>';
+    try {
+      const replies = await SpaccleDB.getTicketReplies(t._id);
+
+      threadEl.innerHTML = '';
+
+      // First message (the original ticket)
+      threadEl.appendChild(buildTicketBubble({
+        text: t.message || '(no message)',
+        fromAdmin: false,
+        createdAt: t.createdAt,
+        isFirst: true,
+      }));
+
+      // All replies in chronological order
+      replies.forEach(r => threadEl.appendChild(buildTicketBubble(r)));
+
+      threadEl.scrollTop = threadEl.scrollHeight;
+    } catch {
+      threadEl.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Could not load thread.</div>';
+    }
+  }
+
+  function buildTicketBubble({ text, fromAdmin, createdAt, isFirst }) {
+    const wrap = document.createElement('div');
+    wrap.className = 'ticket-bubble-wrap ' + (fromAdmin ? 'ticket-bubble-wrap--admin' : 'ticket-bubble-wrap--user');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'ticket-bubble ' + (fromAdmin ? 'ticket-bubble--admin' : 'ticket-bubble--user');
+
+    if (isFirst) {
+      const tag = document.createElement('div');
+      tag.className = 'ticket-bubble__tag';
+      tag.textContent = 'Customer';
+      bubble.appendChild(tag);
+    }
+
+    const body = document.createElement('div');
+    body.textContent = text;
+    bubble.appendChild(body);
+
+    const time = document.createElement('div');
+    time.className = 'ticket-bubble__time';
+    time.textContent = formatDateTime(createdAt);
+    bubble.appendChild(time);
+
+    wrap.appendChild(bubble);
+    return wrap;
   }
 
   function closeTicket() {
     document.getElementById('admin-ticket-overlay').classList.remove('open');
     currentTicketId = null;
+  }
+
+  async function handleTicketReply() {
+    if (!currentTicketId) return;
+    const input = document.getElementById('admin-ticket-reply-input');
+    const text  = (input?.value || '').trim();
+    if (!text) return;
+    input.value = '';
+    const btn = document.getElementById('btn-admin-ticket-reply');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.addTicketReply(currentTicketId, { text, fromAdmin: true, userId: user?.userId });
+      // Reload thread
+      const ticket = await SpaccleDB.getDocument(currentTicketId);
+      await loadTicketThread(ticket);
+      showToast('Reply sent');
+    } catch {
+      showToast('Could not send reply');
+    } finally {
+      btn.classList.remove('loading');
+    }
   }
 
   async function handleTicketStatus(status) {
@@ -506,9 +710,13 @@ const AdminPage = (() => {
     btn.classList.add('loading');
     try {
       await SpaccleDB.setTicketStatus(currentTicketId, status);
-      closeTicket();
-      await loadSupport(currentSupportFilter);
+      // Update UI without closing
+      document.getElementById('btn-admin-ticket-resolve').style.display = status === 'resolved' ? 'none' : '';
+      document.getElementById('btn-admin-ticket-reopen').style.display  = status === 'resolved' ? '' : 'none';
+      const replyBar = document.getElementById('admin-ticket-reply-bar');
+      if (replyBar) replyBar.style.display = status === 'resolved' ? 'none' : '';
       showToast(status === 'resolved' ? 'Ticket resolved' : 'Ticket reopened');
+      await loadSupport(currentSupportFilter);
     } catch {
       showToast('Could not update ticket');
     } finally {
@@ -676,6 +884,9 @@ const AdminPage = (() => {
       const svcCfg = await SpaccleDB.ensureDefaultServices();
       renderServicePriceForm(svcCfg);
     } catch {}
+    await loadItemPricingForm();
+    await loadLegalEditor();
+    await loadPromos();
   }
 
   function renderServicePriceForm(svcCfg) {
@@ -774,6 +985,539 @@ const AdminPage = (() => {
     }
   }
 
+  /* ── Messages (chat) ────────────────────────────────────────────── */
+  let currentChatUserId = null;
+
+  async function loadMessages() {
+    const list = document.getElementById('admin-messages-list');
+    list.innerHTML = '<div class="admin-empty">Loading…</div>';
+    try {
+      const msgs = await SpaccleDB.listAllChatMessages();
+      const users = await SpaccleDB.listAllUsers();
+      const userMap = {};
+      users.forEach(u => { userMap[u._id] = u; });
+
+      // Group by userId, keep latest message per user
+      const threads = {};
+      msgs.forEach(m => {
+        if (!threads[m.userId] || m.createdAt > threads[m.userId].lastAt) {
+          threads[m.userId] = { userId: m.userId, lastMsg: m.text, lastAt: m.createdAt, unread: 0 };
+        }
+        if (!m.read && !m.fromAdmin) threads[m.userId].unread = (threads[m.userId].unread || 0) + 1;
+      });
+
+      const threadList = Object.values(threads).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1));
+      list.innerHTML = '';
+      if (!threadList.length) {
+        list.innerHTML = '<div class="admin-empty">No messages yet.</div>';
+        return;
+      }
+      threadList.forEach(t => {
+        const u = userMap[t.userId] || {};
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.style.cursor = 'pointer';
+        card.innerHTML =
+          `<div class="admin-card__left">` +
+          `<div class="admin-card__title">${escapeAdminHtml(u.name || u.email || t.userId)}</div>` +
+          `<div class="admin-card__meta">${escapeAdminHtml(t.lastMsg.slice(0, 60))} · ${formatTime(t.lastAt)}</div>` +
+          `</div>` +
+          (t.unread ? `<div class="admin-card__right"><span class="admin-card__pill admin-card__pill--open">${t.unread} new</span></div>` : '');
+        card.addEventListener('click', () => openAdminChat(t.userId, u.name || u.email || 'User'));
+        list.appendChild(card);
+      });
+    } catch {
+      list.innerHTML = '<div class="admin-empty">Failed to load messages.</div>';
+    }
+  }
+
+  async function openAdminChat(userId, userName) {
+    currentChatUserId = userId;
+    document.getElementById('admin-chat-title').textContent = userName;
+    document.getElementById('admin-chat-overlay').classList.add('open');
+    await loadAdminChatThread(userId);
+  }
+
+  async function loadAdminChatThread(userId) {
+    const container = document.getElementById('admin-chat-messages');
+    container.innerHTML = '';
+    try {
+      const msgs = await SpaccleDB.getChatHistory(userId);
+      if (!msgs.length) {
+        container.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">No messages yet.</div>';
+        return;
+      }
+      msgs.forEach(m => {
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-bubble-wrap ' + (m.fromAdmin ? 'chat-bubble-wrap--admin' : 'chat-bubble-wrap--user');
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble ' + (m.fromAdmin ? 'chat-bubble--admin' : 'chat-bubble--user');
+        bubble.textContent = m.text;
+        const time = document.createElement('div');
+        time.className = 'chat-bubble-time';
+        time.textContent = formatTime(m.createdAt);
+        wrap.appendChild(bubble);
+        wrap.appendChild(time);
+        container.appendChild(wrap);
+      });
+      container.scrollTop = container.scrollHeight;
+    } catch {
+      container.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Could not load.</div>';
+    }
+  }
+
+  function closeAdminChat() {
+    document.getElementById('admin-chat-overlay').classList.remove('open');
+    currentChatUserId = null;
+  }
+
+  async function handleAdminChatSend() {
+    if (!currentChatUserId) return;
+    const input = document.getElementById('admin-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    try {
+      await SpaccleDB.createChatMessage({ userId: currentChatUserId, text, fromAdmin: true });
+      await loadAdminChatThread(currentChatUserId);
+    } catch {
+      showToast('Could not send message');
+    }
+  }
+
+  /* ── Item pricing ────────────────────────────────────────────────── */
+  async function loadItemPricingForm() {
+    const form = document.getElementById('admin-item-pricing-form');
+    if (!form) return;
+    form.innerHTML = '';
+    try {
+      const items = await SpaccleDB.ensureDefaultItemPricing();
+      items.forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'form-label';
+        label.textContent = item.name;
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'form-input';
+        input.dataset.itemKey = item.key;
+        input.value = item.price;
+        form.appendChild(label);
+        form.appendChild(input);
+      });
+    } catch {}
+  }
+
+  async function handleItemPricingSave() {
+    const btn = document.getElementById('btn-admin-item-pricing-save');
+    btn.classList.add('loading');
+    try {
+      const existing = await SpaccleDB.ensureDefaultItemPricing();
+      const updated = existing.map(item => {
+        const input = document.querySelector(`#admin-item-pricing-form input[data-item-key="${item.key}"]`);
+        return { ...item, price: parseInt(input?.value) || item.price };
+      });
+      await SpaccleDB.saveItemPricing(updated);
+      showToast('Item prices saved');
+    } catch {
+      showToast('Failed to save item prices');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* ── Legal editor ────────────────────────────────────────────────── */
+  async function loadLegalEditor() {
+    try {
+      const [terms, privacy] = await Promise.all([
+        SpaccleDB.getLegalContent('terms'),
+        SpaccleDB.getLegalContent('privacy'),
+      ]);
+      const termsEl   = document.getElementById('admin-legal-terms');
+      const privacyEl = document.getElementById('admin-legal-privacy');
+      if (termsEl)   termsEl.value   = terms   || '';
+      if (privacyEl) privacyEl.value = privacy || '';
+    } catch {}
+  }
+
+  async function handleLegalSave() {
+    const btn = document.getElementById('btn-admin-legal-save');
+    btn.classList.add('loading');
+    try {
+      const terms   = document.getElementById('admin-legal-terms').value;
+      const privacy = document.getElementById('admin-legal-privacy').value;
+      await Promise.all([
+        SpaccleDB.saveLegalContent('terms', terms),
+        SpaccleDB.saveLegalContent('privacy', privacy),
+      ]);
+      showToast('Legal content saved');
+    } catch {
+      showToast('Failed to save legal content');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* ── Broadcast ──────────────────────────────────────────────────── */
+  async function handleBroadcastSend() {
+    const title   = (document.getElementById('admin-broadcast-title')?.value  || '').trim();
+    const message = (document.getElementById('admin-broadcast-message')?.value || '').trim();
+    if (!title || !message) { showToast('Title and message are required'); return; }
+    const btn = document.getElementById('btn-admin-broadcast-send');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.createBroadcast({ title, message });
+      document.getElementById('admin-broadcast-title').value   = '';
+      document.getElementById('admin-broadcast-message').value = '';
+      showToast('Broadcast sent to all users');
+    } catch {
+      showToast('Could not send broadcast');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* ── CSV / PDF Export ───────────────────────────────────────────── */
+  async function exportOrdersCSV() {
+    const btn = document.getElementById('btn-admin-export-csv');
+    btn.classList.add('loading');
+    try {
+      const orders = allOrders.length ? allOrders : await SpaccleDB.listAllOrders();
+      const cols = ['ID', 'Status', 'Service', 'Billing', 'Items', 'Amount (₦)', 'Pickup Day', 'Pickup Time', 'Address', 'Created'];
+      const rows = orders.map(o => [
+        o.publicId || o._id.slice(-8).toUpperCase(),
+        o.status      || '',
+        serviceLabel(o.service),
+        o.billingMode === 'subscription' ? 'Sub' : 'PAYG',
+        o.itemsCount  || '',
+        o.amountPaid  || 0,
+        o.pickupDay   || '',
+        o.pickupTime  || '',
+        (o.address    || '').replace(/,/g, ';'),
+        o.createdAt   || '',
+      ]);
+      const csv = [cols, ...rows].map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'spaccle_orders_' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('CSV downloaded');
+    } catch {
+      showToast('Export failed');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  function exportOrdersPDF() {
+    const orders = allOrders.length ? allOrders : [];
+    const rows = orders.slice(0, 200).map(o =>
+      `<tr>
+        <td>${o.publicId || o._id.slice(-8).toUpperCase()}</td>
+        <td>${statusLabel(o.status)}</td>
+        <td>${serviceLabel(o.service)}</td>
+        <td>${o.billingMode === 'subscription' ? 'Sub' : 'PAYG'}</td>
+        <td>₦${formatNaira(o.amountPaid || 0)}</td>
+        <td>${formatTime(o.createdAt)}</td>
+      </tr>`
+    ).join('');
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head>
+      <title>Spaccle Orders Export</title>
+      <style>
+        body { font-family: sans-serif; font-size: 12px; margin: 20px; }
+        h1   { font-size: 16px; margin-bottom: 12px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+        th { background: #f4f4f4; }
+        @media print { body { margin: 0; } }
+      </style>
+    </head><body>
+      <h1>Spaccle — Orders Export (${new Date().toLocaleDateString('en-NG')})</h1>
+      <table>
+        <thead><tr><th>ID</th><th>Status</th><th>Service</th><th>Billing</th><th>Amount</th><th>Date</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body></html>`);
+    win.document.close();
+    win.focus();
+    win.print();
+  }
+
+  /* ── Promo codes ─────────────────────────────────────────────────── */
+  async function handlePromoAdd() {
+    const code    = (document.getElementById('admin-promo-code')?.value    || '').trim().toUpperCase();
+    const type    = document.getElementById('admin-promo-type')?.value     || 'percent';
+    const value   = parseFloat(document.getElementById('admin-promo-value')?.value  || 0);
+    const maxUses = parseInt(document.getElementById('admin-promo-max-uses')?.value || 0) || 0;
+    const expires = document.getElementById('admin-promo-expires')?.value  || null;
+
+    if (!code)  { showToast('Code is required'); return; }
+    if (!value) { showToast('Value must be > 0'); return; }
+
+    const btn = document.getElementById('btn-admin-promo-add');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.createPromoCode({
+        code,
+        type,
+        value,
+        maxUses,
+        expiresAt: expires ? new Date(expires).toISOString() : null,
+      });
+      document.getElementById('admin-promo-code').value    = '';
+      document.getElementById('admin-promo-value').value   = '';
+      document.getElementById('admin-promo-expires').value = '';
+      showToast('Promo code created: ' + code);
+      await loadPromos();
+    } catch (err) {
+      showToast(err?.message?.includes('conflict') ? 'Code already exists' : 'Could not create promo');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  async function loadPromos() {
+    const list = document.getElementById('admin-promos-list');
+    if (!list) return;
+    list.innerHTML = '<div class="admin-empty" style="font-size:12px">Loading…</div>';
+    try {
+      const promos = await SpaccleDB.listAllPromoCodes();
+      list.innerHTML = '';
+      if (!promos.length) {
+        list.innerHTML = '<div class="admin-empty" style="font-size:12px">No promo codes yet.</div>';
+        return;
+      }
+      promos.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        const discountLabel = p.type === 'percent' ? p.value + '% off' : '₦' + formatNaira(p.value) + ' off';
+        const usesLabel     = p.maxUses ? `${p.usedCount || 0}/${p.maxUses} uses` : `${p.usedCount || 0} uses`;
+        const expLabel      = p.expiresAt ? ' · Exp ' + formatTime(p.expiresAt) : '';
+        const active        = p.active !== false;
+        card.innerHTML =
+          `<div class="admin-card__left">` +
+          `<div class="admin-card__title">${escapeAdminHtml(p.code)}</div>` +
+          `<div class="admin-card__meta">${discountLabel} · ${usesLabel}${expLabel}</div>` +
+          `</div>` +
+          `<div class="admin-card__right">` +
+          `<button class="btn btn--ghost btn--sm" data-promo-id="${escapeAdminHtml(p._id)}" data-active="${active}">` +
+          `${active ? 'Disable' : 'Enable'}</button>` +
+          `</div>`;
+        card.querySelector('button').addEventListener('click', async function () {
+          const id     = this.dataset.promoId;
+          const nowOn  = this.dataset.active === 'true';
+          try {
+            const doc = await SpaccleDB.getDocument(id);
+            await SpaccleDB.saveDocument({ ...doc, active: !nowOn });
+            showToast((nowOn ? 'Disabled' : 'Enabled') + ': ' + p.code);
+            await loadPromos();
+          } catch { showToast('Could not update promo'); }
+        });
+        list.appendChild(card);
+      });
+    } catch {
+      list.innerHTML = '<div class="admin-empty" style="font-size:12px">Failed to load.</div>';
+    }
+  }
+
+  /* ── Theme & language (admin) ───────────────────────────────────── */
+  function applyAdminDarkMode(on) {
+    document.body.classList.toggle('dark', !!on);
+    document.querySelectorAll('.theme-icon-sun').forEach(el => { el.style.display = on ? 'none' : ''; });
+    document.querySelectorAll('.theme-icon-moon').forEach(el => { el.style.display = on ? '' : 'none'; });
+  }
+
+  async function initAdminTheme() {
+    try {
+      const s = await SpaccleDB.getPreference('app_settings', {});
+      const lang = s.language || 'en';
+      applyAdminDarkMode(s.darkMode === true);
+      if (typeof HomePage !== 'undefined') HomePage.applyLanguage(lang);
+      const darkEl = document.getElementById('admin-cfg-dark-mode');
+      const langEl = document.getElementById('admin-cfg-language');
+      if (darkEl) darkEl.checked = s.darkMode === true;
+      if (langEl) langEl.value  = lang;
+    } catch { }
+  }
+
+  async function handleAdminThemeToggle() {
+    const isDark = document.body.classList.contains('dark');
+    applyAdminDarkMode(!isDark);
+    try {
+      const s = await SpaccleDB.getPreference('app_settings', {});
+      await SpaccleDB.setPreference('app_settings', { ...s, darkMode: !isDark });
+    } catch { }
+  }
+
+  async function handleAdminAppearanceSave() {
+    const darkMode = document.getElementById('admin-cfg-dark-mode')?.checked || false;
+    const language = document.getElementById('admin-cfg-language')?.value    || 'en';
+    const btn = document.getElementById('btn-admin-appearance-save');
+    btn.classList.add('loading');
+    try {
+      const s = await SpaccleDB.getPreference('app_settings', {});
+      await SpaccleDB.setPreference('app_settings', { ...s, darkMode, language });
+      applyAdminDarkMode(darkMode);
+      if (typeof HomePage !== 'undefined') HomePage.applyLanguage(language);
+      showToast('Appearance saved');
+    } catch {
+      showToast('Could not save appearance');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* ── Admin notifications ─────────────────────────────────────────── */
+  const ADMIN_NOTIF_KEY = 'spaccle_admin_notifications';
+
+  function getAdminNotifs() {
+    try { return JSON.parse(localStorage.getItem(ADMIN_NOTIF_KEY) || '[]'); } catch { return []; }
+  }
+
+  function storeAdminNotif({ title, body, tab, docId }) {
+    const list = getAdminNotifs();
+    // Deduplicate: same docId within the last 5 seconds
+    if (docId && list.some(n => n.docId === docId)) return;
+    list.unshift({
+      id: Date.now().toString(),
+      docId: docId || null,
+      title,
+      body,
+      tab: tab || null,
+      at: new Date().toISOString(),
+      read: false,
+    });
+    if (list.length > 60) list.splice(60);
+    localStorage.setItem(ADMIN_NOTIF_KEY, JSON.stringify(list));
+  }
+
+  function updateAdminNotifBadge() {
+    const unread = getAdminNotifs().filter(n => !n.read).length;
+    const badge = document.getElementById('admin-notif-badge');
+    if (!badge) return;
+    if (unread > 0) {
+      badge.textContent = unread > 9 ? '9+' : String(unread);
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function clearAdminNotifs() {
+    localStorage.removeItem(ADMIN_NOTIF_KEY);
+    updateAdminNotifBadge();
+    renderAdminNotifList();
+  }
+
+  function openAdminNotifPanel() {
+    // Mark all as read
+    const list = getAdminNotifs().map(n => ({ ...n, read: true }));
+    localStorage.setItem(ADMIN_NOTIF_KEY, JSON.stringify(list));
+    updateAdminNotifBadge();
+    renderAdminNotifList();
+    document.getElementById('admin-notif-overlay').classList.add('open');
+  }
+
+  function closeAdminNotifPanel() {
+    document.getElementById('admin-notif-overlay').classList.remove('open');
+  }
+
+  function renderAdminNotifList() {
+    const listEl  = document.getElementById('admin-notif-list');
+    const emptyEl = document.getElementById('admin-notif-empty');
+    const notifs  = getAdminNotifs();
+    listEl.innerHTML = '';
+
+    if (!notifs.length) {
+      emptyEl.style.display = '';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    notifs.forEach(n => {
+      const item = document.createElement('div');
+      item.className = 'admin-notif-item' + (n.read ? '' : ' admin-notif-item--unread');
+      item.innerHTML =
+        `<div class="admin-notif-item__icon">${notifIcon(n.tab)}</div>` +
+        `<div class="admin-notif-item__body">` +
+        `<div class="admin-notif-item__title">${escapeAdminHtml(n.title)}</div>` +
+        `<div class="admin-notif-item__sub">${escapeAdminHtml(n.body)}</div>` +
+        `<div class="admin-notif-item__time">${formatTime(n.at)}</div>` +
+        `</div>`;
+      if (n.tab) {
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', () => {
+          closeAdminNotifPanel();
+          switchTab(n.tab);
+        });
+      }
+      listEl.appendChild(item);
+    });
+  }
+
+  function notifIcon(tab) {
+    if (tab === 'support')  return '🎫';
+    if (tab === 'messages') return '💬';
+    if (tab === 'orders')   return '📦';
+    return '🔔';
+  }
+
+  /* ── Live changes watcher ────────────────────────────────────────── */
+  function startAdminNotifWatch() {
+    SpaccleDB.watchChanges(function (change) {
+      const doc = change.doc;
+      if (!doc || doc._deleted) return;
+
+      let notif = null;
+
+      if (doc.type === 'support_ticket') {
+        notif = {
+          title: 'New Support Ticket',
+          body:  doc.subject || 'A user submitted a ticket',
+          tab:   'support',
+          docId: doc._id,
+        };
+      } else if (doc.type === 'ticket_reply' && !doc.fromAdmin) {
+        notif = {
+          title: 'Customer Replied to Ticket',
+          body:  (doc.text || '').slice(0, 80),
+          tab:   'support',
+          docId: doc._id,
+        };
+      } else if (doc.type === 'chat_message' && !doc.fromAdmin) {
+        notif = {
+          title: 'New Chat Message',
+          body:  (doc.text || '').slice(0, 80),
+          tab:   'messages',
+          docId: doc._id,
+        };
+      } else if (doc.type === 'order' && doc.status === 'scheduled') {
+        notif = {
+          title: 'New Order Placed',
+          body:  (doc.publicId || '') + ' — ' + serviceLabel(doc.service),
+          tab:   'orders',
+          docId: doc._id,
+        };
+      }
+
+      if (notif) {
+        storeAdminNotif(notif);
+        updateAdminNotifBadge();
+        showToast(notif.title + ': ' + notif.body.slice(0, 40));
+      }
+    });
+  }
+
+  function escapeAdminHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   function updateSyncStatusLabel() {
     const el = document.getElementById('admin-sync-status');
     if (!el) return;
@@ -808,7 +1552,7 @@ const AdminPage = (() => {
 
   function serviceLabel(s) {
     return ({
-      'wash-fold':  'Wash & Fold',
+      'wash-fold':  'Wash, Iron & Fold',
       'dry-clean':  'Dry Cleaning',
       'iron-press': 'Iron & Press',
       'duvet':      'Duvet & Bedding',

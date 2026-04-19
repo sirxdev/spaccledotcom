@@ -551,6 +551,10 @@
 
   <!-- ── Home Dashboard ─────────────────────────────────────────── -->
   <div id="page-home" class="page page--home">
+    <div id="offline-banner" class="offline-banner" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      You're offline — changes will sync when reconnected
+    </div>
 
     <!-- Top bar -->
     <header class="home-topbar">
@@ -559,12 +563,16 @@
         <h1 class="home-greeting__name" id="home-greeting-name">there</h1>
       </div>
       <div class="home-topbar__right">
+        <button class="home-icon-btn" id="btn-home-theme" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+          <svg class="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg class="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
         <button class="home-icon-btn" id="btn-home-notify" aria-label="Notifications">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span class="home-badge" id="home-notify-badge">2</span>
+          <span class="home-badge" id="home-notify-badge"></span>
         </button>
         <button class="home-avatar" id="btn-home-avatar" aria-label="Profile">
           <span id="home-avatar-letter">?</span>
@@ -582,9 +590,9 @@
           <!-- Hero pickup card -->
           <div class="hero-card">
             <div class="hero-card__body">
-              <p class="hero-card__eyebrow">Free pickup & delivery</p>
-              <h2 class="hero-card__title">Ready for fresh<br/>laundry today?</h2>
-              <button class="btn btn--accent btn--pill hero-card__cta" id="btn-schedule-pickup">
+              <p class="hero-card__eyebrow" data-i18n="Free pickup &amp; delivery">Free pickup &amp; delivery</p>
+              <h2 class="hero-card__title" data-i18n="Ready for fresh laundry today?">Ready for fresh<br/>laundry today?</h2>
+              <button class="btn btn--accent btn--pill hero-card__cta" id="btn-schedule-pickup" data-i18n="Schedule Pickup">
                 Schedule Pickup
               </button>
             </div>
@@ -611,11 +619,14 @@
             </div>
           </div>
 
+          <!-- Subscription usage bar (shown for plan users) -->
+          <div id="sub-usage-bar-wrap" class="sub-usage-wrap" style="display:none"></div>
+
           <!-- Active order section -->
           <div class="home-section">
             <div class="home-section__head">
-              <h3 class="home-section__title">Active Order</h3>
-              <button class="home-section__link" id="btn-view-orders">View all</button>
+              <h3 class="home-section__title" data-i18n="Active Order">Active Order</h3>
+              <button class="home-section__link" id="btn-view-orders" data-i18n="View all">View all</button>
             </div>
 
             <!-- Empty state (shown when no active order) -->
@@ -630,8 +641,8 @@
                   <path d="M69 22l4 4 7-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
-              <p class="order-empty__title">No active orders</p>
-              <p class="order-empty__sub">Schedule a pickup and we'll handle the rest</p>
+              <p class="order-empty__title" data-i18n="No active orders">No active orders</p>
+              <p class="order-empty__sub" data-i18n="Schedule a pickup and we'll handle the rest">Schedule a pickup and we'll handle the rest</p>
             </div>
 
             <!-- Active order card (shown when order exists) -->
@@ -642,15 +653,15 @@
               </div>
               <div class="order-card__info">
                 <div class="order-card__row">
-                  <span class="order-card__label">Order ID</span>
+                  <span class="order-card__label" data-i18n="Order ID">Order ID</span>
                   <span class="order-card__val" id="order-id-val">#SP-0001</span>
                 </div>
                 <div class="order-card__row">
-                  <span class="order-card__label">Pickup</span>
+                  <span class="order-card__label" data-i18n="Pickup">Pickup</span>
                   <span class="order-card__val" id="order-pickup-val">Today, 2:00 PM</span>
                 </div>
                 <div class="order-card__row">
-                  <span class="order-card__label">Service</span>
+                  <span class="order-card__label" data-i18n="Service">Service</span>
                   <span class="order-card__val" id="order-items-val">8 items</span>
                 </div>
               </div>
@@ -658,19 +669,19 @@
                 <div class="order-track-steps">
                   <div class="order-track-step done">
                     <div class="order-track-step__dot"></div>
-                    <span>Picked up</span>
+                    <span data-i18n="Picked up">Picked up</span>
                   </div>
                   <div class="order-track-step active">
                     <div class="order-track-step__dot"></div>
-                    <span>Cleaning</span>
+                    <span data-i18n="Cleaning">Cleaning</span>
                   </div>
                   <div class="order-track-step">
                     <div class="order-track-step__dot"></div>
-                    <span>Ready</span>
+                    <span data-i18n="Ready">Ready</span>
                   </div>
                   <div class="order-track-step">
                     <div class="order-track-step__dot"></div>
-                    <span>Delivered</span>
+                    <span data-i18n="Delivered">Delivered</span>
                   </div>
                 </div>
               </div>
@@ -680,7 +691,7 @@
           <!-- Services grid -->
           <div class="home-section">
             <div class="home-section__head">
-              <h3 class="home-section__title">Our Services</h3>
+              <h3 class="home-section__title" data-i18n="Our Services">Our Services</h3>
             </div>
             <div class="services-grid">
 
@@ -693,7 +704,7 @@
                     <circle cx="7" cy="18" r="2" fill="#4A90E2" opacity="0.3"/>
                   </svg>
                 </div>
-                <span class="service-card__name">Wash &amp; Fold</span>
+                <span class="service-card__name" data-i18n="Wash, Iron &amp; Fold">Wash, Iron &amp; Fold</span>
                 <span class="service-card__price">₦900/item</span>
               </button>
 
@@ -705,7 +716,7 @@
                     <path d="M9 12h6" stroke="#5B4FBE" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
                   </svg>
                 </div>
-                <span class="service-card__name">Dry Cleaning</span>
+                <span class="service-card__name" data-i18n="Dry Cleaning">Dry Cleaning</span>
                 <span class="service-card__price">₦900/item</span>
               </button>
 
@@ -718,7 +729,7 @@
                     <path d="M9 12h8" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
                   </svg>
                 </div>
-                <span class="service-card__name">Iron &amp; Press</span>
+                <span class="service-card__name" data-i18n="Iron &amp; Press">Iron &amp; Press</span>
                 <span class="service-card__price">₦900/item</span>
               </button>
 
@@ -733,7 +744,7 @@
                     <circle cx="16" cy="15" r="1.5" fill="#FF9800" opacity="0.5"/>
                   </svg>
                 </div>
-                <span class="service-card__name">Duvet &amp; Bedding</span>
+                <span class="service-card__name" data-i18n="Duvet &amp; Bedding">Duvet &amp; Bedding</span>
                 <span class="service-card__price">From ₦7,500</span>
               </button>
 
@@ -745,7 +756,7 @@
                     <path d="M9 19h6" stroke="#E91E8C" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
                   </svg>
                 </div>
-                <span class="service-card__name">Alterations</span>
+                <span class="service-card__name" data-i18n="Alterations">Alterations</span>
                 <span class="service-card__price">From ₦1,200/item</span>
               </button>
 
@@ -757,7 +768,7 @@
                     <path d="M13 17l1-3" stroke="#1565C0" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
                   </svg>
                 </div>
-                <span class="service-card__name">Shoe Cleaning</span>
+                <span class="service-card__name" data-i18n="Shoe Cleaning">Shoe Cleaning</span>
                 <span class="service-card__price">From ₦3,500/pair</span>
               </button>
 
@@ -767,8 +778,8 @@
           <!-- Promo banner -->
           <div class="promo-banner">
             <div class="promo-banner__text">
-              <p class="promo-banner__tag">New customer offer</p>
-              <h4 class="promo-banner__title">First order 20% off</h4>
+              <p class="promo-banner__tag" data-i18n="New customer offer">New customer offer</p>
+              <h4 class="promo-banner__title" data-i18n="First order 20% off">First order 20% off</h4>
               <p class="promo-banner__sub">Use code <strong>WELCOME20</strong> at checkout</p>
             </div>
             <div class="promo-banner__illo">
@@ -784,41 +795,53 @@
           <!-- How it works -->
           <div class="home-section" style="margin-bottom: 12px">
             <div class="home-section__head">
-              <h3 class="home-section__title">How It Works</h3>
+              <h3 class="home-section__title" data-i18n="How It Works">How It Works</h3>
             </div>
             <div class="how-steps">
               <div class="how-step">
                 <div class="how-step__num">1</div>
                 <div class="how-step__body">
-                  <p class="how-step__title">Schedule</p>
-                  <p class="how-step__desc">Pick a time that works for you</p>
+                  <p class="how-step__title" data-i18n="Schedule">Schedule</p>
+                  <p class="how-step__desc" data-i18n="Pick a time that works for you">Pick a time that works for you</p>
                 </div>
               </div>
               <div class="how-step__connector"></div>
               <div class="how-step">
                 <div class="how-step__num">2</div>
                 <div class="how-step__body">
-                  <p class="how-step__title">We collect</p>
-                  <p class="how-step__desc">Door-to-door pickup at your chosen time</p>
+                  <p class="how-step__title" data-i18n="We collect">We collect</p>
+                  <p class="how-step__desc" data-i18n="Door-to-door pickup at your chosen time">Door-to-door pickup at your chosen time</p>
                 </div>
               </div>
               <div class="how-step__connector"></div>
               <div class="how-step">
                 <div class="how-step__num">3</div>
                 <div class="how-step__body">
-                  <p class="how-step__title">We clean</p>
-                  <p class="how-step__desc">Expert care for every garment</p>
+                  <p class="how-step__title" data-i18n="We clean">We clean</p>
+                  <p class="how-step__desc" data-i18n="Expert care for every garment">Expert care for every garment</p>
                 </div>
               </div>
               <div class="how-step__connector"></div>
               <div class="how-step">
                 <div class="how-step__num">4</div>
                 <div class="how-step__body">
-                  <p class="how-step__title">Delivered</p>
-                  <p class="how-step__desc">Back at your door, fresh and folded</p>
+                  <p class="how-step__title" data-i18n="Delivered">Delivered</p>
+                  <p class="how-step__desc" data-i18n="Back at your door, fresh and folded">Back at your door, fresh and folded</p>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Chat quick-access card -->
+          <div class="chat-quick-card" id="btn-home-chat-quick">
+            <div class="chat-quick-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div class="chat-quick-card__text">
+              <div class="chat-quick-card__title" data-i18n="Chat with Us">Chat with Us</div>
+              <div class="chat-quick-card__sub" data-i18n="Questions? We're here to help">Questions? We're here to help</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
 
         </div><!-- .home-scroll -->
@@ -829,10 +852,10 @@
         <div class="home-scroll">
           <div class="tab-head">
             <div>
-              <h2 class="tab-title">Orders</h2>
-              <p class="tab-subtitle">Track your laundry from pickup to delivery.</p>
+              <h2 class="tab-title" data-i18n="Orders">Orders</h2>
+              <p class="tab-subtitle" data-i18n="Track your laundry from pickup to delivery.">Track your laundry from pickup to delivery.</p>
             </div>
-            <button class="btn btn--primary btn--pill tab-action" id="btn-orders-new">New Order</button>
+            <button class="btn btn--primary btn--pill tab-action" id="btn-orders-new" data-i18n="New Order">New Order</button>
           </div>
 
           <div class="orders-empty" id="orders-empty">
@@ -844,9 +867,9 @@
                 <line x1="8" y1="17" x2="13" y2="17" stroke="#5B4FBE" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
             </div>
-            <h3>No orders yet</h3>
-            <p>Schedule a pickup and your orders will show up here.</p>
-            <button class="btn btn--primary btn--pill" id="btn-orders-empty-cta">Schedule Pickup</button>
+            <h3 data-i18n="No orders yet">No orders yet</h3>
+            <p data-i18n="Schedule a pickup and your orders will show up here.">Schedule a pickup and your orders will show up here.</p>
+            <button class="btn btn--primary btn--pill" id="btn-orders-empty-cta" data-i18n="Schedule Pickup">Schedule Pickup</button>
           </div>
 
           <div class="orders-list" id="orders-list"></div>
@@ -858,10 +881,10 @@
         <div class="home-scroll">
           <div class="tab-head">
             <div>
-              <h2 class="tab-title">Tracking</h2>
-              <p class="tab-subtitle">See when your laundry will be ready.</p>
+              <h2 class="tab-title" data-i18n="Tracking">Tracking</h2>
+              <p class="tab-subtitle" data-i18n="See when your laundry will be ready.">See when your laundry will be ready.</p>
             </div>
-            <button class="btn btn--ghost btn--pill tab-action-secondary" id="btn-track-support">Support</button>
+            <button class="btn btn--ghost btn--pill tab-action-secondary" id="btn-track-support" data-i18n="Support">Support</button>
           </div>
 
           <div class="track-empty" id="track-empty">
@@ -871,9 +894,9 @@
                 <circle cx="12" cy="10" r="3" stroke="#06D6A0" stroke-width="1.8"/>
               </svg>
             </div>
-            <h3>No active order</h3>
-            <p>Once you schedule a pickup, tracking will appear here.</p>
-            <button class="btn btn--primary btn--pill" id="btn-track-empty-cta">Schedule Pickup</button>
+            <h3 data-i18n="No active order">No active order</h3>
+            <p data-i18n="Once you schedule a pickup, tracking will appear here.">Once you schedule a pickup, tracking will appear here.</p>
+            <button class="btn btn--primary btn--pill" id="btn-track-empty-cta" data-i18n="Schedule Pickup">Schedule Pickup</button>
           </div>
 
           <div class="track-card" id="track-card" style="display:none">
@@ -888,11 +911,11 @@
 
             <div class="track-meta">
               <div class="track-meta__row">
-                <span class="track-meta__label">Pickup</span>
+                <span class="track-meta__label" data-i18n="Pickup">Pickup</span>
                 <span class="track-meta__val" id="track-pickup">Today, 2:00 PM</span>
               </div>
               <div class="track-meta__row">
-                <span class="track-meta__label">Est. ready</span>
+                <span class="track-meta__label" data-i18n="Est. ready">Est. ready</span>
                 <span class="track-meta__val" id="track-ready">—</span>
               </div>
             </div>
@@ -900,7 +923,7 @@
             <div class="track-timeline" id="track-timeline"></div>
 
             <div class="track-actions">
-              <button class="btn btn--ghost btn--pill" id="btn-track-details">View Details</button>
+              <button class="btn btn--ghost btn--pill" id="btn-track-details" data-i18n="View Details">View Details</button>
               <button class="btn btn--ghost btn--pill" id="btn-track-map">Map</button>
               <button class="btn btn--primary btn--pill" id="btn-track-advance">Update Status</button>
             </div>
@@ -923,55 +946,101 @@
           <div class="profile-menu">
 
             <div class="profile-menu__section">
-              <p class="profile-menu__label">Account</p>
+              <p class="profile-menu__label" data-i18n="Account">Account</p>
               <button class="profile-menu__item" id="btn-open-profile-info">
                 <div class="profile-menu__item-icon" style="background:#EDE9FF">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#5B4FBE" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="#5B4FBE" stroke-width="1.8"/></svg>
                 </div>
-                <span>Personal Information</span>
+                <span data-i18n="Personal Information">Personal Information</span>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
               <button class="profile-menu__item" id="btn-open-profile-addresses">
                 <div class="profile-menu__item-icon" style="background:#E6FBF6">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#06D6A0" stroke-width="1.8" fill="none"/><circle cx="12" cy="10" r="3" stroke="#06D6A0" stroke-width="1.8"/></svg>
                 </div>
-                <span>Saved Addresses</span>
+                <span data-i18n="Saved Addresses">Saved Addresses</span>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
               <button class="profile-menu__item" id="btn-open-profile-payment">
                 <div class="profile-menu__item-icon" style="background:#FFF3E0">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#FF9800" stroke-width="1.8" fill="none"/><line x1="2" y1="10" x2="22" y2="10" stroke="#FF9800" stroke-width="1.5"/></svg>
                 </div>
-                <span>Payment Methods</span>
+                <span data-i18n="Payment Methods">Payment Methods</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-change-password">
+                <div class="profile-menu__item-icon" style="background:#FCE4EC">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#E91E63" stroke-width="1.8" fill="none"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#E91E63" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span data-i18n="Change Password">Change Password</span>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
             </div>
 
             <div class="profile-menu__section">
-              <p class="profile-menu__label">Preferences</p>
+              <p class="profile-menu__label" data-i18n="Preferences">Preferences</p>
               <button class="profile-menu__item" id="btn-open-profile-notifications">
                 <div class="profile-menu__item-icon" style="background:#F0EEFF">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#5B4FBE" stroke-width="1.8"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#5B4FBE" stroke-width="1.8"/></svg>
                 </div>
-                <span>Notifications</span>
+                <span data-i18n="Notifications">Notifications</span>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
               <button class="profile-menu__item" id="btn-open-profile-settings">
                 <div class="profile-menu__item-icon" style="background:#E8F4FF">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#4A90E2" stroke-width="1.8"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round"/></svg>
                 </div>
-                <span>App Settings</span>
+                <span data-i18n="App Settings">App Settings</span>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
             </div>
 
             <div class="profile-menu__section">
-              <p class="profile-menu__label">Support</p>
+              <p class="profile-menu__label" data-i18n="Support">Support</p>
               <button class="profile-menu__item" id="btn-open-support">
                 <div class="profile-menu__item-icon" style="background:#E6FBF6">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#06D6A0" stroke-width="1.8" fill="none"/></svg>
                 </div>
-                <span>Help &amp; Support</span>
+                <span data-i18n="Help &amp; Support">Help &amp; Support</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-my-tickets">
+                <div class="profile-menu__item-icon" style="background:#E8F4FF">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 14l2 2 4-4" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span data-i18n="My Support Tickets">My Support Tickets</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-chat">
+                <div class="profile-menu__item-icon" style="background:#EDE9FF">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="#5B4FBE" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span data-i18n="Chat with Us">Chat with Us</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-pricing-guide">
+                <div class="profile-menu__item-icon" style="background:#FFF3E0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="#FF9800" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span data-i18n="Price Guide">Price Guide</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+
+            <div class="profile-menu__section">
+              <p class="profile-menu__label" data-i18n="Legal">Legal</p>
+              <button class="profile-menu__item" id="btn-open-terms">
+                <div class="profile-menu__item-icon" style="background:#F3F4F6">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span data-i18n="Terms of Service">Terms of Service</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <button class="profile-menu__item" id="btn-open-privacy">
+                <div class="profile-menu__item-icon" style="background:#F3F4F6">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span data-i18n="Privacy Policy">Privacy Policy</span>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
             </div>
@@ -982,7 +1051,7 @@
                 <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               </svg>
-              Sign Out
+              <span data-i18n="Sign Out">Sign Out</span>
             </button>
 
           </div>
@@ -998,7 +1067,7 @@
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.8" fill="none"/>
           <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.8"/>
         </svg>
-        <span>Home</span>
+        <span data-i18n="Home">Home</span>
       </button>
       <button class="bottom-nav__item" data-tab="orders">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -1007,7 +1076,7 @@
           <line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <line x1="8" y1="17" x2="13" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <span>Orders</span>
+        <span data-i18n="Orders">Orders</span>
       </button>
       <button class="bottom-nav__item bottom-nav__item--center" data-tab="new-order" id="btn-nav-new">
         <div class="bottom-nav__fab">
@@ -1022,14 +1091,14 @@
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.8" fill="none"/>
           <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.8"/>
         </svg>
-        <span>Track</span>
+        <span data-i18n="Track">Track</span>
       </button>
       <button class="bottom-nav__item" data-tab="profile">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/>
         </svg>
-        <span>Profile</span>
+        <span data-i18n="Profile">Profile</span>
       </button>
     </nav>
 
@@ -1038,8 +1107,8 @@
     <div class="sheet" id="sheet-schedule" aria-hidden="true" role="dialog" aria-modal="true">
       <div class="sheet__header">
         <div>
-          <p class="sheet__eyebrow">New Order</p>
-          <h3 class="sheet__title">Schedule Pickup</h3>
+          <p class="sheet__eyebrow" data-i18n="New Order">New Order</p>
+          <h3 class="sheet__title" data-i18n="Schedule Pickup">Schedule Pickup</h3>
         </div>
         <button class="sheet__close" id="btn-schedule-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1048,22 +1117,22 @@
 
       <div class="sheet__content">
         <div class="sheet-block">
-          <p class="sheet-block__label">Service</p>
+          <p class="sheet-block__label" data-i18n="Service">Service</p>
           <div class="service-pills" id="service-pills">
-            <button class="service-pill active" data-service="wash-fold">Wash &amp; Fold</button>
-            <button class="service-pill" data-service="dry-clean">Dry Cleaning</button>
-            <button class="service-pill" data-service="iron-press">Iron &amp; Press</button>
-            <button class="service-pill" data-service="duvet">Bedding</button>
-            <button class="service-pill" data-service="alteration">Alterations</button>
-            <button class="service-pill" data-service="shoe-clean">Shoes</button>
+            <button class="service-pill active" data-service="wash-fold" data-i18n="Wash, Iron &amp; Fold">Wash, Iron &amp; Fold</button>
+            <button class="service-pill" data-service="dry-clean" data-i18n="Dry Cleaning">Dry Cleaning</button>
+            <button class="service-pill" data-service="iron-press" data-i18n="Iron &amp; Press">Iron &amp; Press</button>
+            <button class="service-pill" data-service="duvet" data-i18n="Bedding">Bedding</button>
+            <button class="service-pill" data-service="alteration" data-i18n="Alterations">Alterations</button>
+            <button class="service-pill" data-service="shoe-clean" data-i18n="Shoes">Shoes</button>
           </div>
         </div>
 
         <div class="sheet-block">
-          <p class="sheet-block__label">Billing</p>
+          <p class="sheet-block__label" data-i18n="Billing">Billing</p>
           <div class="admin-tabs" id="billing-tabs">
-            <button class="admin-tab active" id="btn-billing-payg" data-billing="payg">Pay As You Go</button>
-            <button class="admin-tab" id="btn-billing-sub" data-billing="subscription">Monthly Plan</button>
+            <button class="admin-tab active" id="btn-billing-payg" data-billing="payg" data-i18n="Pay As You Go">Pay As You Go</button>
+            <button class="admin-tab" id="btn-billing-sub" data-billing="subscription" data-i18n="Monthly Plan">Monthly Plan</button>
           </div>
         </div>
 
@@ -1079,10 +1148,34 @@
 
         <div class="form-group" id="items-count-group">
           <label class="form-label" for="pickup-items">
-            <span id="items-count-label">Estimated items count</span>
+            <span id="items-count-label">Number of items</span>
             <span class="form-label-hint" id="items-payg-rate" style="display:none">₦900/item</span>
           </label>
           <input class="form-input" id="pickup-items" inputmode="numeric" placeholder="e.g. 8" />
+        </div>
+
+        <!-- Exceed plan toggle — only shown for subscription billing -->
+        <div class="form-group" id="exceed-plan-group" style="display:none">
+          <label class="toggle-row">
+            <span class="form-label" style="margin:0">Exceeding my plan this month</span>
+            <input type="checkbox" id="chk-exceeds-plan" class="toggle-input">
+            <span class="toggle-thumb"></span>
+          </label>
+          <div id="extra-items-group" style="display:none;margin-top:10px">
+            <label class="form-label" for="extra-items-count">Extra items (above plan limit)</label>
+            <input class="form-input" id="extra-items-count" inputmode="numeric" placeholder="e.g. 3">
+            <span style="font-size:11px;color:#888;margin-top:4px;display:block">We'll bill you separately for these.</span>
+          </div>
+        </div>
+
+        <!-- Recurring pickup toggle — only shown for subscription billing -->
+        <div class="form-group" id="recurring-pickup-group" style="display:none">
+          <label class="toggle-row">
+            <span class="form-label" style="margin:0">Set as my recurring monthly pickup</span>
+            <input type="checkbox" id="chk-recurring-pickup" class="toggle-input">
+            <span class="toggle-thumb"></span>
+          </label>
+          <span style="font-size:11px;color:#888;margin-top:4px;display:block" id="recurring-pickup-hint">We'll remind you each month on this day &amp; time.</span>
         </div>
 
         <div class="sheet-block">
@@ -1112,9 +1205,19 @@
           <textarea class="form-input form-textarea" id="pickup-notes" rows="3" placeholder="Gate code, instructions, preferred drop-off…"></textarea>
         </div>
 
+        <!-- Promo code (PAYG only, hidden for subscription) -->
+        <div class="form-group promo-group" id="promo-group">
+          <label class="form-label">Promo / Discount Code</label>
+          <div class="promo-input-row">
+            <input class="form-input" id="promo-input" placeholder="Enter code" style="text-transform:uppercase">
+            <button class="btn btn--ghost btn--sm" id="btn-apply-promo" type="button">Apply</button>
+          </div>
+          <span id="promo-status" style="font-size:12px;margin-top:4px;display:block"></span>
+        </div>
+
         <div class="sheet__footer">
           <button class="btn btn--primary btn--full btn--lg" id="btn-schedule-confirm">
-            <span class="btn__label">Confirm Pickup</span>
+            <span class="btn__label" data-i18n="Confirm Pickup">Confirm Pickup</span>
             <div class="btn__spinner"></div>
           </button>
         </div>
@@ -1134,6 +1237,9 @@
       <div class="sheet__content">
         <div class="tab-subtitle" id="sub-current"></div>
         <div class="plan-cards" id="sub-plan-cards"></div>
+        <button class="btn btn--ghost btn--full" id="btn-custom-plan-chat" style="margin:8px 0 4px;font-size:13px">
+          Need a custom plan? Chat with us →
+        </button>
         <div class="sheet__footer sheet__footer--split">
           <button class="btn btn--ghost btn--pill" id="btn-subscribe-cancel">Cancel</button>
           <button class="btn btn--primary btn--pill" id="btn-subscribe-pay">
@@ -1156,9 +1262,15 @@
       </div>
       <div class="sheet__content">
         <div class="order-detail" id="order-detail"></div>
-        <div class="sheet__footer sheet__footer--split">
-          <button class="btn btn--ghost btn--pill" id="btn-order-support">Support</button>
-          <button class="btn btn--primary btn--pill" id="btn-order-track">Go to Tracking</button>
+        <div class="sheet__footer">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button class="btn btn--ghost btn--pill btn--full" id="btn-order-cancel" style="display:none;color:#E53935;border-color:#E53935">Cancel Order</button>
+            <button class="btn btn--ghost btn--pill btn--full" id="btn-order-reorder" style="display:none">Re-order</button>
+          </div>
+          <div class="sheet__footer--split">
+            <button class="btn btn--ghost btn--pill" id="btn-order-support">Support</button>
+            <button class="btn btn--primary btn--pill" id="btn-order-track">Go to Tracking</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1414,10 +1526,216 @@
             <span class="toggle-thumb"></span>
           </label>
         </div>
+        <div class="sheet-block">
+          <p class="sheet-block__label">Appearance</p>
+          <label class="toggle-row">
+            <span>Dark Mode</span>
+            <input type="checkbox" id="setting-dark-mode" class="toggle-input" />
+            <span class="toggle-thumb"></span>
+          </label>
+          <div class="form-group" style="margin-top:12px">
+            <label class="form-label" for="setting-language">Language</label>
+            <select class="form-input" id="setting-language">
+              <option value="en">English</option>
+              <option value="yo">Yoruba</option>
+              <option value="ig">Igbo</option>
+              <option value="ha">Hausa</option>
+            </select>
+          </div>
+        </div>
         <div class="sheet__footer">
           <button class="btn btn--primary btn--full btn--lg" id="btn-settings-save">
             <span class="btn__label">Save Settings</span>
             <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div class="sheet" id="sheet-notifications" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Inbox</p>
+          <h3 class="sheet__title">Notifications</h3>
+        </div>
+        <button class="sheet__close" id="btn-notif-panel-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+          <button class="btn btn--ghost btn--sm" id="btn-notif-clear-all">Clear all</button>
+        </div>
+        <div id="notif-list"></div>
+        <div id="notif-empty" class="orders-empty" style="display:none">
+          <p>No notifications yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating Sheet -->
+    <div class="sheet" id="sheet-rating" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Delivered 🎉</p>
+          <h3 class="sheet__title">Rate Your Experience</h3>
+        </div>
+        <button class="sheet__close" id="btn-rating-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <p style="color:#888;font-size:14px;margin-bottom:20px">How was your laundry experience? Your feedback helps us improve.</p>
+        <div class="rating-stars" id="rating-stars">
+          <button class="rating-star" data-star="1">★</button>
+          <button class="rating-star" data-star="2">★</button>
+          <button class="rating-star" data-star="3">★</button>
+          <button class="rating-star" data-star="4">★</button>
+          <button class="rating-star" data-star="5">★</button>
+        </div>
+        <input type="hidden" id="rating-order-id">
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label" for="rating-note">Comment (optional)</label>
+          <textarea class="form-input form-textarea" id="rating-note" rows="3" placeholder="Tell us what went well or how we can improve…"></textarea>
+        </div>
+        <div class="sheet__footer">
+          <button class="btn btn--primary btn--full btn--lg" id="btn-rating-submit">
+            <span class="btn__label">Submit Rating</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Sheet -->
+    <div class="sheet" id="sheet-chat" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Spaccle</p>
+          <h3 class="sheet__title">Chat with Us</h3>
+        </div>
+        <button class="sheet__close" id="btn-chat-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content" style="display:flex;flex-direction:column;height:100%;padding-bottom:0">
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-bar">
+          <input type="text" class="form-input" id="chat-input" placeholder="Type a message…" autocomplete="off">
+          <button class="btn btn--primary chat-send-btn" id="btn-chat-send" aria-label="Send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal Reader Sheet -->
+    <div class="sheet" id="sheet-legal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Spaccle</p>
+          <h3 class="sheet__title" id="legal-sheet-title">Legal</h3>
+        </div>
+        <button class="sheet__close" id="btn-legal-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div id="legal-content" class="legal-content"></div>
+      </div>
+    </div>
+
+    <!-- Price Guide Sheet -->
+    <div class="sheet" id="sheet-pricing-guide" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Spaccle</p>
+          <h3 class="sheet__title">Price Guide</h3>
+        </div>
+        <button class="sheet__close" id="btn-pricing-guide-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <p style="font-size:13px;color:#888;margin-bottom:16px">Per-item pricing for common garment types. Prices may vary based on condition.</p>
+        <div id="pricing-guide-services" class="admin-list"></div>
+        <div style="height:16px"></div>
+        <p class="sheet-block__label" style="margin-bottom:8px">Individual Item Prices</p>
+        <div id="pricing-guide-items" class="admin-list"></div>
+      </div>
+    </div>
+
+    <!-- Change Password Sheet -->
+    <div class="sheet" id="sheet-change-password" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Security</p>
+          <h3 class="sheet__title">Change Password</h3>
+        </div>
+        <button class="sheet__close" id="btn-change-password-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div class="form-group">
+          <label class="form-label" for="change-pw-current">Current Password</label>
+          <input class="form-input" id="change-pw-current" type="password" placeholder="Enter current password" autocomplete="current-password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="change-pw-new">New Password</label>
+          <input class="form-input" id="change-pw-new" type="password" placeholder="At least 8 characters" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="change-pw-confirm">Confirm New Password</label>
+          <input class="form-input" id="change-pw-confirm" type="password" placeholder="Repeat new password" autocomplete="new-password" />
+        </div>
+        <div class="sheet__footer">
+          <button class="btn btn--primary btn--full btn--lg" id="btn-change-password-save">
+            <span class="btn__label">Update Password</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Support Tickets Sheet -->
+    <div class="sheet" id="sheet-my-tickets" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div>
+          <p class="sheet__eyebrow">Support</p>
+          <h3 class="sheet__title">My Tickets</h3>
+        </div>
+        <button class="sheet__close" id="btn-my-tickets-close" aria-label="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content">
+        <div id="my-tickets-list"></div>
+        <div id="my-tickets-empty" class="orders-empty" style="display:none">
+          <p>You have no support tickets yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticket Thread Sheet (user side) -->
+    <div class="sheet" id="sheet-ticket-thread" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="sheet__header">
+        <div style="flex:1;min-width:0">
+          <p class="sheet__eyebrow">Support Ticket</p>
+          <h3 class="sheet__title" id="ticket-thread-subject" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">–</h3>
+        </div>
+        <button class="sheet__close" id="btn-ticket-thread-back" aria-label="Back">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="sheet__content" style="display:flex;flex-direction:column;padding-bottom:0">
+        <div id="ticket-thread-status" style="font-size:12px;color:#888;margin-bottom:12px;flex-shrink:0"></div>
+        <div id="ticket-thread-messages" class="ticket-thread" style="flex:1;overflow-y:auto;margin-bottom:8px"></div>
+        <div class="chat-input-bar" style="flex-shrink:0;padding-bottom:16px" id="ticket-reply-bar">
+          <textarea class="form-input" id="ticket-reply-input" rows="2" placeholder="Add a reply…" style="resize:none;padding:10px 14px;line-height:1.4"></textarea>
+          <button class="btn btn--primary chat-send-btn" id="btn-ticket-reply-send" aria-label="Send reply">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
       </div>
@@ -1437,11 +1755,24 @@
           <div class="admin-topbar__sub" id="admin-topbar-sub">Loading...</div>
         </div>
       </div>
-      <button class="admin-topbar__logout" id="btn-admin-logout" aria-label="Logout">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="admin-topbar__icon-btn" id="btn-admin-theme" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+          <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="admin-topbar__icon-btn" id="btn-admin-notif" aria-label="Notifications" style="position:relative">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span class="admin-notif-badge" id="admin-notif-badge" style="display:none"></span>
+        </button>
+        <button class="admin-topbar__logout" id="btn-admin-logout" aria-label="Logout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Tab nav (scrollable) -->
@@ -1450,6 +1781,7 @@
       <button class="admin-tab" data-tab="orders">Orders</button>
       <button class="admin-tab" data-tab="users">Users</button>
       <button class="admin-tab" data-tab="support">Support</button>
+      <button class="admin-tab" data-tab="messages">Messages</button>
       <button class="admin-tab" data-tab="plans">Plans</button>
       <button class="admin-tab" data-tab="config">Config</button>
     </div>
@@ -1489,6 +1821,33 @@
           <button class="btn btn--ghost btn--sm" id="btn-admin-dash-refresh">Refresh</button>
         </div>
         <div id="admin-recent-orders" class="admin-list"></div>
+
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Revenue (Last 7 Days)</h2>
+        </div>
+        <div id="admin-revenue-chart" style="height:120px;padding:8px 0"></div>
+
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Export Data</h2>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn btn--ghost btn--sm" id="btn-admin-export-csv">Export CSV</button>
+          <button class="btn btn--ghost btn--sm" id="btn-admin-export-pdf">Export PDF</button>
+        </div>
+
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Broadcast Notification</h2>
+        </div>
+        <div class="admin-config-form" style="margin-bottom:0">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-input" id="admin-broadcast-title" placeholder="e.g. New Feature Available">
+          <label class="form-label" style="margin-top:8px">Message</label>
+          <textarea class="form-input" id="admin-broadcast-message" rows="3" placeholder="Broadcast message to all users…"></textarea>
+          <button class="btn btn--primary btn--full" id="btn-admin-broadcast-send" style="margin-top:8px">
+            <span class="btn__label">Send Broadcast</span>
+            <div class="btn__spinner"></div>
+          </button>
+        </div>
       </div>
 
       <!-- Orders tab -->
@@ -1532,6 +1891,15 @@
         <div id="admin-tickets-list" class="admin-list"></div>
       </div>
 
+      <!-- Messages tab -->
+      <div class="admin-panel" id="admin-panel-messages">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">Customer Messages</h2>
+          <button class="btn btn--ghost btn--sm" id="btn-admin-messages-refresh">Refresh</button>
+        </div>
+        <div id="admin-messages-list" class="admin-list"></div>
+      </div>
+
       <!-- Plans tab -->
       <div class="admin-panel" id="admin-panel-plans">
         <div class="admin-panel-header">
@@ -1566,6 +1934,74 @@
         </div>
         <div class="admin-config-form" id="admin-services-form"></div>
         <button class="btn btn--primary btn--full" id="btn-admin-services-save" style="margin-top:12px">Save Service Prices</button>
+
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Item Pricing Guide</h2>
+        </div>
+        <div class="admin-config-form" id="admin-item-pricing-form"></div>
+        <button class="btn btn--primary btn--full" id="btn-admin-item-pricing-save" style="margin-top:12px">Save Item Prices</button>
+
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Appearance &amp; Language</h2>
+        </div>
+        <div class="admin-config-form" style="margin-bottom:16px">
+          <div class="admin-toggle-row" style="margin-bottom:12px">
+            <span class="form-label" style="margin:0">Dark Mode</span>
+            <label class="toggle-input"><input type="checkbox" id="admin-cfg-dark-mode"><span class="toggle-thumb"></span></label>
+          </div>
+          <label class="form-label">Language</label>
+          <select class="form-input" id="admin-cfg-language">
+            <option value="en">English</option>
+            <option value="yo">Yoruba</option>
+            <option value="ig">Igbo</option>
+            <option value="ha">Hausa</option>
+          </select>
+          <button class="btn btn--primary btn--full" id="btn-admin-appearance-save" style="margin-top:10px">Save Appearance</button>
+        </div>
+
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Legal Content</h2>
+        </div>
+        <div class="admin-config-form">
+          <label class="form-label">Terms of Service (HTML)</label>
+          <textarea class="form-input" id="admin-legal-terms" rows="6" placeholder="<h2>Terms…"></textarea>
+          <label class="form-label" style="margin-top:8px">Privacy Policy (HTML)</label>
+          <textarea class="form-input" id="admin-legal-privacy" rows="6" placeholder="<h2>Privacy…"></textarea>
+          <button class="btn btn--primary btn--full" id="btn-admin-legal-save" style="margin-top:8px">Save Legal Content</button>
+        </div>
+
+        <div class="admin-panel-header" style="margin-top:20px">
+          <h2 class="admin-panel-title">Promo / Discount Codes</h2>
+        </div>
+        <div class="admin-config-form">
+          <label class="form-label">Code</label>
+          <input type="text" class="form-input" id="admin-promo-code" placeholder="e.g. FIRST20" style="text-transform:uppercase">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <div>
+              <label class="form-label">Type</label>
+              <select class="form-input" id="admin-promo-type">
+                <option value="percent">Percent off (%)</option>
+                <option value="flat">Flat off (₦)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Value</label>
+              <input type="number" class="form-input" id="admin-promo-value" placeholder="e.g. 20">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <div>
+              <label class="form-label">Max Uses (0 = unlimited)</label>
+              <input type="number" class="form-input" id="admin-promo-max-uses" placeholder="0">
+            </div>
+            <div>
+              <label class="form-label">Expires (optional)</label>
+              <input type="date" class="form-input" id="admin-promo-expires">
+            </div>
+          </div>
+          <button class="btn btn--primary btn--full" id="btn-admin-promo-add" style="margin-top:8px">Create Promo Code</button>
+        </div>
+        <div id="admin-promos-list" class="admin-list" style="margin-top:8px"></div>
       </div>
 
     </div><!-- .admin-content -->
@@ -1626,6 +2062,13 @@
         <div class="admin-sheet__body">
           <div class="admin-detail-rows" id="admin-order-details"></div>
           <div class="admin-panel-header" style="margin-top:16px;margin-bottom:8px">
+            <span class="form-label" style="margin:0">Assign Driver / Agent</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <input type="text" class="form-input" id="admin-driver-input" placeholder="Driver name or phone…" style="flex:1">
+            <button class="btn btn--primary btn--sm" id="btn-admin-driver-assign">Assign</button>
+          </div>
+          <div class="admin-panel-header" style="margin-bottom:8px">
             <span class="form-label" style="margin:0">Update Status</span>
           </div>
           <div class="admin-status-actions" id="admin-order-status-actions"></div>
@@ -1652,20 +2095,73 @@
       </div>
     </div>
 
-    <!-- Ticket detail -->
+    <!-- Ticket thread (admin) -->
     <div class="admin-overlay" id="admin-ticket-overlay">
       <div class="admin-overlay__backdrop" id="admin-ticket-backdrop"></div>
       <div class="admin-sheet" id="admin-ticket-sheet">
         <div class="admin-sheet__handle"></div>
         <div class="admin-sheet__header">
-          <h3 class="admin-sheet__title" id="admin-ticket-subject">Support Message</h3>
+          <div style="flex:1;min-width:0">
+            <h3 class="admin-sheet__title" id="admin-ticket-subject" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Support Message</h3>
+            <div class="admin-ticket-meta" id="admin-ticket-meta" style="font-size:11px;color:#999;margin-top:2px"></div>
+          </div>
           <button class="admin-sheet__close" id="btn-admin-ticket-close">✕</button>
         </div>
-        <div class="admin-sheet__body">
-          <div class="admin-ticket-meta" id="admin-ticket-meta"></div>
-          <div class="admin-ticket-message" id="admin-ticket-message"></div>
-          <button class="btn btn--primary btn--full" id="btn-admin-ticket-resolve" style="margin-top:20px">Mark as Resolved</button>
-          <button class="btn btn--ghost btn--full" id="btn-admin-ticket-reopen" style="margin-top:8px;display:none">Reopen Ticket</button>
+        <div class="admin-sheet__body" style="display:flex;flex-direction:column;padding-bottom:0;height:100%">
+          <!-- Status bar -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-shrink:0">
+            <button class="btn btn--primary btn--sm btn--full" id="btn-admin-ticket-resolve">Mark Resolved</button>
+            <button class="btn btn--ghost btn--sm btn--full" id="btn-admin-ticket-reopen" style="display:none">Reopen</button>
+          </div>
+          <!-- Thread messages -->
+          <div id="admin-ticket-thread" class="ticket-thread" style="flex:1;overflow-y:auto;margin-bottom:8px"></div>
+          <!-- Reply input -->
+          <div class="chat-input-bar" style="flex-shrink:0;padding-bottom:12px" id="admin-ticket-reply-bar">
+            <textarea class="form-input" id="admin-ticket-reply-input" rows="2" placeholder="Type your reply…" style="resize:none;padding:10px 14px;line-height:1.4"></textarea>
+            <button class="btn btn--primary chat-send-btn" id="btn-admin-ticket-reply" aria-label="Send reply">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin: Chat thread overlay -->
+    <div class="admin-overlay" id="admin-chat-overlay">
+      <div class="admin-overlay__backdrop" id="admin-chat-backdrop"></div>
+      <div class="admin-sheet" id="admin-chat-sheet">
+        <div class="admin-sheet__handle"></div>
+        <div class="admin-sheet__header">
+          <h3 class="admin-sheet__title" id="admin-chat-title">Chat</h3>
+          <button class="admin-sheet__close" id="btn-admin-chat-close">✕</button>
+        </div>
+        <div class="admin-sheet__body" style="padding-bottom:0;display:flex;flex-direction:column;flex:1">
+          <div id="admin-chat-messages" class="chat-messages" style="max-height:55vh;overflow-y:auto;flex:1"></div>
+          <div class="chat-input-bar" style="margin-top:8px">
+            <input type="text" class="form-input" id="admin-chat-input" placeholder="Reply…" autocomplete="off">
+            <button class="btn btn--primary chat-send-btn" id="btn-admin-chat-send" aria-label="Send">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin notifications panel -->
+    <div class="admin-overlay" id="admin-notif-overlay">
+      <div class="admin-overlay__backdrop" id="admin-notif-backdrop"></div>
+      <div class="admin-sheet admin-notif-panel" id="admin-notif-sheet">
+        <div class="admin-sheet__handle"></div>
+        <div class="admin-sheet__header">
+          <h3 class="admin-sheet__title">Notifications</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn--ghost btn--sm" id="btn-admin-notif-clear">Clear all</button>
+            <button class="admin-sheet__close" id="btn-admin-notif-close">✕</button>
+          </div>
+        </div>
+        <div class="admin-sheet__body" style="padding-top:0">
+          <div id="admin-notif-list"></div>
+          <div id="admin-notif-empty" class="admin-empty" style="display:none;padding:24px 0;text-align:center">No notifications yet.</div>
         </div>
       </div>
     </div>

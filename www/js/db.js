@@ -253,7 +253,7 @@ const SpaccleDB = (() => {
     return `SP-${short.toUpperCase()}`;
   }
 
-  async function createOrder({ userId, service, billingMode = 'payg', planId = null, itemsCount = null, pickupDay, pickupTime, address, notes, paystackRef = null, amountPaid = null }) {
+  async function createOrder({ userId, service, billingMode = 'payg', planId = null, itemsCount = null, pickupDay, pickupTime, address, notes, paystackRef = null, amountPaid = null, exceedsItems = false, extraItemsCount = null, recurring = false }) {
     if (!userId) throw new Error('MISSING_USER');
     const nowIso = new Date().toISOString();
     const _id = generateOrderId(userId);
@@ -276,6 +276,9 @@ const SpaccleDB = (() => {
       pickupTime,
       address,
       notes,
+      exceedsItems,
+      extraItemsCount,
+      recurring,
       status: 'scheduled',
       events: [{ status: 'scheduled', at: nowIso }],
       createdAt: nowIso,
@@ -292,14 +295,13 @@ const SpaccleDB = (() => {
 
   async function listOrders(userId) {
     if (!userId) return [];
-    const startkey = `order_${userId}_`;
-    const endkey = `order_${userId}_\uffff`;
-    const res = await db.allDocs({ include_docs: true, startkey, endkey, descending: true });
+    const prefix = `order_${userId}_`;
+    const res = await db.allDocs({ include_docs: true, startkey: prefix + '\uffff', endkey: prefix, descending: true });
     return res.rows.map(r => r.doc).filter(Boolean);
   }
 
   async function listAllOrders() {
-    const res = await db.allDocs({ include_docs: true, startkey: 'order_', endkey: 'order_\uffff', descending: true });
+    const res = await db.allDocs({ include_docs: true, startkey: 'order_\uffff', endkey: 'order_', descending: true });
     return res.rows.map(r => r.doc).filter(Boolean);
   }
 
@@ -316,12 +318,12 @@ const SpaccleDB = (() => {
   async function getOrdersByUser(userId) {
     if (!userId) return [];
     const prefix = `order_${userId}_`;
-    const res = await db.allDocs({ include_docs: true, startkey: prefix, endkey: prefix + '\uffff', descending: true });
+    const res = await db.allDocs({ include_docs: true, startkey: prefix + '\uffff', endkey: prefix, descending: true });
     return res.rows.map(r => r.doc).filter(Boolean);
   }
 
   async function listAllSupportTickets() {
-    const res = await db.allDocs({ include_docs: true, startkey: 'ticket_', endkey: 'ticket_\uffff', descending: true });
+    const res = await db.allDocs({ include_docs: true, startkey: 'ticket_\uffff', endkey: 'ticket_', descending: true });
     return res.rows.map(r => r.doc).filter(Boolean);
   }
 
@@ -556,9 +558,9 @@ const SpaccleDB = (() => {
     const existing = await getPreference('services_config', null);
     if (existing) return existing;
     const defaults = {
-      'wash-fold':  { name: 'Wash & Fold',       pricePerItem: 900,  unit: 'item',  display: '₦900/item' },
-      'dry-clean':  { name: 'Dry Cleaning',       pricePerItem: 900,  unit: 'item',  display: '₦900/item' },
-      'iron-press': { name: 'Iron & Press',        pricePerItem: 900,  unit: 'item',  display: '₦900/item' },
+      'wash-fold':  { name: 'Wash, Iron & Fold',  pricePerItem: 900,  unit: 'item',  display: '₦900/item' },
+      'dry-clean':  { name: 'Dry Cleaning',        pricePerItem: 900,  unit: 'item',  display: '₦900/item' },
+      'iron-press': { name: 'Iron & Press',        pricePerItem: 600,  unit: 'item',  display: '₦600/item' },
       'duvet':      { name: 'Duvet & Bedding',     pricePerItem: 7500, unit: 'item',  display: 'From ₦7,500' },
       'alteration': { name: 'Alterations',         pricePerItem: 1200, unit: 'item',  display: 'From ₦1,200/item' },
       'shoe-clean': { name: 'Shoe Cleaning',       pricePerItem: 2000, unit: 'pair',  display: 'From ₦2,000/pair' },
@@ -573,6 +575,224 @@ const SpaccleDB = (() => {
 
   async function saveServicesConfig(config) {
     return setPreference('services_config', config);
+  }
+
+  /* ── Item pricing guide ─────────────────────────────────────────── */
+  async function ensureDefaultItemPricing() {
+    const existing = await getPreference('item_pricing', null);
+    if (existing) return existing;
+    const defaults = [
+      { key: 'suit',         name: "Men's / Women's Suit",  price: 4000 },
+      { key: 'bedsheet',     name: 'Bedsheet',              price: 1500 },
+      { key: 'pillow-case',  name: 'Pillow Case',           price: 500  },
+      { key: 'towel',        name: 'Towel',                 price: 1700 },
+      { key: 'ladies-dress', name: "Ladies' Classy Dress",  price: 4000 },
+      { key: 'extra-item',   name: 'Extra Item (over plan)', price: 700  },
+      { key: 'express-24hr', name: '24hrs Express Service', price: 3000 },
+      { key: 'stain-remover',name: 'Stain Remover Add-on',  price: 2000 },
+    ];
+    await setPreference('item_pricing', defaults);
+    return defaults;
+  }
+  async function getItemPricing()         { return getPreference('item_pricing', null); }
+  async function saveItemPricing(items)   { return setPreference('item_pricing', items); }
+
+  /* ── Recurring pickup ───────────────────────────────────────────── */
+  async function setRecurringPickup(userId, schedule) {
+    if (!userId) throw new Error('MISSING_USER');
+    const docId = subscriptionDocId(userId);
+    const sub = await db.get(docId);
+    await db.put({ ...sub, recurringPickup: schedule, updatedAt: new Date().toISOString() });
+  }
+
+  /* ── Order rating ───────────────────────────────────────────────── */
+  async function rateOrder(orderId, stars, note = '') {
+    const doc = await db.get(orderId);
+    await db.put({ ...doc, rating: stars, ratingNote: note, ratedAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  }
+
+  /* ── Chat messages ──────────────────────────────────────────────── */
+  function chatMsgId(userId) {
+    return `chat_${userId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  }
+
+  async function createChatMessage({ userId, text, fromAdmin = false }) {
+    if (!userId || !text) throw new Error('INVALID_CHAT_MSG');
+    const nowIso = new Date().toISOString();
+    const doc = {
+      _id: chatMsgId(userId), type: 'chat_message',
+      userId, text, fromAdmin, read: false,
+      createdAt: nowIso, updatedAt: nowIso,
+    };
+    await db.put(doc);
+    return doc;
+  }
+
+  async function getChatHistory(userId) {
+    if (!userId) return [];
+    const prefix = `chat_${userId}_`;
+    const res = await db.allDocs({ include_docs: true, startkey: prefix, endkey: prefix + '\uffff' });
+    return res.rows.map(r => r.doc).filter(Boolean);
+  }
+
+  async function listAllChatMessages() {
+    const res = await db.allDocs({ include_docs: true, startkey: 'chat_\uffff', endkey: 'chat_', descending: true });
+    return res.rows.map(r => r.doc).filter(d => d && d.type === 'chat_message');
+  }
+
+  async function markChatRead(userId) {
+    const msgs = await getChatHistory(userId);
+    const unread = msgs.filter(m => !m.read && m.fromAdmin);
+    for (const m of unread) {
+      await db.put({ ...m, read: true, updatedAt: new Date().toISOString() }).catch(() => {});
+    }
+  }
+
+  /* ── Legal content ──────────────────────────────────────────────── */
+  async function getLegalContent(type) {
+    const defaults = {
+      terms: '<h2>Terms of Service</h2><p>By using Spaccle, you agree to our service terms. We will pick up, clean, and return your laundry as agreed. Pricing is as displayed and subject to change with notice.</p>',
+      privacy: '<h2>Privacy Policy</h2><p>We collect only the data needed to provide our service (name, email, address). Your data is never sold to third parties. You may request deletion at any time by contacting support.</p>',
+    };
+    return getPreference(`legal_${type}`, defaults[type] || '');
+  }
+  async function saveLegalContent(type, html) { return setPreference(`legal_${type}`, html); }
+
+  /* ── Subscription cancellation & renewal ───────────────────────── */
+  async function cancelSubscription(userId) {
+    if (!userId) throw new Error('MISSING_USER');
+    const docId = subscriptionDocId(userId);
+    const sub = await db.get(docId);
+    await db.put({ ...sub, status: 'cancelled', cancelledAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  }
+
+  async function checkSubscriptionRenewal(userId) {
+    if (!userId) return null;
+    const sub = await getSubscription(userId);
+    if (!sub) return null;
+    if (sub.status !== 'active') return null;
+    const renewAt = new Date(sub.renewAt);
+    const now = new Date();
+    if (renewAt > now) return null;
+    return sub; // expired — caller should prompt renewal
+  }
+
+  /* ── Password change ────────────────────────────────────────────── */
+  async function changePassword(userId, currentPassword, newPassword) {
+    if (!userId) throw new Error('MISSING_USER');
+    const doc = await db.get(userId);
+    const currentHash = await hashPassword(currentPassword, doc.salt);
+    if (currentHash !== doc.password) throw new Error('WRONG_PASSWORD');
+    const newSalt = generateSalt();
+    const newHash = await hashPassword(newPassword, newSalt);
+    await db.put({ ...doc, password: newHash, salt: newSalt, updatedAt: new Date().toISOString() });
+  }
+
+  /* ── Promo / discount codes ─────────────────────────────────────── */
+  async function createPromoCode({ code, type = 'flat', value, maxUses = null, expiresAt = null }) {
+    const id = `promo_${code.trim().toUpperCase()}`;
+    const nowIso = new Date().toISOString();
+    try { await db.get(id); throw new Error('PROMO_EXISTS'); } catch (e) { if (e.message === 'PROMO_EXISTS') throw e; }
+    const doc = { _id: id, type: 'promo_code', code: code.trim().toUpperCase(), discountType: type, value: Number(value), maxUses, usedCount: 0, expiresAt, active: true, createdAt: nowIso, updatedAt: nowIso };
+    await db.put(doc);
+    return doc;
+  }
+
+  async function validatePromoCode(code) {
+    if (!code) return null;
+    try {
+      const doc = await db.get(`promo_${code.trim().toUpperCase()}`);
+      if (!doc.active) return null;
+      if (doc.maxUses != null && doc.usedCount >= doc.maxUses) return null;
+      if (doc.expiresAt && new Date(doc.expiresAt) < new Date()) return null;
+      return doc;
+    } catch { return null; }
+  }
+
+  async function redeemPromoCode(code) {
+    const doc = await validatePromoCode(code);
+    if (!doc) throw new Error('INVALID_PROMO');
+    await db.put({ ...doc, usedCount: (doc.usedCount || 0) + 1, updatedAt: new Date().toISOString() });
+    return doc;
+  }
+
+  async function listAllPromoCodes() {
+    const res = await db.allDocs({ include_docs: true, startkey: 'promo_', endkey: 'promo_\uffff' });
+    return res.rows.map(r => r.doc).filter(d => d && d.type === 'promo_code');
+  }
+
+  /* ── Driver assignment ──────────────────────────────────────────── */
+  async function assignDriver(orderId, driverName) {
+    const doc = await db.get(orderId);
+    await db.put({ ...doc, assignedDriver: driverName || null, updatedAt: new Date().toISOString() });
+  }
+
+  /* ── Broadcasts ─────────────────────────────────────────────────── */
+  async function createBroadcast({ title, message }) {
+    const id = `broadcast_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const doc = { _id: id, type: 'broadcast', title, message, createdAt: new Date().toISOString() };
+    await db.put(doc);
+    return doc;
+  }
+
+  async function listNewBroadcasts(sinceIso) {
+    const res = await db.allDocs({ include_docs: true, startkey: 'broadcast_', endkey: 'broadcast_\uffff' });
+    const all = res.rows.map(r => r.doc).filter(Boolean);
+    return sinceIso ? all.filter(b => b.createdAt > sinceIso) : all;
+  }
+
+  async function markBroadcastSeen(id) {
+    const SEEN_KEY = 'spaccle_broadcast_seen';
+    const seen = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]');
+    if (!seen.includes(id)) { seen.push(id); localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); }
+  }
+
+  /* ── Ticket replies ─────────────────────────────────────────────── */
+  function ticketReplyId(ticketId) {
+    return `ticket_reply_${ticketId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  }
+
+  async function addTicketReply(ticketId, { text, fromAdmin = false, userId }) {
+    if (!ticketId || !text) throw new Error('INVALID_REPLY');
+    const nowIso = new Date().toISOString();
+    const doc = {
+      _id: ticketReplyId(ticketId),
+      type: 'ticket_reply',
+      ticketId,
+      userId,
+      text,
+      fromAdmin,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    await db.put(doc);
+    // Mark ticket as having a new reply and bump updatedAt
+    try {
+      const ticket = await db.get(ticketId);
+      await db.put({
+        ...ticket,
+        updatedAt: nowIso,
+        lastReplyAt: nowIso,
+        hasAdminReply: fromAdmin ? true : (ticket.hasAdminReply || false),
+        hasUserReply:  !fromAdmin ? true : (ticket.hasUserReply || false),
+      });
+    } catch { }
+    return doc;
+  }
+
+  async function getTicketReplies(ticketId) {
+    if (!ticketId) return [];
+    const prefix = `ticket_reply_${ticketId}_`;
+    const res = await db.allDocs({ include_docs: true, startkey: prefix, endkey: prefix + '\uffff' });
+    return res.rows.map(r => r.doc).filter(Boolean);
+  }
+
+  /* ── User support tickets ───────────────────────────────────────── */
+  async function listTicketsByUser(userId) {
+    if (!userId) return [];
+    const prefix = `ticket_${userId}_`;
+    const res = await db.allDocs({ include_docs: true, startkey: prefix + '\uffff', endkey: prefix, descending: true });
+    return res.rows.map(r => r.doc).filter(Boolean);
   }
 
   function subscriptionDocId(userId) {
@@ -745,6 +965,29 @@ const SpaccleDB = (() => {
     window.addEventListener('offline', () => emitSyncState({ online: false }));
   }
 
+  async function getDocument(id) {
+    return db.get(id);
+  }
+
+  async function saveDocument(doc) {
+    return db.put(doc);
+  }
+
+  /* ── Live changes feed ──────────────────────────────────────────── */
+  let _changesHandler = null;
+
+  function watchChanges(callback) {
+    if (_changesHandler) { try { _changesHandler.cancel(); } catch { } }
+    _changesHandler = db.changes({ live: true, since: 'now', include_docs: true });
+    _changesHandler.on('change', callback);
+    _changesHandler.on('error', () => { });
+    return _changesHandler;
+  }
+
+  function stopWatchChanges() {
+    if (_changesHandler) { try { _changesHandler.cancel(); } catch { } _changesHandler = null; }
+  }
+
   bindOnlineOffline();
 
   return {
@@ -791,5 +1034,34 @@ const SpaccleDB = (() => {
     stopSync,
     getSyncState,
     onSyncStateChange,
+    ensureDefaultItemPricing,
+    getItemPricing,
+    saveItemPricing,
+    setRecurringPickup,
+    rateOrder,
+    createChatMessage,
+    getChatHistory,
+    listAllChatMessages,
+    markChatRead,
+    getLegalContent,
+    saveLegalContent,
+    cancelSubscription,
+    checkSubscriptionRenewal,
+    changePassword,
+    createPromoCode,
+    validatePromoCode,
+    redeemPromoCode,
+    listAllPromoCodes,
+    assignDriver,
+    createBroadcast,
+    listNewBroadcasts,
+    markBroadcastSeen,
+    listTicketsByUser,
+    addTicketReply,
+    getTicketReplies,
+    watchChanges,
+    stopWatchChanges,
+    getDocument,
+    saveDocument,
   };
 })();

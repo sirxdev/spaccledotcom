@@ -31,20 +31,48 @@ const HomePage = (() => {
     refresh();
     startAutoRefresh();
     requestNotificationPermission();
+    updateNotifBadge();
   }
 
   async function bootstrapData() {
     await initConfigDefaults();
+    await initTheme();
     try {
       servicesConfig = await SpaccleDB.ensureDefaultServices();
+      // Migrate existing installs to updated service names/prices
+      if (servicesConfig['wash-fold']?.name === 'Wash & Fold') {
+        servicesConfig['wash-fold'].name    = 'Wash, Iron & Fold';
+        await SpaccleDB.saveServicesConfig(servicesConfig);
+      }
+      if (servicesConfig['iron-press']?.pricePerItem === 900) {
+        servicesConfig['iron-press'].pricePerItem = 600;
+        servicesConfig['iron-press'].display      = '₦600/item';
+        await SpaccleDB.saveServicesConfig(servicesConfig);
+      }
       renderServiceCardPrices();
+    } catch { }
+    try {
+      // Migrate item pricing: add new items if missing
+      const items = await SpaccleDB.ensureDefaultItemPricing();
+      const keys = items.map(i => i.key);
+      const newItems = [
+        { key: 'extra-item',    name: 'Extra Item (over plan)', price: 700  },
+        { key: 'express-24hr',  name: '24hrs Express Service',  price: 3000 },
+        { key: 'stain-remover', name: 'Stain Remover Add-on',   price: 2000 },
+      ].filter(i => !keys.includes(i.key));
+      if (newItems.length) {
+        await SpaccleDB.saveItemPricing([...items, ...newItems]);
+      }
     } catch { }
     try {
       await SpaccleDB.ensureDefaultPlans();
       await renderPlansUI();
     } catch { }
-
     bindSyncUI();
+    checkSubscriptionRenewal();
+    checkBroadcasts();
+    checkNewAdminMessages();
+    setupOfflineIndicator();
   }
 
   function renderServiceCardPrices() {
@@ -162,6 +190,7 @@ const HomePage = (() => {
   function setupActions() {
     document.getElementById('btn-schedule-pickup').addEventListener('click', handleNewOrder);
     document.getElementById('btn-home-notify').addEventListener('click', handleNotifications);
+    document.getElementById('btn-home-theme').addEventListener('click', handleQuickThemeToggle);
     document.getElementById('btn-home-avatar').addEventListener('click', () => switchTab('profile'));
     document.getElementById('btn-view-orders').addEventListener('click', () => switchTab('orders'));
     document.getElementById('btn-logout').addEventListener('click', handleLogout);
@@ -248,10 +277,8 @@ const HomePage = (() => {
   }
 
   function handleNotifications() {
-    const badge = document.getElementById('home-notify-badge');
-    if (badge) badge.textContent = '';
     requestNotificationPermission();
-    showToast('Notifications cleared');
+    openNotificationPanel();
   }
 
   function handleServiceTap(service) {
@@ -283,7 +310,7 @@ const HomePage = (() => {
     document.getElementById('btn-order-close').addEventListener('click', closeAllSheets);
     document.getElementById('btn-support-close').addEventListener('click', closeAllSheets);
     document.getElementById('btn-subscription-close').addEventListener('click', closeAllSheets);
-    document.getElementById('btn-subscribe-cancel').addEventListener('click', closeAllSheets);
+    document.getElementById('btn-subscribe-cancel').addEventListener('click', handleCancelSubscription);
     document.getElementById('btn-profile-info-close').addEventListener('click', closeAllSheets);
     document.getElementById('btn-profile-addresses-close').addEventListener('click', closeAllSheets);
     document.getElementById('btn-profile-payment-close').addEventListener('click', closeAllSheets);
@@ -323,6 +350,60 @@ const HomePage = (() => {
     document.getElementById('btn-notif-save').addEventListener('click', handleNotifSave);
     document.getElementById('btn-settings-save').addEventListener('click', handleSettingsSave);
 
+    // Notification panel
+    document.getElementById('btn-notif-panel-close').addEventListener('click', closeNotificationPanel);
+    document.getElementById('btn-notif-clear-all').addEventListener('click', clearAllNotifications);
+
+    // Rating
+    document.getElementById('btn-rating-close').addEventListener('click', closeRatingSheet);
+    document.getElementById('btn-rating-submit').addEventListener('click', handleRatingSubmit);
+    document.querySelectorAll('.rating-star').forEach(btn => {
+      btn.addEventListener('click', () => selectRatingStar(parseInt(btn.dataset.star)));
+    });
+
+    // Chat
+    document.getElementById('btn-open-chat').addEventListener('click', openChatSheet);
+    document.getElementById('btn-home-chat-quick').addEventListener('click', openChatSheet);
+    document.getElementById('btn-chat-close').addEventListener('click', () => { stopChatRefresh(); closeAllSheets(); });
+    document.getElementById('btn-chat-send').addEventListener('click', handleChatSend);
+    document.getElementById('chat-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChatSend(); }
+    });
+    document.getElementById('btn-custom-plan-chat').addEventListener('click', openChatSheet);
+
+    // Legal
+    document.getElementById('btn-open-terms').addEventListener('click', () => openLegalSheet('terms'));
+    document.getElementById('btn-open-privacy').addEventListener('click', () => openLegalSheet('privacy'));
+    document.getElementById('btn-legal-close').addEventListener('click', closeAllSheets);
+
+    // Price guide
+    document.getElementById('btn-open-pricing-guide').addEventListener('click', openPricingGuide);
+    document.getElementById('btn-pricing-guide-close').addEventListener('click', closeAllSheets);
+
+    // Exceed plan checkbox
+    document.getElementById('chk-exceeds-plan').addEventListener('change', e => {
+      document.getElementById('extra-items-group').style.display = e.target.checked ? '' : 'none';
+    });
+
+    // Promo code
+    document.getElementById('btn-apply-promo').addEventListener('click', handleApplyPromo);
+    document.getElementById('promo-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); }
+    });
+
+    // Change password
+    document.getElementById('btn-open-change-password').addEventListener('click', () => openSheet('sheet-change-password'));
+    document.getElementById('btn-change-password-close').addEventListener('click', closeAllSheets);
+    document.getElementById('btn-change-password-save').addEventListener('click', handleChangePassword);
+
+    // Support tickets list
+    document.getElementById('btn-open-my-tickets').addEventListener('click', openMyTickets);
+    document.getElementById('btn-my-tickets-close').addEventListener('click', closeAllSheets);
+    document.getElementById('btn-ticket-thread-back').addEventListener('click', openMyTickets);
+    document.getElementById('btn-ticket-reply-send').addEventListener('click', handleUserTicketReply);
+    document.getElementById('ticket-reply-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleUserTicketReply(); }
+    });
   }
 
   function openSheet(sheetId) {
@@ -381,7 +462,7 @@ const HomePage = (() => {
       return;
     }
 
-    if (!itemsCount || itemsCount <= 0) {
+    if (billingMode === 'payg' && (!itemsCount || itemsCount <= 0)) {
       const el = document.getElementById('pickup-items');
       if (el) el.focus();
       showToast('Enter number of items');
@@ -417,7 +498,7 @@ const HomePage = (() => {
       const reference = `SPACCLE_PICKUP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
       const svcCfg = servicesConfig?.[selectedService] || {};
       const pricePerItem = svcCfg.pricePerItem || 900;
-      const amountKobo = itemsCount * pricePerItem * 100;
+      const amountKobo = applyPromoDiscount(itemsCount * pricePerItem) * 100;
 
       const handler = window.PaystackPop.setup({
         key: pk,
@@ -427,6 +508,12 @@ const HomePage = (() => {
         ref: reference,
         label: `Pickup — ${itemsCount} item${itemsCount !== 1 ? 's' : ''}`,
         callback: function() {
+          if (appliedPromo) {
+            SpaccleDB.redeemPromoCode(appliedPromo.code).catch(() => {});
+            appliedPromo = null;
+            const statusEl = document.getElementById('promo-status');
+            if (statusEl) statusEl.textContent = '';
+          }
           placeOrder({ userId: user.userId, day, time, address, notes, itemsCount, paystackRef: reference })
             .catch(function() { showToast('Order save failed — contact support'); });
         },
@@ -449,6 +536,13 @@ const HomePage = (() => {
     const pricePerItem = svcCfg.pricePerItem || 900;
     const amountPaid = billingMode === 'payg' ? (Number(itemsCount) || 0) * pricePerItem : null;
 
+    const exceedsEl = document.getElementById('chk-exceeds-plan');
+    const extraEl   = document.getElementById('extra-items-count');
+    const recurringEl = document.getElementById('chk-recurring-pickup');
+    const exceedsItems = billingMode === 'subscription' && exceedsEl?.checked;
+    const extraItemsCount = exceedsItems ? (parseInt(extraEl?.value) || 0) : null;
+    const recurring = billingMode === 'subscription' && recurringEl?.checked;
+
     const order = await SpaccleDB.createOrder({
       userId,
       service: selectedService,
@@ -461,7 +555,15 @@ const HomePage = (() => {
       notes,
       paystackRef,
       amountPaid,
+      exceedsItems,
+      extraItemsCount,
+      recurring,
     });
+
+    if (recurring && billingMode === 'subscription') {
+      SpaccleDB.setRecurringPickup(userId, { dayOfWeek: new Date(day).getDay(), time, address, setAt: new Date().toISOString() })
+        .catch(() => {});
+    }
 
     const btn = document.getElementById('btn-schedule-confirm');
     document.getElementById('pickup-address').value = '';
@@ -517,10 +619,10 @@ const HomePage = (() => {
 
   function serviceName(service) {
     const names = {
-      'wash-fold': 'Wash & Fold',
-      'dry-clean': 'Dry Cleaning',
+      'wash-fold':  'Wash, Iron & Fold',
+      'dry-clean':  'Dry Cleaning',
       'iron-press': 'Iron & Press',
-      'duvet': 'Duvet & Bedding',
+      'duvet':      'Duvet & Bedding',
       'alteration': 'Clothes Alteration / Repair',
       'shoe-clean': 'Shoe Cleaning',
     };
@@ -564,46 +666,17 @@ const HomePage = (() => {
     return order && !['delivered', 'cancelled'].includes(order.status);
   }
 
-  function simulatedDesiredStatus(order) {
-    if (!order || !order.simulated) return order?.status;
-    const created = Date.parse(order.createdAt || '');
-    if (!created) return order.status;
-    const elapsed = Date.now() - created;
-    if (elapsed < 10_000) return 'scheduled';
-    if (elapsed < 30_000) return 'picked_up';
-    if (elapsed < 60_000) return 'cleaning';
-    if (elapsed < 90_000) return 'ready';
-    return 'delivered';
-  }
-
-  async function ensureSimulatedProgress(order) {
-    if (!order || !order.simulated) return order;
-    let current = order.status;
-    const desired = simulatedDesiredStatus(order);
-    if (desired === current) return order;
-    const flow = ['scheduled', 'picked_up', 'cleaning', 'ready', 'delivered'];
-    const idxCurrent = flow.indexOf(current);
-    const idxDesired = flow.indexOf(desired);
-    if (idxCurrent === -1 || idxDesired === -1) return order;
-
-    let updated = order;
-    for (let i = idxCurrent + 1; i <= idxDesired; i++) {
-      updated = await SpaccleDB.setOrderStatus(updated._id, flow[i], { simulated: true });
-    }
-    return updated;
-  }
-
   async function refresh() {
     if (!user) return;
     const activeOrder = await SpaccleDB.getActiveOrder(user.userId);
-    const progressed = await ensureSimulatedProgress(activeOrder);
     const orders = await SpaccleDB.listOrders(user.userId);
 
-    renderHomeActiveOrder(progressed);
+    renderHomeActiveOrder(activeOrder);
     renderOrders(orders);
-    renderTracking(progressed);
+    renderTracking(activeOrder);
+    renderSubscriptionUsageBar();
 
-    selectedOrderId = progressed?._id || selectedOrderId;
+    selectedOrderId = activeOrder?._id || selectedOrderId;
   }
 
   function startAutoRefresh() {
@@ -703,6 +776,18 @@ const HomePage = (() => {
       title.textContent = order.publicId || 'SP-000000';
       const detail = document.getElementById('order-detail');
       detail.innerHTML = renderOrderDetailHtml(order);
+
+      const cancelBtn = document.getElementById('btn-order-cancel');
+      const reorderBtn = document.getElementById('btn-order-reorder');
+      const cancellable = ['scheduled', 'confirmed'].includes(order.status);
+      if (cancelBtn) {
+        cancelBtn.style.display = cancellable ? '' : 'none';
+        cancelBtn.onclick = () => handleCancelOrder(order._id);
+      }
+      if (reorderBtn) {
+        reorderBtn.style.display = order.status === 'delivered' ? '' : 'none';
+        reorderBtn.onclick = () => handleReorder(order);
+      }
       openSheet('sheet-order');
     } catch {
       showToast('Could not open order');
@@ -858,15 +943,24 @@ const HomePage = (() => {
     }
 
     if (subBlock) subBlock.style.display = billingMode === 'subscription' ? '' : 'none';
-    if (itemsGroup) itemsGroup.style.display = '';
+
+    const isSub = billingMode === 'subscription';
+    // For subscription users items count is optional (no validation), for PAYG it's required
+    if (itemsGroup) itemsGroup.style.display = isSub ? 'none' : '';
+
+    const exceedGroup = document.getElementById('exceed-plan-group');
+    if (exceedGroup) exceedGroup.style.display = isSub ? '' : 'none';
+    const recurringGroup = document.getElementById('recurring-pickup-group');
+    if (recurringGroup) recurringGroup.style.display = isSub ? '' : 'none';
+
     const rateHint = document.getElementById('items-payg-rate');
     if (rateHint) {
-      rateHint.style.display = billingMode === 'payg' ? '' : 'none';
+      rateHint.style.display = isSub ? 'none' : '';
       const svcCfg = servicesConfig?.[selectedService] || {};
       rateHint.textContent = svcCfg.display || '₦900/item';
     }
     const itemsLabel = document.getElementById('items-count-label');
-    if (itemsLabel) itemsLabel.textContent = billingMode === 'subscription' ? 'Estimated items count' : 'Number of items';
+    if (itemsLabel) itemsLabel.textContent = 'Number of items';
 
     if (billingMode === 'subscription' && user) {
       subscription = await SpaccleDB.getSubscription(user.userId);
@@ -1343,19 +1437,34 @@ const HomePage = (() => {
     }
   }
 
+  const NOTIF_KEY = 'spaccle_notifications';
+
+  function getStoredNotifications() {
+    try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch { return []; }
+  }
+
+  function storeNotification(title, body) {
+    const list = getStoredNotifications();
+    list.unshift({ id: Date.now().toString(), title, body, at: new Date().toISOString(), read: false });
+    if (list.length > 50) list.splice(50);
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(list));
+    updateNotifBadge();
+  }
+
+  function updateNotifBadge() {
+    const unread = getStoredNotifications().filter(n => !n.read).length;
+    const badge = document.getElementById('home-notify-badge');
+    if (badge) badge.textContent = unread > 0 ? (unread > 9 ? '9+' : String(unread)) : '';
+  }
+
   async function fireOrderNotification(title, body) {
     const prefs = await SpaccleDB.getPreference('notification_prefs', {});
     if (prefs.orderUpdates === false && prefs.orderReady === false) return;
 
-    // In-app badge
-    const badge = document.getElementById('home-notify-badge');
-    if (badge) badge.textContent = '1';
+    storeNotification(title, body);
 
-    // OS notification (browser / Cordova WebView with permission)
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      try {
-        new Notification(title, { body, icon: 'img/icon.png' });
-      } catch { }
+      try { new Notification(title, { body, icon: 'img/icon.png' }); } catch { }
     }
   }
 
@@ -1379,6 +1488,10 @@ const HomePage = (() => {
     if (order.status === 'ready' && prefs.orderReady === false) return;
     if (order.status !== 'ready' && prefs.orderUpdates === false) return;
     await fireOrderNotification(msg.title, msg.body);
+
+    if (order.status === 'delivered' && !order.rating) {
+      setTimeout(() => openRatingSheet(order), 1500);
+    }
   }
 
   /* ── Profile — App Settings ──────────────────────────────────── */
@@ -1388,6 +1501,9 @@ const HomePage = (() => {
     document.getElementById('setting-compact-list').checked = s.compactList === true;
     document.getElementById('setting-confirm-schedule').checked = s.confirmSchedule !== false;
     document.getElementById('setting-autofill-addr').checked = s.autofillAddr !== false;
+    document.getElementById('setting-dark-mode').checked = s.darkMode === true;
+    const langEl = document.getElementById('setting-language');
+    if (langEl) langEl.value = s.language || 'en';
     openSheet('sheet-profile-settings');
   }
 
@@ -1395,12 +1511,18 @@ const HomePage = (() => {
     const btn = document.getElementById('btn-settings-save');
     setButtonLoading(btn, true);
     try {
+      const darkMode = document.getElementById('setting-dark-mode').checked;
+      const language = document.getElementById('setting-language')?.value || 'en';
       await SpaccleDB.setPreference('app_settings', {
         showPrices: document.getElementById('setting-show-prices').checked,
         compactList: document.getElementById('setting-compact-list').checked,
         confirmSchedule: document.getElementById('setting-confirm-schedule').checked,
         autofillAddr: document.getElementById('setting-autofill-addr').checked,
+        darkMode,
+        language,
       });
+      applyDarkMode(darkMode);
+      applyLanguage(language);
       closeAllSheets();
       showToast('Settings saved');
     } catch {
@@ -1408,6 +1530,289 @@ const HomePage = (() => {
     } finally {
       setButtonLoading(btn, false);
     }
+  }
+
+  /* ── Dark mode ───────────────────────────────────────────────── */
+  function applyDarkMode(on) {
+    document.body.classList.toggle('dark', !!on);
+    // Sync sun/moon icons in all topbars
+    document.querySelectorAll('.theme-icon-sun').forEach(el => { el.style.display = on ? 'none' : ''; });
+    document.querySelectorAll('.theme-icon-moon').forEach(el => { el.style.display = on ? '' : 'none'; });
+  }
+
+  async function initTheme() {
+    try {
+      const s = await SpaccleDB.getPreference('app_settings', {});
+      applyDarkMode(s.darkMode === true);
+      applyLanguage(s.language || 'en');
+    } catch { }
+  }
+
+  async function handleQuickThemeToggle() {
+    const isDark = document.body.classList.contains('dark');
+    applyDarkMode(!isDark);
+    try {
+      const s = await SpaccleDB.getPreference('app_settings', {});
+      await SpaccleDB.setPreference('app_settings', { ...s, darkMode: !isDark });
+    } catch { }
+  }
+
+  /* ── Language / i18n ─────────────────────────────────────────── */
+  const TRANSLATIONS = {
+    yo: {
+      /* ── Home tab ── */
+      'Free pickup & delivery':                      'Gbígbà àti fíránṣẹ́ lọ́fẹ̀',
+      'Ready for fresh laundry today?':              'Ṣé o ṣetán fún aṣọ tútù lónì?',
+      'Schedule Pickup':                             'Ṣeto Gbígbà',
+      'Active Order':                                'Àṣẹ tó Ṣiṣẹ',
+      'View all':                                    'Wo gbogbo rẹ',
+      'No active orders':                            'Kò sí àṣẹ tó ṣiṣẹ',
+      "Schedule a pickup and we'll handle the rest": 'Ṣeto gbígbà, a ó ṣe iyókù',
+      'Order ID':                                    'Nọ́mbà Àṣẹ',
+      'Pickup':                                      'Gbígbà',
+      'Service':                                     'Iṣẹ',
+      'Picked up':                                   'Ti Gbà',
+      'Cleaning':                                    'Ìmọ̀tótó',
+      'Ready':                                       'Ṣetán',
+      'Delivered':                                   'Ti Ranṣẹ',
+      'Our Services':                                'Àwọn Iṣẹ Wa',
+      'Wash, Iron & Fold':                           'Fọ, Irò &amp; Pín',
+      'Dry Cleaning':                                'Ìmọ̀tótó Gbígbẹ',
+      'Iron & Press':                                'Irò &amp; Tẹ',
+      'Duvet & Bedding':                             'Ibòrí &amp; Àṣọ-ibùsùn',
+      'Alterations':                                 'Àtúnṣe',
+      'Shoe Cleaning':                               'Ìmọ̀tótó Bàtà',
+      'New customer offer':                          'Ìgbàdí onibàárà tuntun',
+      'First order 20% off':                         'Àṣẹ àkọ́kọ́ 20% ẹ̀san',
+      'How It Works':                                'Bí Ó Ṣe Ń Ṣiṣẹ',
+      'Schedule':                                    'Ṣeto',
+      'Pick a time that works for you':              'Yan àkókò tó bá ọ mu',
+      'We collect':                                  'A Gba',
+      'Door-to-door pickup at your chosen time':     'Gbígbà lẹ́nu ọ̀nà rẹ ní àkókò tí o yàn',
+      'We clean':                                    'A Wẹ',
+      'Expert care for every garment':               'Ìtọ́jú àgbèjọrò fún aṣọ kọ̀ọ̀kan',
+      'Back at your door, fresh and folded':         'Padà sí ọ tútù àti pín',
+      'Chat with Us':                                'Bá Wa Sọ̀rọ̀',
+      "Questions? We're here to help":               'Ìbéèrè? A wà níbí láti ràn ọ́ lọ́wọ́',
+      /* ── Orders tab ── */
+      'Orders':                                      'Àwọn Àṣẹ',
+      'Track your laundry from pickup to delivery.': 'Tẹ̀lé aṣọ rẹ láti gbígbà sí fíránṣẹ́.',
+      'New Order':                                   'Àṣẹ Tuntun',
+      'No orders yet':                               'Kò sí àṣẹ síbẹ̀',
+      'Schedule a pickup and your orders will show up here.': 'Ṣeto gbígbà, àṣẹ rẹ yóò farahàn níbí.',
+      /* ── Track tab ── */
+      'Tracking':                                    'Ìtẹ̀lé',
+      'See when your laundry will be ready.':        'Rí ìgbà tí aṣọ rẹ yóò ṣetán.',
+      'Support':                                     'Ìrànlọ́wọ́',
+      'No active order':                             'Kò sí àṣẹ tó ṣiṣẹ',
+      'Once you schedule a pickup, tracking will appear here.': 'Bí o bá ṣeto gbígbà, ìtẹ̀lé yóò farahàn níbí.',
+      'View Details':                                'Wo Àlàyé',
+      'Est. ready':                                  'Àsọtẹ́lẹ̀ ṣetán',
+      /* ── Profile tab ── */
+      'Home':                                        'Ilé',
+      'Track':                                       'Tẹ̀lé',
+      'Profile':                                     'Àkọsílẹ̀',
+      'Account':                                     'Àkáǹtì',
+      'Preferences':                                 'Àwọn Yàn',
+      'Legal':                                       'Òfin',
+      'Personal Information':                        'Ìsọfúnni Tàbítì',
+      'Saved Addresses':                             'Àdírẹ́sì Tí A Tọ́jú',
+      'Payment Methods':                             'Ọ̀nà Ìsanwó',
+      'Change Password':                             'Yí Ọ̀rọ̀ Àṣírí Padà',
+      'Notifications':                               'Àwọn Ìfitónilétí',
+      'App Settings':                                'Ìtọ́nà App',
+      'Help & Support':                              'Ìrànlọ́wọ́',
+      'My Support Tickets':                          'Àwọn Tikẹ́tì Atilẹ̀yìn Mi',
+      'Price Guide':                                 'Ìtọ́sọ̀nà Iye',
+      'Terms of Service':                            'Àwọn Ìlànà Iṣẹ́',
+      'Privacy Policy':                              'Òfin Ìkọ̀kọ̀',
+      'Sign Out':                                    'Jáde',
+      /* ── Sheet ── */
+      'Billing':                                     'Ìsanwó',
+      'Pay As You Go':                               'Sanwó Bí O Bá Lọ',
+      'Monthly Plan':                                'Ètò Oṣooṣu',
+      'Bedding':                                     'Àṣọ-ibùsùn',
+      'Shoes':                                       'Bàtà',
+      'Confirm Pickup':                              'Jẹ́rìí Gbígbà',
+    },
+    ig: {
+      /* ── Home tab ── */
+      'Free pickup & delivery':                      'Nweta na nneweta n\'efu',
+      'Ready for fresh laundry today?':              'I dị njikere maka akwa ọhụrụ taa?',
+      'Schedule Pickup':                             'Hazie Nweta',
+      'Active Order':                                'Iwu Na-arụ Ọrụ',
+      'View all':                                    'Lee ha niile',
+      'No active orders':                            'Enweghị iwu na-arụ ọrụ',
+      "Schedule a pickup and we'll handle the rest": 'Hazie nweta, anyị ga-elekọta ihe fọdụrụ',
+      'Order ID':                                    'Nọmba Iwu',
+      'Pickup':                                      'Nweta',
+      'Service':                                     'Ọrụ',
+      'Picked up':                                   'Atọla',
+      'Cleaning':                                    'Ịsa Ọcha',
+      'Ready':                                       'Dị Njikere',
+      'Delivered':                                   'Ebugharịla',
+      'Our Services':                                'Ọrụ Anyị',
+      'Wash, Iron & Fold':                           'Saa, Ayị &amp; Kọkọba',
+      'Dry Cleaning':                                'Ịsa Ọcha Ọkọrọ',
+      'Iron & Press':                                'Ayị &amp; Pịa',
+      'Duvet & Bedding':                             'Duvet &amp; Akwa Ụlọ Ụra',
+      'Alterations':                                 'Mgbanwe',
+      'Shoe Cleaning':                               'Ịsa Ọkpụkpụ',
+      'New customer offer':                          'Nkwado ndị ahịa ọhụrụ',
+      'First order 20% off':                         'Iwu mbụ 20% mbelata',
+      'How It Works':                                'Otu O Si Arụ Ọrụ',
+      'Schedule':                                    'Hazie',
+      'Pick a time that works for you':              'Họrọ oge dị mma maka gị',
+      'We collect':                                  'Anyị Anakọta',
+      'Door-to-door pickup at your chosen time':     'Nweta n\'ụzọ n\'ụzọ n\'oge ị họọrọ',
+      'We clean':                                    'Anyị Asacha',
+      'Expert care for every garment':               'Nlekọta nke ọma maka uwe ọ bụla',
+      'Back at your door, fresh and folded':         'Laghachi n\'ụzọ gị, ọhụrụ ma tụkpụọ',
+      'Chat with Us':                                'Kpọọ Anyị Okwu',
+      "Questions? We're here to help":               'Ajụjụ ọ dị? Anyị nọ ebe a inyere aka',
+      /* ── Orders tab ── */
+      'Orders':                                      'Iwu',
+      'Track your laundry from pickup to delivery.': 'Leso akwa gị site na nweta ruo n\'nneweta.',
+      'New Order':                                   'Iwu Ọhụrụ',
+      'No orders yet':                               'Enweghị iwu ọ bụla',
+      'Schedule a pickup and your orders will show up here.': 'Hazie nweta, iwu gị ga-apụtakwa ebe a.',
+      /* ── Track tab ── */
+      'Tracking':                                    'Ịleso',
+      'See when your laundry will be ready.':        'Hụ mgbe akwa gị ga-adị njikere.',
+      'Support':                                     'Enyemaka',
+      'No active order':                             'Enweghị iwu na-arụ ọrụ',
+      'Once you schedule a pickup, tracking will appear here.': 'Mgbe ị haziere nweta, ịleso ga-apụtakwa ebe a.',
+      'View Details':                                'Lee Nkọwa',
+      'Est. ready':                                  'Oge a tụrụ anya',
+      /* ── Profile tab ── */
+      'Home':                                        'Ụlọ',
+      'Track':                                       'Śle',
+      'Profile':                                     'Profaịlụ',
+      'Account':                                     'Akaụntụ',
+      'Preferences':                                 'Nhọrọ',
+      'Legal':                                       'Iwu',
+      'Personal Information':                        'Ozi Nkeonwe',
+      'Saved Addresses':                             'Adreesị Echekwara',
+      'Payment Methods':                             'Ụzọ Ịkwụ Ụgwọ',
+      'Change Password':                             'Gbanwee Paswọọdụ',
+      'Notifications':                               'Ọkwa',
+      'App Settings':                                'Ntọala App',
+      'Help & Support':                              'Enyemaka',
+      'My Support Tickets':                          'Tiketi Nkwado M',
+      'Price Guide':                                 'Nduzi Ọnụ Ahịa',
+      'Terms of Service':                            'Usoro Ọrụ',
+      'Privacy Policy':                              'Iwu Nzuzo',
+      'Sign Out':                                    'Pụọ',
+      /* ── Sheet ── */
+      'Billing':                                     'Ịkwụ Ụgwọ',
+      'Pay As You Go':                               'Kwụọ Ụgwọ Ka Ị Gaa',
+      'Monthly Plan':                                'Atụmatụ Ọnwa',
+      'Bedding':                                     'Akwa Ụlọ Ụra',
+      'Shoes':                                       'Ọkpụkpụ',
+      'Confirm Pickup':                              'Nwekwaa Nweta',
+    },
+    ha: {
+      /* ── Home tab ── */
+      'Free pickup & delivery':                      'Tattarawa da isarwa kyauta',
+      'Ready for fresh laundry today?':              'Shin kana shirye don sabbin tufafi yau?',
+      'Schedule Pickup':                             'Tsara Karɓawa',
+      'Active Order':                                'Umurnin da Ke Gudana',
+      'View all':                                    'Duba duka',
+      'No active orders':                            'Babu umurnin da ke gudana',
+      "Schedule a pickup and we'll handle the rest": 'Tsara karɓawa, za mu sarrafa sauran',
+      'Order ID':                                    'Lambar Umarni',
+      'Pickup':                                      'Karɓawa',
+      'Service':                                     'Aiki',
+      'Picked up':                                   'An Karɓa',
+      'Cleaning':                                    'Wanki',
+      'Ready':                                       'Shirye',
+      'Delivered':                                   'An Isar',
+      'Our Services':                                'Ayyukanmu',
+      'Wash, Iron & Fold':                           'Wanke, Ƙone &amp; Naɗa',
+      'Dry Cleaning':                                'Bushewar Wanki',
+      'Iron & Press':                                'Ƙone &amp; Latsa',
+      'Duvet & Bedding':                             'Duvet &amp; Kayan Gado',
+      'Alterations':                                 'Gyarawa',
+      'Shoe Cleaning':                               'Tsaftace Takalmi',
+      'New customer offer':                          'Tayin sabon abokin ciniki',
+      'First order 20% off':                         'Umarni na farko ragi 20%',
+      'How It Works':                                'Yadda Yake Aiki',
+      'Schedule':                                    'Tsara',
+      'Pick a time that works for you':              'Zaɓi lokaci da ya dace maka',
+      'We collect':                                  'Mun Tattara',
+      'Door-to-door pickup at your chosen time':     'Tattarawa daga ƙofa a lokacin da ka zaɓa',
+      'We clean':                                    'Mun Wanke',
+      'Expert care for every garment':               'Kulawa ta ƙwararru ga kowane riga',
+      'Back at your door, fresh and folded':         'Baya ga ƙofarka, sabo kuma laƙe',
+      'Chat with Us':                                'Yi Hira da Mu',
+      "Questions? We're here to help":               'Tambayoyi? Muna nan don taimako',
+      /* ── Orders tab ── */
+      'Orders':                                      'Umarni',
+      'Track your laundry from pickup to delivery.': 'Bi tufafinka daga karɓawa zuwa isar da su.',
+      'New Order':                                   'Sabon Umarni',
+      'No orders yet':                               'Babu umarni tukuna',
+      'Schedule a pickup and your orders will show up here.': 'Tsara karɓawa, umurninku za su bayyana anan.',
+      /* ── Track tab ── */
+      'Tracking':                                    'Bin Didigi',
+      'See when your laundry will be ready.':        'Duba lokacin da tufafinka za su shiryu.',
+      'Support':                                     'Taimako',
+      'No active order':                             'Babu umurnin da ke gudana',
+      'Once you schedule a pickup, tracking will appear here.': 'Da zarar ka tsara karɓawa, bin didigi zai bayyana anan.',
+      'View Details':                                'Duba Cikakkun Bayanai',
+      'Est. ready':                                  'Ƙididdigan shirye',
+      /* ── Profile tab ── */
+      'Home':                                        'Gida',
+      'Track':                                       'Bi',
+      'Profile':                                     'Bayanai',
+      'Account':                                     'Asusun',
+      'Preferences':                                 'Zaɓuɓɓuka',
+      'Legal':                                       'Doka',
+      'Personal Information':                        'Bayanan Sirri',
+      'Saved Addresses':                             'Adireshi da aka Adana',
+      'Payment Methods':                             'Hanyoyin Biyan Kuɗi',
+      'Change Password':                             'Canza Kalmar Sirri',
+      'Notifications':                               'Sanarwa',
+      'App Settings':                                'Saitunan App',
+      'Help & Support':                              'Taimako',
+      'My Support Tickets':                          'Tikitocin Taimako Na',
+      'Price Guide':                                 'Jagoran Farashi',
+      'Terms of Service':                            'Sharuɗɗan Sabis',
+      'Privacy Policy':                              'Manufar Keɓantawa',
+      'Sign Out':                                    'Fita',
+      /* ── Sheet ── */
+      'Billing':                                     'Biyan Kuɗi',
+      'Pay As You Go':                               'Biya Yayin da Kake Tafiya',
+      'Monthly Plan':                                'Shirin Wata',
+      'Bedding':                                     'Kayan Gado',
+      'Shoes':                                       'Takalmi',
+      'Confirm Pickup':                              'Tabbatar Karɓawa',
+    },
+  };
+
+  function t(key, lang) {
+    const l = lang || document.documentElement.lang || 'en';
+    return (TRANSLATIONS[l] && TRANSLATIONS[l][key]) || key;
+  }
+
+  function applyLanguage(lang) {
+    document.documentElement.lang = lang;
+    // Capture original innerHTML on first call so English can always be restored
+    if (!applyLanguage._captured) {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.dataset.originalHtml = el.innerHTML;
+      });
+      applyLanguage._captured = true;
+    }
+    const map = lang === 'en' ? null : (TRANSLATIONS[lang] || {});
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      if (lang === 'en') {
+        el.innerHTML = el.dataset.originalHtml;
+      } else {
+        const key = el.dataset.i18n;
+        const translated = map[key];
+        if (translated) el.textContent = translated;
+      }
+    });
   }
 
   function escHtml(str) {
@@ -1444,5 +1849,516 @@ const HomePage = (() => {
     }, 2600);
   }
 
-  return { init };
+  /* ── Cancel order (customer) ────────────────────────────────────── */
+  async function handleCancelOrder(orderId) {
+    if (!confirm('Cancel this order? This cannot be undone.')) return;
+    try {
+      await SpaccleDB.setOrderStatus(orderId, 'cancelled');
+      closeAllSheets();
+      showToast('Order cancelled');
+      await refresh();
+    } catch {
+      showToast('Could not cancel order');
+    }
+  }
+
+  /* ── Cancel subscription ─────────────────────────────────────────── */
+  async function handleCancelSubscription() {
+    if (!user) { closeAllSheets(); return; }
+    if (!subscription || subscription.status !== 'active') { closeAllSheets(); return; }
+    if (!confirm('Cancel your subscription? You will lose access at the end of this billing period.')) return;
+    try {
+      await SpaccleDB.cancelSubscription(user.userId);
+      subscription = null;
+      closeAllSheets();
+      showToast('Subscription cancelled');
+      billingMode = 'payg';
+      updateBillingUI();
+    } catch {
+      showToast('Could not cancel subscription');
+    }
+  }
+
+  /* ── Subscription renewal check ─────────────────────────────────── */
+  async function checkSubscriptionRenewal() {
+    if (!user) return;
+    try {
+      const expired = await SpaccleDB.checkSubscriptionRenewal(user.userId);
+      if (!expired) return;
+      const renew = confirm('Your subscription has expired. Renew now to keep your monthly benefits?');
+      if (renew) await openSubscriptionSheet();
+    } catch { }
+  }
+
+  /* ── Re-order ────────────────────────────────────────────────────── */
+  function handleReorder(order) {
+    closeAllSheets();
+    selectedService = order.service || selectedService;
+    document.querySelectorAll('.service-pill').forEach(p =>
+      p.classList.toggle('active', p.dataset.service === selectedService));
+    billingMode = order.billingMode || 'payg';
+    buildDatePicker();
+    updateBillingUI();
+    openSheet('sheet-schedule');
+    setTimeout(() => {
+      const addrEl = document.getElementById('pickup-address');
+      const timeEl = document.getElementById('pickup-time');
+      if (addrEl && order.address) addrEl.value = order.address;
+      if (timeEl && order.pickupTime) {
+        Array.from(timeEl.options).forEach(o => { if (o.value === order.pickupTime) o.selected = true; });
+      }
+    }, 100);
+  }
+
+  /* ── Subscription usage bar ─────────────────────────────────────── */
+  async function renderSubscriptionUsageBar() {
+    const bar = document.getElementById('sub-usage-bar-wrap');
+    if (!bar || !user) return;
+    try {
+      const sub = await SpaccleDB.getSubscription(user.userId);
+      if (!sub || sub.status !== 'active') { bar.style.display = 'none'; return; }
+      const included = Number(sub.includedItems) || 0;
+      if (!included) { bar.style.display = 'none'; return; }
+      const used = included - (Number(sub.itemsRemaining) || 0);
+      const pct = Math.min(100, Math.round((used / included) * 100));
+      const colour = pct >= 90 ? '#E53935' : pct >= 70 ? '#FB8C00' : '#5B4FBE';
+      bar.style.display = '';
+      bar.innerHTML = `
+        <div class="sub-usage-label">
+          <span>Plan items used</span>
+          <span style="font-weight:700;color:${colour}">${used} / ${included}</span>
+        </div>
+        <div class="sub-usage-track">
+          <div class="sub-usage-fill" style="width:${pct}%;background:${colour}"></div>
+        </div>`;
+    } catch { }
+  }
+
+  /* ── Promo / discount codes ─────────────────────────────────────── */
+  let appliedPromo = null;
+
+  async function handleApplyPromo() {
+    const input = document.getElementById('promo-input');
+    const code = input?.value.trim().toUpperCase();
+    const statusEl = document.getElementById('promo-status');
+    if (!code) return;
+    try {
+      const promo = await SpaccleDB.validatePromoCode(code);
+      if (!promo) {
+        if (statusEl) { statusEl.textContent = 'Invalid or expired code'; statusEl.style.color = '#E53935'; }
+        appliedPromo = null;
+        return;
+      }
+      appliedPromo = promo;
+      const discountText = promo.discountType === 'percent'
+        ? `${promo.value}% off`
+        : `₦${Number(promo.value).toLocaleString('en-NG')} off`;
+      if (statusEl) { statusEl.textContent = `✓ ${discountText} applied`; statusEl.style.color = '#2E7D32'; }
+      showToast(`Promo applied — ${discountText}`);
+    } catch {
+      if (statusEl) { statusEl.textContent = 'Could not validate code'; statusEl.style.color = '#E53935'; }
+    }
+  }
+
+  function applyPromoDiscount(amount) {
+    if (!appliedPromo) return amount;
+    if (appliedPromo.discountType === 'percent') return Math.round(amount * (1 - appliedPromo.value / 100));
+    return Math.max(0, amount - appliedPromo.value);
+  }
+
+  /* ── Change password ─────────────────────────────────────────────── */
+  async function handleChangePassword() {
+    if (!user) return;
+    const current = document.getElementById('change-pw-current').value;
+    const newPw    = document.getElementById('change-pw-new').value;
+    const confirm2 = document.getElementById('change-pw-confirm').value;
+    if (!current) { showToast('Enter your current password'); return; }
+    if (newPw.length < 8) { showToast('New password must be at least 8 characters'); return; }
+    if (newPw !== confirm2) { showToast('Passwords do not match'); return; }
+    const btn = document.getElementById('btn-change-password-save');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.changePassword(user.userId, current, newPw);
+      document.getElementById('change-pw-current').value = '';
+      document.getElementById('change-pw-new').value = '';
+      document.getElementById('change-pw-confirm').value = '';
+      closeAllSheets();
+      showToast('Password changed successfully');
+    } catch (err) {
+      showToast(err?.message === 'WRONG_PASSWORD' ? 'Current password is incorrect' : 'Could not change password');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* ── Broadcast notifications ─────────────────────────────────────── */
+  async function checkBroadcasts() {
+    try {
+      const SEEN_KEY = 'spaccle_broadcast_seen';
+      const seen = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]');
+      const all = await SpaccleDB.listNewBroadcasts(null);
+      const unseen = all.filter(b => !seen.includes(b._id));
+      if (!unseen.length) return;
+      const latest = unseen[unseen.length - 1];
+      storeNotification(latest.title || 'Spaccle Update', latest.message || '');
+      SpaccleDB.markBroadcastSeen(latest._id).catch(() => {});
+    } catch { }
+  }
+
+  /* ── Check for new admin chat replies ───────────────────────────── */
+  const CHAT_SEEN_KEY = 'spaccle_chat_last_seen';
+
+  async function checkNewAdminMessages() {
+    if (!user) return;
+    try {
+      const msgs = await SpaccleDB.getChatHistory(user.userId);
+      const lastSeen = localStorage.getItem(CHAT_SEEN_KEY + '_' + user.userId) || '';
+      const newAdminMsgs = msgs.filter(m => m.fromAdmin && !m.read && m.createdAt > lastSeen);
+      if (newAdminMsgs.length) {
+        storeNotification('Spaccle Support', newAdminMsgs[newAdminMsgs.length - 1].text);
+        const latest = newAdminMsgs.reduce((a, b) => a.createdAt > b.createdAt ? a : b);
+        localStorage.setItem(CHAT_SEEN_KEY + '_' + user.userId, latest.createdAt);
+      }
+    } catch { }
+  }
+
+  /* ── Offline indicator ───────────────────────────────────────────── */
+  function setupOfflineIndicator() {
+    const banner = document.getElementById('offline-banner');
+    if (!banner) return;
+    const update = () => { banner.style.display = navigator.onLine ? 'none' : ''; };
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    update();
+  }
+
+  /* ── My support tickets ──────────────────────────────────────────── */
+  let currentTicket = null;
+
+  async function openMyTickets() {
+    openSheet('sheet-my-tickets');
+    const list = document.getElementById('my-tickets-list');
+    list.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:24px 0">Loading…</div>';
+    try {
+      const tickets = await SpaccleDB.listTicketsByUser(user.userId);
+      list.innerHTML = '';
+      if (!tickets.length) {
+        list.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:24px 0">No tickets yet. Use Help & Support to submit one.</div>';
+        return;
+      }
+      tickets.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'admin-card';
+        item.style.cssText = 'margin-bottom:10px;cursor:pointer';
+        const isResolved = t.status === 'resolved';
+        const hasReply   = t.hasAdminReply;
+        item.innerHTML = `
+          <div class="admin-card__left">
+            <div class="admin-card__title">${escapeHtml(t.subject || 'Support message')}</div>
+            <div class="admin-card__meta">${formatTime(t.createdAt)}${hasReply ? ' · Admin replied' : ''}</div>
+          </div>
+          <div class="admin-card__right">
+            <span class="admin-card__pill ${isResolved ? 'admin-card__pill--resolved' : 'admin-card__pill--open'}">
+              ${isResolved ? 'Resolved' : 'Open'}
+            </span>
+          </div>`;
+        item.addEventListener('click', () => openTicketThread(t));
+        list.appendChild(item);
+      });
+    } catch {
+      list.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Could not load.</div>';
+    }
+  }
+
+  async function openTicketThread(ticket) {
+    currentTicket = ticket;
+    document.getElementById('ticket-thread-subject').textContent = ticket.subject || 'Support Ticket';
+    document.getElementById('ticket-thread-status').textContent =
+      ticket.status === 'resolved' ? '✓ This ticket has been resolved.' : 'Status: Open';
+
+    const replyBar = document.getElementById('ticket-reply-bar');
+    if (replyBar) replyBar.style.display = ticket.status === 'resolved' ? 'none' : '';
+
+    openSheet('sheet-ticket-thread');
+    await loadUserTicketThread(ticket);
+  }
+
+  async function loadUserTicketThread(ticket) {
+    const threadEl = document.getElementById('ticket-thread-messages');
+    threadEl.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Loading…</div>';
+    try {
+      const replies = await SpaccleDB.getTicketReplies(ticket._id);
+      threadEl.innerHTML = '';
+
+      // Original message
+      threadEl.appendChild(buildUserTicketBubble({
+        text: ticket.message || '',
+        fromAdmin: false,
+        createdAt: ticket.createdAt,
+        isFirst: true,
+      }));
+
+      // Replies
+      replies.forEach(r => threadEl.appendChild(buildUserTicketBubble(r)));
+      threadEl.scrollTop = threadEl.scrollHeight;
+    } catch {
+      threadEl.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Could not load thread.</div>';
+    }
+  }
+
+  function buildUserTicketBubble({ text, fromAdmin, createdAt, isFirst }) {
+    const wrap = document.createElement('div');
+    wrap.className = 'ticket-bubble-wrap ' + (fromAdmin ? 'ticket-bubble-wrap--admin' : 'ticket-bubble-wrap--user');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'ticket-bubble ' + (fromAdmin ? 'ticket-bubble--admin' : 'ticket-bubble--user');
+
+    if (fromAdmin && isFirst !== true) {
+      const tag = document.createElement('div');
+      tag.className = 'ticket-bubble__tag';
+      tag.textContent = 'Spaccle Support';
+      bubble.appendChild(tag);
+    }
+
+    const body = document.createElement('div');
+    body.textContent = text;
+    bubble.appendChild(body);
+
+    const time = document.createElement('div');
+    time.className = 'ticket-bubble__time';
+    time.textContent = formatTime(createdAt);
+    bubble.appendChild(time);
+
+    wrap.appendChild(bubble);
+    return wrap;
+  }
+
+  async function handleUserTicketReply() {
+    if (!currentTicket || !user) return;
+    const input = document.getElementById('ticket-reply-input');
+    const text  = (input?.value || '').trim();
+    if (!text) return;
+    input.value = '';
+    const btn = document.getElementById('btn-ticket-reply-send');
+    setButtonLoading(btn, true);
+    try {
+      await SpaccleDB.addTicketReply(currentTicket._id, { text, fromAdmin: false, userId: user.userId });
+      await loadUserTicketThread(currentTicket);
+      // Refresh the tickets list in background
+      const fresh = await SpaccleDB.listTicketsByUser(user.userId);
+      currentTicket = fresh.find(t => t._id === currentTicket._id) || currentTicket;
+    } catch {
+      showToast('Could not send reply');
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  }
+
+  /* ── Notification panel ──────────────────────────────────────────── */
+  function openNotificationPanel() {
+    const list = getStoredNotifications();
+    const listEl = document.getElementById('notif-list');
+    const emptyEl = document.getElementById('notif-empty');
+    listEl.innerHTML = '';
+    if (!list.length) {
+      emptyEl.style.display = '';
+    } else {
+      emptyEl.style.display = 'none';
+      list.forEach(n => {
+        const item = document.createElement('div');
+        item.className = 'notif-item' + (n.read ? '' : ' notif-item--unread');
+        item.innerHTML = `
+          <div class="notif-item__body">
+            <div class="notif-item__title">${escapeHtml(n.title)}</div>
+            <div class="notif-item__sub">${escapeHtml(n.body)}</div>
+            <div class="notif-item__time">${formatTime(n.at)}</div>
+          </div>
+          <button class="notif-item__dismiss" data-id="${n.id}" aria-label="Dismiss">✕</button>
+        `;
+        item.querySelector('.notif-item__dismiss').addEventListener('click', e => {
+          e.stopPropagation();
+          dismissNotification(n.id);
+          item.remove();
+          if (!listEl.children.length) emptyEl.style.display = '';
+          updateNotifBadge();
+        });
+        listEl.appendChild(item);
+      });
+    }
+    // Mark all as read
+    const stored = getStoredNotifications().map(n => ({ ...n, read: true }));
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(stored));
+    updateNotifBadge();
+    openSheet('sheet-notifications');
+  }
+
+  function closeNotificationPanel() { closeAllSheets(); }
+
+  function dismissNotification(id) {
+    const stored = getStoredNotifications().filter(n => n.id !== id);
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(stored));
+  }
+
+  function clearAllNotifications() {
+    localStorage.removeItem(NOTIF_KEY);
+    updateNotifBadge();
+    const listEl = document.getElementById('notif-list');
+    const emptyEl = document.getElementById('notif-empty');
+    if (listEl) listEl.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = '';
+  }
+
+  /* ── Rating sheet ────────────────────────────────────────────────── */
+  let selectedRating = 0;
+
+  function openRatingSheet(order) {
+    selectedRating = 0;
+    document.getElementById('rating-order-id').value = order._id;
+    document.getElementById('rating-note').value = '';
+    document.querySelectorAll('.rating-star').forEach(b => b.classList.remove('active'));
+    openSheet('sheet-rating');
+  }
+
+  function closeRatingSheet() { closeAllSheets(); }
+
+  function selectRatingStar(n) {
+    selectedRating = n;
+    document.querySelectorAll('.rating-star').forEach(b =>
+      b.classList.toggle('active', parseInt(b.dataset.star) <= n));
+  }
+
+  async function handleRatingSubmit() {
+    if (!selectedRating) { showToast('Please select a star rating'); return; }
+    const orderId = document.getElementById('rating-order-id').value;
+    const note = document.getElementById('rating-note').value.trim();
+    const btn = document.getElementById('btn-rating-submit');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.rateOrder(orderId, selectedRating, note);
+      closeAllSheets();
+      showToast('Thank you for your rating!');
+    } catch {
+      showToast('Could not save rating');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* ── Chat sheet ──────────────────────────────────────────────────── */
+  let _chatRefreshTimer = null;
+
+  async function openChatSheet() {
+    openSheet('sheet-chat');
+    await loadChatMessages();
+    // Auto-refresh every 8s while chat is open so admin replies appear
+    stopChatRefresh();
+    _chatRefreshTimer = setInterval(async () => {
+      const sheet = document.getElementById('sheet-chat');
+      if (!sheet || !sheet.classList.contains('active')) { stopChatRefresh(); return; }
+      await loadChatMessages();
+    }, 8000);
+  }
+
+  function stopChatRefresh() {
+    clearInterval(_chatRefreshTimer);
+    _chatRefreshTimer = null;
+  }
+
+  async function loadChatMessages() {
+    if (!user) return;
+    const container = document.getElementById('chat-messages');
+    try {
+      await SpaccleDB.markChatRead(user.userId);
+      const msgs = await SpaccleDB.getChatHistory(user.userId);
+      container.innerHTML = '';
+      if (!msgs.length) {
+        container.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:24px 0">👋 Hi! How can we help you?</div>';
+        return;
+      }
+      msgs.forEach(m => container.appendChild(buildChatBubble(m)));
+      container.scrollTop = container.scrollHeight;
+    } catch {
+      container.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Could not load messages.</div>';
+    }
+  }
+
+  function buildChatBubble(msg) {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-bubble-wrap ' + (msg.fromAdmin ? 'chat-bubble-wrap--admin' : 'chat-bubble-wrap--user');
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble ' + (msg.fromAdmin ? 'chat-bubble--admin' : 'chat-bubble--user');
+    bubble.textContent = msg.text;
+    const time = document.createElement('div');
+    time.className = 'chat-bubble-time';
+    time.textContent = formatTime(msg.createdAt);
+    wrap.appendChild(bubble);
+    wrap.appendChild(time);
+    return wrap;
+  }
+
+  async function handleChatSend() {
+    if (!user) return;
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    try {
+      const msg = await SpaccleDB.createChatMessage({ userId: user.userId, text, fromAdmin: false });
+      const container = document.getElementById('chat-messages');
+      container.appendChild(buildChatBubble(msg));
+      container.scrollTop = container.scrollHeight;
+    } catch {
+      showToast('Could not send message');
+    }
+  }
+
+  /* ── Legal reader ────────────────────────────────────────────────── */
+  async function openLegalSheet(type) {
+    const titleEl = document.getElementById('legal-sheet-title');
+    const contentEl = document.getElementById('legal-content');
+    titleEl.textContent = type === 'terms' ? 'Terms of Service' : 'Privacy Policy';
+    contentEl.innerHTML = '<p style="color:#aaa;font-size:13px">Loading…</p>';
+    openSheet('sheet-legal');
+    try {
+      const html = await SpaccleDB.getLegalContent(type);
+      contentEl.innerHTML = html || '<p>Content not yet available.</p>';
+    } catch {
+      contentEl.innerHTML = '<p>Could not load content.</p>';
+    }
+  }
+
+  /* ── Pricing guide ───────────────────────────────────────────────── */
+  async function openPricingGuide() {
+    openSheet('sheet-pricing-guide');
+    const svcEl   = document.getElementById('pricing-guide-services');
+    const itemsEl = document.getElementById('pricing-guide-items');
+    svcEl.innerHTML = '<div style="font-size:13px;color:#aaa;padding:8px">Loading…</div>';
+    itemsEl.innerHTML = '';
+    try {
+      const [svcCfg, itemPricing] = await Promise.all([
+        SpaccleDB.ensureDefaultServices(),
+        SpaccleDB.ensureDefaultItemPricing(),
+      ]);
+      svcEl.innerHTML = '';
+      Object.values(svcCfg).forEach(svc => {
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.style.cursor = 'default';
+        card.innerHTML = `<div class="admin-card__left"><div class="admin-card__title">${escapeHtml(svc.name)}</div></div><div class="admin-card__right"><span class="admin-card__pill">${escapeHtml(svc.display)}</span></div>`;
+        svcEl.appendChild(card);
+      });
+      itemsEl.innerHTML = '';
+      itemPricing.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.style.cursor = 'default';
+        card.innerHTML = `<div class="admin-card__left"><div class="admin-card__title">${escapeHtml(item.name)}</div></div><div class="admin-card__right"><span class="admin-card__pill">₦${Number(item.price).toLocaleString('en-NG')}</span></div>`;
+        itemsEl.appendChild(card);
+      });
+    } catch {
+      svcEl.innerHTML = '<div style="font-size:13px;color:#aaa;padding:8px">Could not load pricing.</div>';
+    }
+  }
+
+  return { init, updateNotifBadge, applyLanguage };
 })();
