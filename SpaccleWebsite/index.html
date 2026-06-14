@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join the Waitlist | Spaccle - Premium Laundry Service</title>
+    <meta name="description" content="Be the first to experience Spaccle's premium laundry service. Join our exclusive waitlist for early access and special launch offers.">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400;700&family=Outfit:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/waitlist.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <span class="logo-symbol">S</span><span class="logo-text">PACCLE</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a href="#waitlist-form" class="btn btn-primary-gradient shadow-sm">Join Waitlist</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="waitlist-hero">
+        <div class="hero-bg-symbol">S</div>
+        <div class="hero-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="container">
+            <div class="row align-items-center min-vh-100 pt-5">
+                <div class="col-lg-7 mb-5 mb-lg-0" data-aos="fade-right" data-aos-duration="1000">
+                    <div class="badge-wrapper mb-4">
+                        <span class="early-access-badge">
+                            <i class="bi bi-lightning-charge-fill me-2"></i>Limited Early Access
+                        </span>
+                    </div>
+                    <h1 class="display-1 mb-4">
+                        Be First to <br>
+                        <span class="text-gradient">Experience</span><br>
+                        Premium Care
+                    </h1>
+                    <p class="lead text-muted mb-4 fw-light">
+                        Join our exclusive waitlist and be among the first to experience Nigeria's most sophisticated app-based laundry service. Early members receive <strong class="text-dark">15% off for 3 months</strong> and priority access.
+                    </p>
+                    
+                    <!-- Social Proof Mini -->
+                    <div class="social-proof-mini d-flex align-items-center gap-3 mb-5">
+                        <div class="avatar-stack">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" alt="User" class="avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Zoe" alt="User" class="avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mark" alt="User" class="avatar">
+                            <div class="avatar-more">+</div>
+                        </div>
+                        <div>
+                            <span class="fw-bold text-dark" id="waitlist-counter">1,247</span>
+                            <span class="text-muted">people already joined</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Waitlist Form Card -->
+                <div class="col-lg-5" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+                    <div class="waitlist-card" id="waitlist-form">
+                        <div class="card-glow"></div>
+                        <div class="waitlist-card-inner">
+                            <div class="text-center mb-4">
+                                <div class="icon-circle mb-3">
+                                    <i class="bi bi-envelope-heart fs-2"></i>
+                                </div>
+                                <h3 class="h4 mb-2">Secure Your Spot</h3>
+                                <p class="text-muted small mb-0">Join now — spots are limited for our Lagos launch</p>
+                            </div>
+                            
+                            <form id="waitlistForm" class="waitlist-form">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="fullName" placeholder="John Doe" required>
+                                    <label for="fullName">Full Name</label>
+                                    <div class="invalid-feedback">Please enter your full name</div>
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control" id="email" placeholder="john@example.com" required>
+                                    <label for="email">Email Address</label>
+                                    <div class="invalid-feedback">Please enter a valid email address</div>
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="tel" class="form-control" id="phone" placeholder="+234...">
+                                    <label for="phone">Phone Number (Optional)</label>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label small text-muted mb-2">I'm interested in:</label>
+                                    <div class="interest-tags">
+                                        <label class="interest-tag" data-plan="basic">
+                                            <input type="radio" name="plan" value="basic">
+                                            <span>Basic</span>
+                                        </label>
+                                        <label class="interest-tag" data-plan="standard">
+                                            <input type="radio" name="plan" value="standard">
+                                            <span>Standard</span>
+                                        </label>
+                                        <label class="interest-tag" data-plan="family">
+                                            <input type="radio" name="plan" value="family">
+                                            <span>Family</span>
+                                        </label>
+                                        <label class="interest-tag" data-plan="custom">
+                                            <input type="radio" name="plan" value="custom">
+                                            <span>Custom</span>
+                                        </label>
+                                        <label class="interest-tag" data-plan="payg">
+                                            <input type="radio" name="plan" value="payg">
+                                            <span>PAYG</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Plan Details Panel -->
+                                <div id="planDetails" class="plan-details d-none mb-4">
+                                    <div class="plan-details-header">
+                                        <span class="plan-name" id="selectedPlanName">Basic Plan</span>
+                                        <span class="plan-price" id="selectedPlanPrice">₦18k/month</span>
+                                    </div>
+                                    <div class="plan-discount">
+                                        <i class="bi bi-tag-fill text-success me-1"></i>
+                                        <span id="selectedPlanDiscount">₦15.3k with 15% waitlist discount</span>
+                                    </div>
+                                    <ul class="plan-features" id="selectedPlanFeatures">
+                                        <li><i class="bi bi-check2"></i> Up to 20 items/month</li>
+                                        <li><i class="bi bi-check2"></i> 1-2 pickups per month</li>
+                                        <li><i class="bi bi-check2"></i> 3-5 day turnaround</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label small text-muted mb-2">How did you hear about us?</label>
+                                    <select class="form-select form-select-lg bg-light border-0" id="source" name="source">
+                                        <option value="">Select an option</option>
+                                        <option value="instagram">Instagram</option>
+                                        <option value="twitter">X (Twitter)</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                        <option value="facebook">Facebook</option>
+                                        <option value="google">Google Search</option>
+                                        <option value="friend">Friend/Family Referral</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="event">Event/Conference</option>
+                                        <option value="blog">Blog/Article</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary-gradient btn-lg w-100 submit-btn">
+                                    <span class="btn-text">Join the Waitlist</span>
+                                    <span class="btn-loader d-none">
+                                        <span class="spinner-border spinner-border-sm me-2"></span>Joining...
+                                    </span>
+                                </button>
+                                
+                                <p class="text-center text-muted small mt-3 mb-0">
+                                    <i class="bi bi-shield-check me-1"></i>No spam, ever. Unsubscribe anytime.
+                                </p>
+                            </form>
+                            
+                            <!-- Success State (Hidden by default) -->
+                            <div id="successState" class="success-state d-none">
+                                <div class="success-animation">
+                                    <div class="checkmark-circle">
+                                        <div class="checkmark draw"></div>
+                                    </div>
+                                </div>
+                                <h3 class="h4 mb-2">You're In!</h3>
+                                <p class="text-muted mb-4">Welcome to the Spaccle family. Check your email for confirmation.</p>
+                                <div class="referral-box p-3 rounded-3 mb-3">
+                                    <p class="small text-muted mb-2">Share with friends & move up the list:</p>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-sm" value="https://spaccle.com/waitlist?ref=USER123" readonly id="referralLink">
+                                        <button class="btn btn-outline-dark btn-sm" type="button" onclick="copyReferral()">
+                                            <i class="bi bi-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="social-share d-flex justify-content-center gap-2">
+                                    <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
+                                        <i class="bi bi-twitter-x"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm rounded-circle">
+                                        <i class="bi bi-facebook"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="py-5 bg-light" id="benefits">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-badge">Why Join Early</span>
+                <h2 class="display-5 mb-3">Exclusive Early Access Benefits</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">Be part of our founding member community and enjoy these special perks.</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <h4>Save More</h4>
+                        <p class="text-muted">15% off all plans for 3 months — that's up to ₦28,350 in savings</p>
+                        <span class="benefit-badge">Early Bird</span>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="benefit-card">
+                        <div class="benefit-icon icon-purple">
+                            <i class="bi bi-rocket-takeoff"></i>
+                        </div>
+                        <h4>First in Line</h4>
+                        <p class="text-muted">Be among the first 500 to access our service when we launch in Lagos</p>
+                        <span class="benefit-badge">Priority</span>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="benefit-card">
+                        <div class="benefit-icon icon-pink">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <h4>Free Starter Kit</h4>
+                        <p class="text-muted">Premium garment bag, branded hangers & fabric care guide worth ₦15,000</p>
+                        <span class="benefit-badge">Free Gift</span>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="benefit-card">
+                        <div class="benefit-icon icon-orange">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </div>
+                        <h4>Launch Event</h4>
+                        <p class="text-muted">Exclusive invite to our launch party with networking and giveaways</p>
+                        <span class="benefit-badge">VIP Access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Preview Section -->
+    <section class="py-5" id="pricing-preview">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-badge">Pricing</span>
+                <h2 class="display-5 mb-3">Simple Pricing</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">Choose the plan that fits your lifestyle. Waitlist members get <strong class="text-gradient">15% off for 3 months</strong>.</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden pricing-card">
+                        <div class="card-body p-5">
+                            <h5 class="fw-bold text-muted text-uppercase small mb-4">Basic</h5>
+                            <div class="d-flex align-items-baseline mb-2">
+                                <span class="display-4 fw-bold">₦18k</span>
+                                <span class="text-muted ms-2">/month</span>
+                            </div>
+                            <div class="waitlist-price mb-4">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                                    <i class="bi bi-tag-fill me-1"></i>₦15.3k with waitlist discount
+                                </span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>Up to 20 items.</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> 1-2 pickups per month</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Turnaround: 3-5 Days</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>  Savings: 20-25 % vs PAYG</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Rollover: Up to 5 items</li>
+                            </ul>
+                            <a href="#waitlist-form" class="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Join Waitlist</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card border-0 shadow-lg h-100 rounded-4 overflow-hidden position-relative pricing-card popular">
+                        <div class="position-absolute top-0 start-0 w-100 h-1 bg-primary"></div>
+                        <div class="popular-badge">Most Popular</div>
+                        <div class="card-body p-5">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold text-primary text-uppercase small mb-0">Standard</h5>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">Popular</span>
+                            </div>
+                            <div class="d-flex align-items-baseline mb-2">
+                                <span class="display-4 fw-bold">₦32k</span>
+                                <span class="text-muted ms-2">/month</span>
+                            </div>
+                            <div class="waitlist-price mb-4">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                                    <i class="bi bi-tag-fill me-1"></i>₦27.2k with waitlist discount
+                                </span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>Up to 40 items.</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> 2 pickups per month</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Turnaround: 48-72 Hours</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>  Savings: 20-25 %</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Rollover: Up to 10 items</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Free express: Once/month</li>
+                            </ul>
+                            <a href="#waitlist-form" class="btn btn-primary-gradient w-100 rounded-pill py-3 fw-bold">Join Waitlist</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden pricing-card">
+                        <div class="card-body p-5">
+                            <h5 class="fw-bold text-muted text-uppercase small mb-4">Family</h5>
+                            <div class="d-flex align-items-baseline mb-2">
+                                <span class="display-4 fw-bold">₦63k</span>
+                                <span class="text-muted ms-2">/month</span>
+                            </div>
+                            <div class="waitlist-price mb-4">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                                    <i class="bi bi-tag-fill me-1"></i>₦53.55k with waitlist discount
+                                </span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Items: Up to 80 times</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Pickup: Unlimited</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Turnaround: Priority</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Savings : 35-40 %</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Rollover: Up to 20 times</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Free express: Twice/month</li>
+                            </ul>
+                            <a href="#waitlist-form" class="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Join Waitlist</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Custom & PAYG Row -->
+            <div class="row g-4 justify-content-center mt-2">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden pricing-card pricing-card-alt">
+                        <div class="card-body p-5">
+                            <h5 class="fw-bold text-muted text-uppercase small mb-4">Custom Plan</h5>
+                            <div class="d-flex align-items-baseline mb-2">
+                                <span class="display-4 fw-bold">Let's Talk</span>
+                            </div>
+                            <div class="waitlist-price mb-4">
+                                <span class="badge bg-purple bg-opacity-10 text-purple rounded-pill px-3 py-2">
+                                    <i class="bi bi-stars me-1"></i>Tailored for You
+                                </span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Bespoke service packages</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Corporate & bulk rates</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Hotels & hospitality</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Event & wedding services</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Dedicated account manager</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Custom pickup schedules</li>
+                            </ul>
+                            <a href="#waitlist-form" class="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Contact Us</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden pricing-card pricing-card-alt">
+                        <div class="card-body p-5">
+                            <h5 class="fw-bold text-muted text-uppercase small mb-4">Pay As You Go</h5>
+                            <div class="d-flex align-items-baseline mb-2">
+                                <span class="display-4 fw-bold">₦900</span>
+                                <span class="text-muted ms-2">/item</span>
+                            </div>
+                            <div class="waitlist-price mb-4">
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">
+                                    <i class="bi bi-cash-stack me-1"></i>No Commitment
+                                </span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> No monthly subscription</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Pay only for what you clean</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Standard 3-5 day turnaround</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Minimum order: ₦5,000</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Same quality service</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Perfect for occasional use</li>
+                            </ul>
+                            <a href="#waitlist-form" class="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Join Waitlist</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-5 bg-light" id="how-it-works">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-badge">The Process</span>
+                <h2 class="display-5 mb-3">What Happens Next</h2>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="timeline">
+                        <div class="timeline-item" data-aos="fade-up" data-aos-delay="100">
+                            <div class="timeline-marker">1</div>
+                            <div class="timeline-content">
+                                <h4>Join the Waitlist</h4>
+                                <p class="text-muted">Enter your details above to secure your spot. It takes less than 30 seconds.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-aos="fade-up" data-aos-delay="200">
+                            <div class="timeline-marker">2</div>
+                            <div class="timeline-content">
+                                <h4>Get Early Updates</h4>
+                                <p class="text-muted">We'll keep you informed about our progress, launch timeline, and exclusive previews.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-aos="fade-up" data-aos-delay="300">
+                            <div class="timeline-marker">3</div>
+                            <div class="timeline-content">
+                                <h4>Priority Invitation</h4>
+                                <p class="text-muted">When we launch, you'll receive a priority invitation to activate your account and an invite for the launch event.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-aos="fade-up" data-aos-delay="400">
+                            <div class="timeline-marker marker-gradient">4</div>
+                            <div class="timeline-content">
+                                <h4>Start Your Experience</h4>
+                                <p class="text-muted">Schedule your first pickup and enjoy premium laundry care with your exclusive benefits.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-5 bg-dark text-white">
+        <div class="container py-4">
+            <div class="row g-4 text-center">
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="display-4 fw-bold text-gradient counter" data-target="1247">0</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">Waitlist Members</div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="display-4 fw-bold text-gradient counter" data-target="500">0</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">Launch Spots</div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="display-4 fw-bold text-gradient">Q2</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">Expected Launch</div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="display-4 fw-bold text-gradient">Lagos</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">First City</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-5">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-badge">Beta Feedback</span>
+                <h2 class="display-5 mb-3">What Early Testers Say</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-card">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="mb-4 text-muted">"I was part of the beta testing and I'm blown away by the quality. The packaging alone makes you feel like royalty. Can't wait for the full launch!"</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amara" alt="Amara" class="testimonial-avatar">
+                            <div>
+                                <h6 class="fw-bold mb-0">Amara K.</h6>
+                                <small class="text-muted">Beta Tester, Ikoyi</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-card">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="mb-4 text-muted">"Finally, a laundry service that understands luxury fabrics. My traditional wears have never been handled with such care. Worth every penny."</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emmanuel" alt="Emmanuel" class="testimonial-avatar">
+                            <div>
+                                <h6 class="fw-bold mb-0">Emmanuel O.</h6>
+                                <small class="text-muted">Beta Tester, Lekki</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-card">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="mb-4 text-muted">"The convenience is unmatched. Pickup at my door, perfect cleaning, and delivery back. It's like having a personal laundry butler."</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Zainab" alt="Zainab" class="testimonial-avatar">
+                            <div>
+                                <h6 class="fw-bold mb-0">Zainab M.</h6>
+                                <small class="text-muted">Beta Tester, VI</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-5 bg-light" id="faq">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5" data-aos="fade-up">
+                        <span class="section-badge">FAQ</span>
+                        <h2 class="display-5 mb-3">Common Questions</h2>
+                    </div>
+                    <div class="accordion accordion-flush shadow-sm rounded-4 overflow-hidden bg-white" id="accordionFAQ" data-aos="fade-up" data-aos-delay="100">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    When will Spaccle officially launch?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    We're targeting Q2 2026 for our official launch in Lagos. Waitlist members will be the first to know the exact date and will receive priority access before we open to the general public.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    Is there a cost to join the waitlist?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    Absolutely not! Joining the waitlist is completely free. You'll only pay for services once you decide to place an order after we launch.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                    How does the 15% discount work?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    Once you join the waitlist, your 15% discount will be automatically applied to all your orders for the first 3 months after you activate your account. No promo codes needed!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                    Which areas in Lagos will you serve?
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    We currently serve: Ikoyi, Victoria Island, Lekki (Phase 1 & 2), Ajah, Yaba, Surulere, Agege, and Abule Egba. We're expanding to more areas soon — join the waitlist to request your location!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+                                    Can I refer friends to the waitlist?
+                                </button>
+                            </h2>
+                            <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    Yes! After joining, you'll receive a unique referral link. Share it with friends and family. For every person who joins through your link, you'll move up the waitlist priority queue.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Media Section -->
+    <section class="py-5 bg-light" id="social-media">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
+                    <h3 class="h2 mb-3">Connect With Us</h3>
+                    <p class="text-muted mb-4">Follow our journey and be the first to see behind-the-scenes content, tips, and exclusive updates.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="https://www.instagram.com/spaccle?igsh=MWFxYm1vY3F4YWU1OQ%3D%3D&utm_source=qr" target="_blank" class="social-btn instagram">
+                            <i class="bi bi-instagram"></i>
+                            <span>Instagram</span>
+                        </a>
+                        <a href="https://x.com/spaccle?s=21&t=WSWCtUqyP2NxJS3eJ0ofpg" target="_blank" class="social-btn twitter">
+                            <i class="bi bi-twitter-x"></i>
+                            <span>X (Twitter)</span>
+                        </a>
+                        <a href="https://www.linkedin.com/company/spaccle-digital-limited/about/?viewAsMember=true" target="_blank" class="social-btn linkedin">
+                            <i class="bi bi-linkedin"></i>
+                            <span>LinkedIn</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="whatsapp-card p-4 rounded-4 bg-white shadow-sm">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="whatsapp-icon">
+                                <i class="bi bi-whatsapp"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Chat on WhatsApp</h5>
+                                <p class="text-muted mb-2 small">Quick questions? Message us directly</p>
+                                <a href="https://wa.me/2349083050660" target="_blank" class="whatsapp-number">
+                                    <i class="bi bi-telephone-fill me-2"></i>0908 305 0660
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="cta-box rounded-5 p-5 text-center position-relative overflow-hidden" data-aos="zoom-in">
+                <div class="cta-glow"></div>
+                <div class="position-relative z-1">
+                    <h2 class="display-4 fw-bold mb-4">Ready to Join?</h2>
+                    <p class="lead mb-4 opacity-75">Don't miss out on exclusive founding member benefits. Spots are filling up fast!</p>
+                    <a href="#waitlist-form" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary">Join Waitlist Now</a>
+                    <p class="small mt-3 opacity-75 mb-0">
+                        <i class="bi bi-people-fill me-2"></i><span class="counter-small" data-target="1247">0</span> people have already joined
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row g-5 mb-5">
+                <div class="col-lg-4">
+                    <a href="index.html" class="footer-brand text-decoration-none text-dark">
+                        <span class="logo-symbol">S</span><span class="logo-text">PACCLE</span>
+                    </a>
+                    <p class="text-muted">
+                        Redefining fabric care with technology and craftsmanship. The premium choice for Nigeria's best dressed.
+                    </p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="https://www.instagram.com/spaccle?igsh=MWFxYm1vY3F4YWU1OQ%3D%3D&utm_source=qr" target="_blank" class="text-dark fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="https://x.com/spaccle?s=21&t=WSWCtUqyP2NxJS3eJ0ofpg" target="_blank" class="text-dark fs-5"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="text-dark fs-5"><i class="bi bi-facebook"></i></a>
+                        <a href="https://www.linkedin.com/company/spaccle-digital-limited/about/?viewAsMember=true" target="_blank" class="text-dark fs-5"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="mb-3 fw-bold">Company</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="index.html" class="text-decoration-none text-muted">Home</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">About Us</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Careers</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Privacy</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="mb-3 fw-bold">Resources</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="#" class="text-decoration-none text-muted">Blog</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Help Center</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="mb-3 fw-bold">Questions?</h6>
+                    <p class="text-muted small">Email us at <a href="mailto:hello@spaccle.com" class="text-decoration-none">hello@spaccle.com</a></p>
+                    <p class="text-muted small mb-0">We'll respond within 24 hours.</p>
+                </div>
+            </div>
+            <div class="border-top pt-4 text-center text-muted small">
+                &copy; 2026 Spaccle Laundry. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            once: true,
+            offset: 50,
+            duration: 800,
+        });
+
+        // Counter Animation
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // Intersection Observer for counters
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.counter').forEach(counter => {
+            counterObserver.observe(counter);
+        });
+
+        // Form Handling
+        const waitlistForm = document.getElementById('waitlistForm');
+        const successState = document.getElementById('successState');
+        const submitBtn = waitlistForm.querySelector('.submit-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoader = submitBtn.querySelector('.btn-loader');
+
+        waitlistForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            const email = document.getElementById('email').value;
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+            const selectedPlan = document.querySelector('input[name="plan"]:checked');
+            
+            if (!email || !fullName || !selectedPlan) {
+                alert('Please fill in all required fields and select a plan');
+                return;
+            }
+            
+            // Show loading state
+            btnText.classList.add('d-none');
+            btnLoader.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            // Prepare data
+            const source = document.getElementById('source').value;
+            const formData = {
+                full_name: fullName,
+                email: email,
+                phone: phone || null,
+                plan: selectedPlan.value,
+                source: source || null
+            };
+            
+            try {
+                // Submit to API
+                const response = await fetch('api/submit.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update referral link
+                    document.getElementById('referralLink').value = result.data.referral_link;
+                    
+                    // Hide form, show success
+                    waitlistForm.classList.add('d-none');
+                    successState.classList.remove('d-none');
+                    
+                    // Animate checkmark
+                    setTimeout(() => {
+                        document.querySelector('.checkmark').classList.add('animate');
+                    }, 100);
+                    
+                    // Update counter
+                    const counter = document.getElementById('waitlist-counter');
+                    counter.textContent = result.data.stats.total_members.toLocaleString();
+                } else {
+                    // Show error
+                    alert(result.error || 'Something went wrong. Please try again.');
+                    btnText.classList.remove('d-none');
+                    btnLoader.classList.add('d-none');
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit. Please check your connection and try again.');
+                btnText.classList.remove('d-none');
+                btnLoader.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Copy Referral Link
+        function copyReferral() {
+            const referralInput = document.getElementById('referralLink');
+            referralInput.select();
+            referralInput.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(referralInput.value);
+            
+            // Show feedback
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check"></i>';
+            btn.classList.add('btn-success');
+            btn.classList.remove('btn-outline-dark');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-dark');
+            }, 2000);
+        }
+
+        // Plan Selection and Details Display
+        const planData = {
+            basic: {
+                name: 'Basic Plan',
+                price: '₦18k/month',
+                discount: '₦15.3k with 15% waitlist discount',
+                features: [
+                    'Up to 20 items/month',
+                    '1-2 pickups per month',
+                    '3-5 day turnaround',
+                    'Rollover: Up to 5 items'
+                ]
+            },
+            standard: {
+                name: 'Standard Plan',
+                price: '₦32k/month',
+                discount: '₦27.2k with 15% waitlist discount',
+                features: [
+                    'Up to 40 items/month',
+                    '2 pickups per month',
+                    '48-72 hour turnaround',
+                    'Rollover: Up to 10 items',
+                    'Free express: Once/month'
+                ]
+            },
+            family: {
+                name: 'Family Plan',
+                price: '₦63k/month',
+                discount: '₦53.55k with 15% waitlist discount',
+                features: [
+                    'Up to 80 items/month',
+                    'Unlimited pickups',
+                    'Priority turnaround',
+                    'Rollover: Up to 20 items',
+                    'Free express: Twice/month'
+                ]
+            },
+            custom: {
+                name: 'Custom Plan',
+                price: 'Custom Quote',
+                discount: 'Tailored pricing for your needs',
+                features: [
+                    'Bespoke service packages',
+                    'Corporate & bulk rates',
+                    'Hotels & hospitality',
+                    'Event & wedding services',
+                    'Dedicated account manager',
+                    'Custom pickup schedules'
+                ]
+            },
+            payg: {
+                name: 'Pay As You Go',
+                price: '₦900/item',
+                discount: 'No monthly subscription required',
+                features: [
+                    'Pay only for what you clean',
+                    'No commitment',
+                    'Standard 3-5 day turnaround',
+                    'Minimum order: ₦5,000',
+                    'Same quality service',
+                    'Perfect for occasional use'
+                ]
+            }
+        };
+
+        const planDetails = document.getElementById('planDetails');
+        const selectedPlanName = document.getElementById('selectedPlanName');
+        const selectedPlanPrice = document.getElementById('selectedPlanPrice');
+        const selectedPlanDiscount = document.getElementById('selectedPlanDiscount');
+        const selectedPlanFeatures = document.getElementById('selectedPlanFeatures');
+
+        document.querySelectorAll('.interest-tag input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Update selected styling
+                document.querySelectorAll('.interest-tag').forEach(tag => {
+                    tag.classList.remove('selected');
+                });
+                this.parentElement.classList.add('selected');
+
+                // Show and populate plan details
+                const plan = planData[this.value];
+                if (plan) {
+                    selectedPlanName.textContent = plan.name;
+                    selectedPlanPrice.textContent = plan.price;
+                    selectedPlanDiscount.textContent = plan.discount;
+                    selectedPlanFeatures.innerHTML = plan.features.map(f => 
+                        `<li><i class="bi bi-check2"></i> ${f}</li>`
+                    ).join('');
+                    planDetails.classList.remove('d-none');
+                }
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

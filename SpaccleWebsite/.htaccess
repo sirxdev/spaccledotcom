@@ -1,0 +1,58 @@
+# Spaccle URL Rewriting Rules
+# Place this file in the root directory of your website
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Remove .html extension from URLs
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^/]+)/?$ $1.html [L]
+
+# Handle waitlist referral links
+# Redirects /waitlist?ref=XXX to /waitlist.html?ref=XXX
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^waitlist$ waitlist.html [L,QSA]
+
+# Alternative: Pretty URLs for all pages
+# This allows accessing /waitlist instead of /waitlist.html
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule !.*\.html$ %{REQUEST_FILENAME}.html [L,QSA]
+
+# Enable compression for faster loading
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+</IfModule>
+
+# Browser caching for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect database file
+<Files "waitlist.db">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Protect API folder from direct access (optional - allows only POST/GET)
+<IfModule mod_rewrite.c>
+    RewriteRule ^api/database\.php$ - [F,L]
+</IfModule>

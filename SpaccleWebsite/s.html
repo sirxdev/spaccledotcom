@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaccle | Premium Laundry Service</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400&family=Outfit:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style3.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <span class="logo-symbol">S</span><span class="logo-text">PACCLE</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#how-it-works">Process</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a href="#contact" class="btn btn-primary-gradient shadow-sm">Schedule Pickup</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="hero-bg-symbol">S</div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right" data-aos-duration="1000">
+                    <span class="d-inline-block py-1 px-3 rounded-pill bg-light text-dark border mb-4 small tracking-wider text-uppercase fw-bold">
+                        <i class="bi bi-stars text-primary me-2"></i>Premium Fabric Care
+                    </span>
+                    <h1 class="display-1 mb-4">
+                        Laundry <br>
+                        <span class="text-gradient">Reimagined.</span>
+                    </h1>
+                    <p class="lead text-muted mb-5 pe-lg-5 fw-light">
+                        Experience the pinnacle of garment care. We combine advanced technology with artisanal attention to detail to keep your wardrobe pristine.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#contact" class="btn btn-primary-gradient btn-lg">Book Now</a>
+                        <a href="#services" class="btn btn-outline-dark btn-lg rounded-pill px-4 border-2">Explore Services</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 position-relative" data-aos="fade-left" data-aos-duration="1200">
+                    <div class="hero-image-wrapper">
+                        <img src="images/hero.jpg" alt="Premium Laundry Service" class="img-fluid">
+                    </div>
+                    <!-- Floating Elements -->
+                    <div class="floating-card card-top-right">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-2 text-success">
+                            <i class="bi bi-shield-check fs-4"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Guarantee</small>
+                            <span class="fw-bold">100% Care</span>
+                        </div>
+                    </div>
+                    <div class="floating-card card-bottom-left">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-2 text-primary">
+                            <i class="bi bi-clock-history fs-4"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Delivery</small>
+                            <span class="fw-bold">24h Turnaround</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features / Why Choose Us -->
+    <section class="py-5">
+        <div class="container py-5">
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="fs-1 text-primary"><i class="bi bi-droplet"></i></div>
+                        <div>
+                            <h4 class="mb-2">Eco-Friendly</h4>
+                            <p class="text-muted fw-light">We use biodegradable detergents that are tough on stains but gentle on the planet.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="fs-1 text-primary"><i class="bi bi-truck"></i></div>
+                        <div>
+                            <h4 class="mb-2">Free Pickup</h4>
+                            <p class="text-muted fw-light">Door-to-door service at no extra cost. We collect and deliver on your schedule.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="fs-1 text-primary"><i class="bi bi-gem"></i></div>
+                        <div>
+                            <h4 class="mb-2">Premium Care</h4>
+                            <p class="text-muted fw-light">Each garment is inspected and treated individually by our expert team.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-5 bg-light" id="services">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 mb-3">Our Services</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">Tailored solutions for every fabric type.</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-basket"></i>
+                        </div>
+                        <h3>Wash & Fold</h3>
+                        <p class="text-muted mb-4">Perfect for everyday clothes. We wash, dry, and neatly fold your laundry.</p>
+                        <a href="#" class="text-decoration-none fw-bold text-dark stretched-link">Learn More <i class="bi bi-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-suit-heart"></i>
+                        </div>
+                        <h3>Dry Cleaning</h3>
+                        <p class="text-muted mb-4">Specialized care for your delicate fabrics, suits, and dresses.</p>
+                        <a href="#" class="text-decoration-none fw-bold text-dark stretched-link">Learn More <i class="bi bi-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-house-check"></i>
+                        </div>
+                        <h3>Household Items</h3>
+                        <p class="text-muted mb-4">Deep cleaning for duvets, curtains, and oversized bedding items.</p>
+                        <a href="#" class="text-decoration-none fw-bold text-dark stretched-link">Learn More <i class="bi bi-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="py-5" id="how-it-works">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="display-5">How It Works</h2>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
+                    <div class="process-step">
+                        <span class="step-number">01</span>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon">
+                                <i class="bi bi-calendar-check fs-3 text-dark"></i>
+                            </div>
+                            <div class="step-line d-none d-md-block"></div>
+                        </div>
+                        <h5>Schedule</h5>
+                        <p class="text-muted small">Book a pickup online or via phone.</p>
+                    </div>
+                </div>
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
+                    <div class="process-step">
+                        <span class="step-number">02</span>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon">
+                                <i class="bi bi-truck fs-3 text-dark"></i>
+                            </div>
+                            <div class="step-line d-none d-md-block"></div>
+                        </div>
+                        <h5>Pickup</h5>
+                        <p class="text-muted small">We collect your bags at your doorstep.</p>
+                    </div>
+                </div>
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
+                    <div class="process-step">
+                        <span class="step-number">03</span>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon">
+                                <i class="bi bi-magic fs-3 text-dark"></i>
+                            </div>
+                            <div class="step-line d-none d-md-block"></div>
+                        </div>
+                        <h5>Clean</h5>
+                        <p class="text-muted small">Expert processing with premium detergents.</p>
+                    </div>
+                </div>
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
+                    <div class="process-step">
+                        <span class="step-number">04</span>
+                        <div class="step-icon-wrapper">
+                            <div class="step-icon">
+                                <i class="bi bi-box-seam fs-3 text-dark"></i>
+                            </div>
+                        </div>
+                        <h5>Deliver</h5>
+                        <p class="text-muted small">Fresh, clean clothes returned to you.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Stats Section -->
+    <section class="py-5 bg-dark text-white">
+        <div class="container py-4">
+            <div class="row g-4 text-center">
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="display-4 fw-bold text-gradient">5k+</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">Happy Customers</div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="display-4 fw-bold text-gradient">120k</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">Garments Cleaned</div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="display-4 fw-bold text-gradient">99%</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">Satisfaction Rate</div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="display-4 fw-bold text-gradient">24h</div>
+                    <div class="small opacity-75 text-uppercase tracking-wider">Fast Turnaround</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-5 bg-light" id="pricing">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 mb-3">Simple Pricing</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">Choose the plan that fits your lifestyle. No hidden fees.</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden">
+                        <div class="card-body p-5">
+                            <h5 class="fw-bold text-muted text-uppercase small mb-4">Basic</h5>
+                            <div class="d-flex align-items-baseline mb-4">
+                                <span class="display-4 fw-bold">₦18k</span>
+                                <span class="text-muted ms-2">/month</span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>Up to 20 items.</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> 1-2 Pickup per week.</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Turnaround: 3-5 Days</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>  Savings: 20-25 % vs PAYG</li>
+                                  <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Rollover: Up to 5 items</li>
+                                  
+                            </ul>
+                            <a href="#contact" class="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Choose Basic Plan</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card border-0 shadow-lg h-100 rounded-4 overflow-hidden position-relative">
+                        <div class="position-absolute top-0 start-0 w-100 h-1 bg-primary"></div>
+                        <div class="card-body p-5">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold text-primary text-uppercase small mb-0">Standard</h5>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">Popular</span>
+                            </div>
+                            <div class="d-flex align-items-baseline mb-4">
+                                <span class="display-4 fw-bold">₦32k</span>
+                                <span class="text-muted ms-2">/month</span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                      <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>Up to 40 items.</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Pickup 3 per week.</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Turnaround: 48-72 Hours</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i>  Savings: 20-25 %</li>
+                                  <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Rollover: Up to 10 items</li>
+                                  <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Free express: Once/month</li>
+                          </ul>
+                            <a href="#contact" class="btn btn-primary-gradient w-100 rounded-pill py-3 fw-bold">Choose Premium</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden">
+                        <div class="card-body p-5">
+                            <h5 class="fw-bold text-muted text-uppercase small mb-4">Family</h5>
+                            <div class="d-flex align-items-baseline mb-4">
+                                <span class="display-4 fw-bold">₦55k</span>
+                                <span class="text-muted ms-2">/month</span>
+                            </div>
+                            <ul class="list-unstyled mb-5 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Items: Up to 80 times</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Pickup: Unlimited</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Turnaround: Priority</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Savings : 35-40 %</li>
+                                <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Rollover: Up to 20 times</li>
+                                 <li class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-primary"></i> Free express: Twice/month</li>
+                            </ul>
+                            <a href="#contact" class="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Choose Family</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-5">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 mb-3">Client Stories</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="p-4 bg-white border rounded-4 shadow-sm h-100">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="mb-4 text-muted">"Spaccle has completely changed my weekends. No more laundry chores, and my clothes have never looked better. The pickup is always on time."</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light rounded-circle p-2" style="width: 50px; height: 50px;">
+                                <i class="bi bi-person-fill fs-4 text-muted"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Chioma A.</h6>
+                                <small class="text-muted">Lekki, Lagos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="p-4 bg-white border rounded-4 shadow-sm h-100">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="mb-4 text-muted">"The premium packaging makes me feel like I'm unboxing a gift every time. Professional service through and through. Highly recommended!"</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light rounded-circle p-2" style="width: 50px; height: 50px;">
+                                <i class="bi bi-person-fill fs-4 text-muted"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Tunde B.</h6>
+                                <small class="text-muted">Victoria Island</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="p-4 bg-white border rounded-4 shadow-sm h-100">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="mb-4 text-muted">"I trust them with my most delicate traditional wears. They know exactly how to handle expensive fabrics. Best laundry service in Nigeria."</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light rounded-circle p-2" style="width: 50px; height: 50px;">
+                                <i class="bi bi-person-fill fs-4 text-muted"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Sarah O.</h6>
+                                <small class="text-muted">Ikoyi</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-5 bg-light" id="faq">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5" data-aos="fade-up">
+                        <h2 class="display-5 mb-3">Common Questions</h2>
+                    </div>
+                    <div class="accordion accordion-flush shadow-sm rounded-4 overflow-hidden bg-white" id="accordionFAQ" data-aos="fade-up" data-aos-delay="100">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    How do I schedule a pickup?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    Simply click the "Schedule Pickup" button on our website or give us a call. You can choose a convenient time slot, and our rider will be at your doorstep.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    What is your turnaround time?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    Our standard service is 48 hours. However, we offer a 24-hour express service for urgent requests at a small additional fee.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                    Do you handle delicate fabrics?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    Absolutely. Our experts are trained to handle all types of fabrics, including silk, wool, velvet, and traditional Nigerian attires with intricate details.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                    Is there a minimum order value?
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body pb-4 text-muted">
+                                    Yes, our minimum order value for free pickup and delivery is ₦5,000. Orders below this amount may attract a small logistics fee.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-5" id="contact">
+        <div class="container py-5">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h2 class="display-4 mb-4">Get in Touch</h2>
+                    <p class="lead text-muted mb-5">Have a question or ready to schedule your first pickup? We're here to help.</p>
+                    
+                    <div class="d-flex align-items-center gap-4 mb-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                            <i class="bi bi-geo-alt fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Visit Us</h6>
+                            <p class="text-muted mb-0">12 Admiralty Way, Lekki Phase 1, Lagos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-4 mb-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                            <i class="bi bi-telephone fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Call Us</h6>
+                            <p class="text-muted mb-0">+234 800 SPACCLE</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                            <i class="bi bi-envelope fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Email Us</h6>
+                            <p class="text-muted mb-0">hello@spaccle.com</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5">
+                        <form>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-uppercase text-muted">Name</label>
+                                    <input type="text" class="form-control form-control-lg bg-light border-0" placeholder="John Doe">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-uppercase text-muted">Phone</label>
+                                    <input type="tel" class="form-control form-control-lg bg-light border-0" placeholder="+234...">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold text-uppercase text-muted">Email</label>
+                                    <input type="email" class="form-control form-control-lg bg-light border-0" placeholder="john@example.com">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold text-uppercase text-muted">Service Type</label>
+                                    <select class="form-select form-select-lg bg-light border-0">
+                                        <option>Laundry Service</option>
+                                        <option>Dry Cleaning</option>
+                                        <option>Household Items</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold text-uppercase text-muted">Message</label>
+                                    <textarea class="form-control form-control-lg bg-light border-0" rows="3" placeholder="Tell us more about your needs..."></textarea>
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <button class="btn btn-primary-gradient w-100 py-3 fw-bold shadow-sm">Send Message</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="bg-dark text-white rounded-5 p-5 text-center position-relative overflow-hidden" data-aos="zoom-in">
+                <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" style="background: var(--primary-gradient); filter: blur(100px);"></div>
+                <div class="position-relative z-1">
+                    <h2 class="display-4 fw-bold mb-4">Ready for the Spaccle Experience?</h2>
+                    <p class="lead mb-4 opacity-75">Join thousands of satisfied customers in Nigeria.</p>
+                    <a href="#contact" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row g-5 mb-5">
+                <div class="col-lg-4">
+                    <a href="#" class="footer-brand text-decoration-none text-dark">
+                        <span class="logo-symbol">S</span><span class="logo-text">PACCLE</span>
+                    </a>
+                    <p class="text-muted">
+                        Redefining fabric care with technology and craftsmanship. The premium choice for Nigeria's best dressed.
+                    </p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="#" class="text-dark fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-dark fs-5"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="text-dark fs-5"><i class="bi bi-facebook"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="mb-3 fw-bold">Company</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="#" class="text-decoration-none text-muted">About Us</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Careers</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Privacy</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="mb-3 fw-bold">Services</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="#" class="text-decoration-none text-muted">Dry Cleaning</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Laundry</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Ironing</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="mb-3 fw-bold">Newsletter</h6>
+                    <form class="d-flex gap-2">
+                        <input type="email" class="form-control" placeholder="Your email">
+                        <button class="btn btn-dark">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-top pt-4 text-center text-muted small">
+                &copy; 2024 Spaccle Laundry. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            once: true,
+            offset: 50,
+            duration: 800,
+        });
+    </script>
+</body>
+</html>

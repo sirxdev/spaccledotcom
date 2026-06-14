@@ -28,6 +28,7 @@ node_modules/
 # Android signing credentials — never commit these
 admin
 admin/
+admin.pub
 *.keystore
 signing-key-credentials.txt
 
