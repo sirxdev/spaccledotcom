@@ -842,53 +842,53 @@ const HomePage = (() => {
 
   function statusLabel(status) {
     const labels = {
-      scheduled:  ‘Scheduled’,
-      confirmed:  ‘Confirmed’,
-      assigned:   ‘Rider Assigned’,
-      picked_up:  ‘Picked Up’,
-      processing: ‘Processing’,
-      cleaning:   ‘Cleaning’,
-      ready:      ‘Ready for Delivery’,
-      in_transit: ‘Out for Delivery’,
-      delivered:  ‘Delivered’,
-      completed:  ‘Completed’,
-      cancelled:  ‘Cancelled’,
+      scheduled:  "Scheduled",
+      confirmed:  "Confirmed",
+      assigned:   "Rider Assigned",
+      picked_up:  "Picked Up",
+      processing: "Processing",
+      cleaning:   "Cleaning",
+      ready:      "Ready for Delivery",
+      in_transit: "Out for Delivery",
+      delivered:  "Delivered",
+      completed:  "Completed",
+      cancelled:  "Cancelled",
     };
-    return labels[status] || ‘In Progress’;
+    return labels[status] || "In Progress";
   }
 
   function statusSub(status) {
     const subs = {
-      scheduled:  ‘We’ll arrive within your pickup window.’,
-      confirmed:  ‘Your order is confirmed — we’ll pick it up soon.’,
-      assigned:   ‘A rider has been assigned and will collect your laundry.’,
-      picked_up:  ‘Your laundry is on the way to our facility.’,
-      processing: ‘Your items are being sorted and prepared.’,
-      cleaning:   ‘We’re cleaning, pressing, and quality-checking.’,
-      ready:      ‘Your laundry is ready — delivery is next.’,
-      in_transit: ‘Your clean laundry is on the way to you!’,
-      delivered:  ‘Delivered to your address. Enjoy fresh laundry!’,
-      completed:  ‘Order complete. Thank you for using Spaccle.’,
-      cancelled:  ‘This order has been cancelled.’,
+      scheduled:  "We'll arrive within your pickup window.",
+      confirmed:  "Your order is confirmed — we'll pick it up soon.",
+      assigned:   "A rider has been assigned and will collect your laundry.",
+      picked_up:  "Your laundry is on the way to our facility.",
+      processing: "Your items are being sorted and prepared.",
+      cleaning:   "We're cleaning, pressing, and quality-checking.",
+      ready:      "Your laundry is ready — delivery is next.",
+      in_transit: "Your clean laundry is on the way to you!",
+      delivered:  "Delivered to your address. Enjoy fresh laundry!",
+      completed:  "Order complete. Thank you for using Spaccle.",
+      cancelled:  "This order has been cancelled.",
     };
-    return subs[status] || ‘’;
+    return subs[status] || "";
   }
 
   function statusTitle(status) {
     const titles = {
-      scheduled:  ‘Pickup Scheduled’,
-      confirmed:  ‘Order Confirmed’,
-      assigned:   ‘Rider Assigned’,
-      picked_up:  ‘Picked Up’,
-      processing: ‘At Facility’,
-      cleaning:   ‘Cleaning’,
-      ready:      ‘Ready for Delivery’,
-      in_transit: ‘Out for Delivery’,
-      delivered:  ‘Delivered’,
-      completed:  ‘Completed’,
-      cancelled:  ‘Cancelled’,
+      scheduled:  "Pickup Scheduled",
+      confirmed:  "Order Confirmed",
+      assigned:   "Rider Assigned",
+      picked_up:  "Picked Up",
+      processing: "At Facility",
+      cleaning:   "Cleaning",
+      ready:      "Ready for Delivery",
+      in_transit: "Out for Delivery",
+      delivered:  "Delivered",
+      completed:  "Completed",
+      cancelled:  "Cancelled",
     };
-    return titles[status] || ‘In Progress’;
+    return titles[status] || "In Progress";
   }
 
   function isActive(order) {
