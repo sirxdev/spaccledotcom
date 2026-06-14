@@ -19,6 +19,16 @@ const HomePage = (() => {
 
   function init(data = {}) {
     user = data.user || SpaccleDB.getSession();
+    // Reset per-session state so a different user logging in starts clean
+    selectedOrderId = null;
+    supportOrderId = null;
+    selectedPlanId = null;
+    selectedSubPlanId = null;
+    subscription = null;
+    _lastKnownOrderStatus = null;
+    selectedRating = 0;
+    currentTicket = null;
+    appliedPromo = null;
     renderUser();
     if (!initialized) {
       setupBottomNav();
@@ -227,20 +237,83 @@ const HomePage = (() => {
   async function handleNewOrder() {
     supportOrderId = null;
     billingMode = 'payg';
+    appliedPromo = null;
+    selectedService = 'wash-fold';
+    document.querySelectorAll('.service-pill').forEach(p =>
+      p.classList.toggle('active', p.dataset.service === 'wash-fold'));
+    const promoInput = document.getElementById('promo-input');
+    if (promoInput) promoInput.value = '';
+    const promoStatus = document.getElementById('promo-status');
+    if (promoStatus) promoStatus.textContent = '';
     buildDatePicker();
     updateBillingUI();
     openSheet('sheet-schedule');
+    loadSavedAddresses();
+  }
+
+  async function loadSavedAddresses() {
+    const pillsEl = document.getElementById('saved-address-pills');
+    const addrInput = document.getElementById('pickup-address');
+    const saveBtn = document.getElementById('btn-save-address');
+    if (!pillsEl || !addrInput) return;
+
     try {
-      const s = await SpaccleDB.getPreference('app_settings', {});
-      if (s.autofillAddr !== false && user) {
-        const addrs = await SpaccleDB.getAddresses(user.userId);
+      const addrs = await SpaccleDB.getAddresses(user?.userId || user?._id);
+
+      if (addrs && addrs.length) {
+        pillsEl.style.display = 'flex';
+        pillsEl.innerHTML = '';
+        addrs.slice(0, 5).forEach(a => {
+          const label = a.label || `${a.street}, ${a.city}`.slice(0, 30);
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'saved-address-pill';
+          pill.textContent = label;
+          pill.addEventListener('click', () => {
+            addrInput.value = `${a.street}, ${a.city}`;
+            pillsEl.querySelectorAll('.saved-address-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            if (saveBtn) saveBtn.style.display = 'none';
+          });
+          pillsEl.appendChild(pill);
+        });
+
+        // Pre-fill default
         const def = addrs.find(a => a.isDefault) || addrs[0];
-        if (def) {
-          const el = document.getElementById('pickup-address');
-          if (el && !el.value) el.value = `${def.street}, ${def.city}`;
+        if (def && addrInput && !addrInput.value) {
+          addrInput.value = `${def.street}, ${def.city}`;
         }
+      } else {
+        pillsEl.style.display = 'none';
       }
-    } catch { }
+    } catch { pillsEl.style.display = 'none'; }
+
+    // Show "Save address" button when user types something not already saved
+    // Clone to remove any previously-attached listeners from earlier sheet opens
+    const freshInput = addrInput.cloneNode(true);
+    addrInput.replaceWith(freshInput);
+    freshInput.addEventListener('input', () => {
+      if (saveBtn) saveBtn.style.display = freshInput.value.trim() ? '' : 'none';
+    });
+
+    if (saveBtn) {
+      saveBtn.onclick = async () => {
+        const raw = freshInput.value.trim();
+        if (!raw) return;
+        const parts = raw.split(',').map(s => s.trim());
+        try {
+          await SpaccleDB.saveAddress(user?.userId || user?._id, {
+            street: parts[0] || raw,
+            city: parts.slice(1).join(', ') || '',
+            label: raw.slice(0, 30),
+            isDefault: false,
+          });
+          saveBtn.style.display = 'none';
+          showToast('Address saved');
+          loadSavedAddresses();
+        } catch { showToast('Could not save address'); }
+      };
+    }
   }
 
   function buildDatePicker() {
@@ -297,12 +370,14 @@ const HomePage = (() => {
       unsubscribeSync = null;
     }
     SpaccleDB.logout();
-    initialized = false;
     user = null;
     App.navigate('auth');
   }
 
   function setupSheets() {
+    // Hide all sheets at init so inactive ones never bleed through on mobile WebViews
+    document.querySelectorAll('.sheet').forEach(s => { s.style.display = 'none'; });
+
     const overlay = document.getElementById('sheet-overlay');
     overlay.addEventListener('click', closeAllSheets);
 
@@ -333,6 +408,13 @@ const HomePage = (() => {
     document.getElementById('btn-order-track').addEventListener('click', () => {
       closeAllSheets();
       switchTab('track');
+    });
+
+    document.getElementById('btn-order-track-map').addEventListener('click', openOrderMap);
+    document.getElementById('btn-order-map-close').addEventListener('click', closeOrderMap);
+    document.getElementById('btn-order-chat-rider').addEventListener('click', () => {
+      closeOrderMap();
+      openChatSheet();
     });
 
     document.getElementById('btn-order-support').addEventListener('click', () => {
@@ -408,22 +490,127 @@ const HomePage = (() => {
 
   function openSheet(sheetId) {
     const overlay = document.getElementById('sheet-overlay');
-    const sheets = document.querySelectorAll('.sheet');
-    sheets.forEach(s => {
-      s.classList.toggle('active', s.id === sheetId);
-      s.setAttribute('aria-hidden', s.id === sheetId ? 'false' : 'true');
+    document.querySelectorAll('.sheet').forEach(s => {
+      if (s.id === sheetId) {
+        s.style.display = '';                    // restore display before animating in
+        requestAnimationFrame(() => {            // one frame so display change registers
+          s.classList.add('active');
+          s.setAttribute('aria-hidden', 'false');
+        });
+      } else {
+        const wasActive = s.classList.contains('active');
+        s.classList.remove('active');
+        s.setAttribute('aria-hidden', 'true');
+        if (wasActive) {
+          setTimeout(() => { if (!s.classList.contains('active')) s.style.display = 'none'; }, 400);
+        } else {
+          s.style.display = 'none';
+        }
+      }
     });
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
   }
 
   function closeAllSheets() {
+    stopChatRefresh();
     document.getElementById('sheet-overlay').classList.remove('active');
     document.getElementById('sheet-overlay').setAttribute('aria-hidden', 'true');
     document.querySelectorAll('.sheet').forEach(s => {
       s.classList.remove('active');
       s.setAttribute('aria-hidden', 'true');
+      setTimeout(() => { if (!s.classList.contains('active')) s.style.display = 'none'; }, 400);
     });
+  }
+
+  async function openOrderMap() {
+    const order = selectedOrderId ? await SpaccleDB.getDocument(selectedOrderId) : null;
+    if (!order) { showToast('No active order'); return; }
+    
+    openSheet('sheet-order-map');
+    const mapEl = document.getElementById('order-map');
+    const loading = document.getElementById('order-map-loading');
+    const empty = document.getElementById('order-map-empty');
+    const pickupAddr = document.getElementById('order-map-pickup');
+    const deliveryAddr = document.getElementById('order-map-delivery');
+    
+    pickupAddr.textContent = order.pickupAddress || order.address || '-';
+    deliveryAddr.textContent = order.deliveryAddress || '-';
+    
+    loading.style.display = 'flex';
+    mapEl.style.display = 'none';
+    empty.style.display = 'none';
+    
+    try {
+      const cfg = await SpaccleDB.getPreference('integrations_config', null);
+      const key = (cfg?.mapsApiKey || getConfig().googleMaps?.apiKey || '').trim();
+      if (!key) {
+        loading.style.display = 'none';
+        empty.style.display = 'flex';
+        return;
+      }
+      
+      await loadGoogleMaps(key);
+      
+      const defaultCenter = { lat: 6.5244, lng: 3.3792 };
+      const map = new window.google.maps.Map(mapEl, {
+        center: defaultCenter,
+        zoom: 13,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        streetViewControl: false,
+      });
+      
+      let markers = [];
+      
+      if (order.pickupLat && order.pickupLng) {
+        const pickupMarker = new window.google.maps.Marker({
+          position: { lat: order.pickupLat, lng: order.pickupLng },
+          map,
+          title: 'Pickup Location',
+          icon: { path: window.google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: '#4A90E2', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }
+        });
+        markers.push(pickupMarker);
+      }
+      
+      if (order.deliveryLat && order.deliveryLng) {
+        const deliveryMarker = new window.google.maps.Marker({
+          position: { lat: order.deliveryLat, lng: order.deliveryLng },
+          map,
+          title: 'Delivery Location',
+          icon: { path: window.google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: '#06D6A0', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }
+        });
+        markers.push(deliveryMarker);
+      }
+      
+      if (order.riderLat && order.riderLng && (order.status === 'picked_up' || order.status === 'in_transit')) {
+        const riderMarker = new window.google.maps.Marker({
+          position: { lat: order.riderLat, lng: order.riderLng },
+          map,
+          title: 'Your Rider',
+          icon: { path: 'M12 2L4 11h3v8h10v-8h3L12 2z', scale: 1.2, fillColor: '#5B4FBE', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 1 }
+        });
+        markers.push(riderMarker);
+      }
+      
+      if (markers.length > 0) {
+        const bounds = new window.google.maps.LatLngBounds();
+        markers.forEach(m => bounds.extend(m.getPosition()));
+        map.fitBounds(bounds);
+      }
+      
+      mapEl.dataset.ready = 'true';
+      loading.style.display = 'none';
+      mapEl.style.display = '';
+    } catch (err) {
+      console.error('Map error:', err);
+      loading.style.display = 'none';
+      empty.style.display = 'flex';
+    }
+  }
+
+  function closeOrderMap() {
+    closeAllSheets();
   }
 
   function openSupport(orderId = null) {
@@ -479,16 +666,24 @@ const HomePage = (() => {
     }
 
     setButtonLoading(btn, true);
-    try {
-      if (billingMode === 'subscription') {
+
+    if (billingMode === 'subscription') {
+      try {
         await SpaccleDB.consumeSubscription({ userId: user.userId, itemsCount });
         await placeOrder({ userId: user.userId, day, time, address, notes, itemsCount });
-        return;
+      } catch (err) {
+        showToast('Could not schedule: ' + (err?.message || 'unknown error'));
+      } finally {
+        setButtonLoading(btn, false);
       }
+      return;
+    }
 
-      // PAYG: collect Paystack deposit first
+    // PAYG: collect Paystack deposit first
+    let pk, amountKobo, handler;
+    try {
       const cfg = await SpaccleDB.getPreference('integrations_config', null);
-      const pk = (cfg?.paystackPublicKey || getConfig().paystack?.publicKey || '').trim();
+      pk = (cfg?.paystackPublicKey || getConfig().paystack?.publicKey || '').trim();
       if (!pk) {
         showToast('Payment not configured — contact support');
         return;
@@ -498,9 +693,23 @@ const HomePage = (() => {
       const reference = `SPACCLE_PICKUP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
       const svcCfg = servicesConfig?.[selectedService] || {};
       const pricePerItem = svcCfg.pricePerItem || 900;
-      const amountKobo = applyPromoDiscount(itemsCount * pricePerItem) * 100;
+      amountKobo = applyPromoDiscount(itemsCount * pricePerItem) * 100;
 
-      const handler = window.PaystackPop.setup({
+      if (amountKobo <= 0) {
+        // Free order path
+        if (appliedPromo?.code) {
+          try { await SpaccleDB.redeemPromoCode(appliedPromo.code, user.userId); } catch {}
+        }
+        appliedPromo = null;
+        const pi = document.getElementById('promo-code');
+        const ps = document.getElementById('promo-status');
+        if (pi) pi.value = '';
+        if (ps) ps.textContent = '';
+        await placeOrder({ userId: user.userId, day, time, address, notes, itemsCount });
+        return;
+      }
+
+      handler = window.PaystackPop.setup({
         key: pk,
         email: user.email || 'guest@spaccle.com',
         amount: amountKobo,
@@ -522,13 +731,15 @@ const HomePage = (() => {
           setButtonLoading(btn, false);
         },
       });
-      handler.openIframe();
-      return; // button loading cleared in callback/onClose
     } catch (err) {
       showToast('Could not schedule: ' + (err?.message || 'unknown error'));
-    } finally {
       setButtonLoading(btn, false);
+      return;
     }
+
+    // Open iframe OUTSIDE try/finally so finally does not run here
+    handler.openIframe();
+    // button loading cleared in callback/onClose
   }
 
   async function placeOrder({ userId, day, time, address, notes, itemsCount, paystackRef = null }) {
@@ -631,39 +842,57 @@ const HomePage = (() => {
 
   function statusLabel(status) {
     const labels = {
-      scheduled: 'Scheduled',
-      picked_up: 'Picked Up',
-      cleaning: 'Cleaning',
-      ready: 'Ready',
-      delivered: 'Delivered',
+      scheduled:  ‘Scheduled’,
+      confirmed:  ‘Confirmed’,
+      assigned:   ‘Rider Assigned’,
+      picked_up:  ‘Picked Up’,
+      processing: ‘Processing’,
+      cleaning:   ‘Cleaning’,
+      ready:      ‘Ready for Delivery’,
+      in_transit: ‘Out for Delivery’,
+      delivered:  ‘Delivered’,
+      completed:  ‘Completed’,
+      cancelled:  ‘Cancelled’,
     };
-    return labels[status] || 'In Progress';
+    return labels[status] || ‘In Progress’;
   }
 
   function statusSub(status) {
     const subs = {
-      scheduled: 'We’ll arrive within your pickup window.',
-      picked_up: 'Your laundry is on the way to our facility.',
-      cleaning: 'We’re cleaning, pressing, and quality-checking.',
-      ready: 'Your laundry is ready — delivery is next.',
-      delivered: 'Delivered to your address.',
+      scheduled:  ‘We’ll arrive within your pickup window.’,
+      confirmed:  ‘Your order is confirmed — we’ll pick it up soon.’,
+      assigned:   ‘A rider has been assigned and will collect your laundry.’,
+      picked_up:  ‘Your laundry is on the way to our facility.’,
+      processing: ‘Your items are being sorted and prepared.’,
+      cleaning:   ‘We’re cleaning, pressing, and quality-checking.’,
+      ready:      ‘Your laundry is ready — delivery is next.’,
+      in_transit: ‘Your clean laundry is on the way to you!’,
+      delivered:  ‘Delivered to your address. Enjoy fresh laundry!’,
+      completed:  ‘Order complete. Thank you for using Spaccle.’,
+      cancelled:  ‘This order has been cancelled.’,
     };
-    return subs[status] || '';
+    return subs[status] || ‘’;
   }
 
   function statusTitle(status) {
     const titles = {
-      scheduled: 'Pickup Scheduled',
-      picked_up: 'Picked Up',
-      cleaning: 'Cleaning',
-      ready: 'Ready',
-      delivered: 'Delivered',
+      scheduled:  ‘Pickup Scheduled’,
+      confirmed:  ‘Order Confirmed’,
+      assigned:   ‘Rider Assigned’,
+      picked_up:  ‘Picked Up’,
+      processing: ‘At Facility’,
+      cleaning:   ‘Cleaning’,
+      ready:      ‘Ready for Delivery’,
+      in_transit: ‘Out for Delivery’,
+      delivered:  ‘Delivered’,
+      completed:  ‘Completed’,
+      cancelled:  ‘Cancelled’,
     };
-    return titles[status] || 'In Progress';
+    return titles[status] || ‘In Progress’;
   }
 
   function isActive(order) {
-    return order && !['delivered', 'cancelled'].includes(order.status);
+    return order && !['delivered', 'completed', 'cancelled'].includes(order.status);
   }
 
   async function refresh() {
@@ -676,7 +905,9 @@ const HomePage = (() => {
     renderTracking(activeOrder);
     renderSubscriptionUsageBar();
 
-    selectedOrderId = activeOrder?._id || selectedOrderId;
+    if (!document.getElementById('sheet-order')?.classList.contains('active')) {
+      selectedOrderId = activeOrder?._id || selectedOrderId;
+    }
   }
 
   function startAutoRefresh() {
@@ -711,11 +942,17 @@ const HomePage = (() => {
 
     const steps = Array.from(card.querySelectorAll('.order-track-step'));
     const map = {
-      scheduled: 0,
-      picked_up: 0,
-      cleaning: 1,
-      ready: 2,
-      delivered: 3,
+      scheduled:  0,
+      confirmed:  0,
+      assigned:   0,
+      picked_up:  1,
+      processing: 1,
+      cleaning:   1,
+      ready:      2,
+      in_transit: 2,
+      delivered:  3,
+      completed:  3,
+      cancelled:  0,
     };
     const activeIdx = map[order.status] ?? 0;
     steps.forEach((s, idx) => {
@@ -772,7 +1009,7 @@ const HomePage = (() => {
     selectedOrderId = orderId;
     try {
       const order = await SpaccleDB.getOrder(orderId);
-      const title = document.getElementById('order-sheet-title');
+      const title = document.getElementById('sheet-order-title');
       title.textContent = order.publicId || 'SP-000000';
       const detail = document.getElementById('order-detail');
       detail.innerHTML = renderOrderDetailHtml(order);
@@ -785,8 +1022,14 @@ const HomePage = (() => {
         cancelBtn.onclick = () => handleCancelOrder(order._id);
       }
       if (reorderBtn) {
-        reorderBtn.style.display = order.status === 'delivered' ? '' : 'none';
+        reorderBtn.style.display = ['delivered', 'completed'].includes(order.status) ? '' : 'none';
         reorderBtn.onclick = () => handleReorder(order);
+      }
+      const rateBtn = document.getElementById('btn-order-rate');
+      if (rateBtn) {
+        const canRate = ['delivered', 'completed'].includes(order.status) && !order.rating;
+        rateBtn.style.display = canRate ? '' : 'none';
+        rateBtn.onclick = () => openRatingSheet(order);
       }
       openSheet('sheet-order');
     } catch {
@@ -817,6 +1060,9 @@ const HomePage = (() => {
       <div class="order-detail__row"><strong>Service:</strong> ${escapeHtml(serviceName(order.service))}</div>
       <div class="order-detail__row"><strong>Pickup:</strong> ${escapeHtml(`${order.pickupDay || '—'}, ${order.pickupTime || '—'}`)}</div>
       <div class="order-detail__row"><strong>Address:</strong> ${escapeHtml(order.address || '—')}</div>
+      <div class="order-detail__row"><strong>Items:</strong> ${escapeHtml(String(order.itemsCount || '—'))}</div>
+      <div class="order-detail__row"><strong>Amount:</strong> ${order.amountPaid ? '₦' + Number(order.amountPaid).toLocaleString() : '—'}</div>
+      <div class="order-detail__row"><strong>Rider:</strong> ${escapeHtml(order.assignedDriver || order.riderId || '—')}</div>
       <div class="order-detail__row"><strong>Status:</strong> ${escapeHtml(statusLabel(order.status))}</div>
       <div style="height:12px"></div>
       ${timeline}
@@ -856,7 +1102,11 @@ const HomePage = (() => {
     document.getElementById('track-order-id').textContent = order.publicId || 'SP-000000';
     document.getElementById('track-status-title').textContent = statusTitle(order.status);
     document.getElementById('track-status-sub').textContent = statusSub(order.status);
-    document.getElementById('track-status-pill').textContent = statusLabel(order.status);
+    const pillEl = document.getElementById('track-status-pill');
+    if (pillEl) {
+      pillEl.textContent = statusLabel(order.status);
+      pillEl.className = 'track-card__pill status-pill status-pill--' + (order.status || 'scheduled');
+    }
     document.getElementById('track-pickup').textContent = `${order.pickupDay || '—'}, ${order.pickupTime || '—'}`;
     document.getElementById('track-ready').textContent = estimateReady(order);
 
@@ -865,13 +1115,13 @@ const HomePage = (() => {
     const timelineEl = document.getElementById('track-timeline');
     timelineEl.innerHTML = '';
     const flow = [
-      { status: 'scheduled', label: 'Scheduled', sub: 'Pickup window confirmed.' },
-      { status: 'picked_up', label: 'Picked up', sub: 'Driver collected your laundry.' },
-      { status: 'cleaning', label: 'Cleaning', sub: 'Cleaning + quality check.' },
-      { status: 'ready', label: 'Ready', sub: 'Ready for delivery.' },
-      { status: 'delivered', label: 'Delivered', sub: 'Delivered to your address.' },
+      { statuses: ['scheduled', 'confirmed'],              label: 'Scheduled',   sub: 'Pickup window confirmed.' },
+      { statuses: ['assigned', 'picked_up'],               label: 'Picked up',   sub: 'Driver collected your laundry.' },
+      { statuses: ['processing', 'cleaning'],              label: 'Cleaning',    sub: 'Cleaning + quality check.' },
+      { statuses: ['ready', 'in_transit'],                 label: 'Out for Delivery', sub: 'On the way to you.' },
+      { statuses: ['delivered', 'completed'],              label: 'Delivered',   sub: 'Delivered to your address.' },
     ];
-    const idx = flow.findIndex(s => s.status === order.status);
+    const idx = flow.findIndex(s => s.statuses.includes(order.status));
 
     flow.forEach((step, i) => {
       const item = document.createElement('div');
@@ -905,8 +1155,8 @@ const HomePage = (() => {
     if (!order?.createdAt) return '—';
     const created = Date.parse(order.createdAt);
     if (!created) return '—';
-    const readyAt = new Date(created + 60_000);
-    return readyAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    const readyAt = new Date(created + 24 * 60 * 60 * 1000);
+    return readyAt.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   }
 
   async function handleAdvanceStatus() {
@@ -925,9 +1175,9 @@ const HomePage = (() => {
     }
   }
 
-  function setBillingMode(mode) {
+  async function setBillingMode(mode) {
     billingMode = mode === 'subscription' ? 'subscription' : 'payg';
-    updateBillingUI();
+    await updateBillingUI();
   }
 
   async function updateBillingUI() {
@@ -1062,7 +1312,9 @@ const HomePage = (() => {
       if (current) {
         const ren = subscription.renewAt ? formatTime(subscription.renewAt) : '';
         const picks = subscription.pickupsRemaining == null ? 'Unlimited' : String(subscription.pickupsRemaining);
-        current.textContent = `Active: ${subscription.planId} • Items left: ${subscription.itemsRemaining + subscription.rolloverRemaining} • Pickups left: ${picks} • Renew: ${ren}`;
+        const planName = subscription.planName || subscription.planId?.replace(/^plan_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Plan';
+        const itemsLeft = (Number(subscription.itemsRemaining) || 0) + (Number(subscription.rolloverRemaining) || 0);
+        current.textContent = `Active: ${planName} • Items left: ${itemsLeft} • Pickups left: ${picks} • Renew: ${ren}`;
       }
     } else {
       if (current) current.textContent = 'No active subscription.';
@@ -1121,8 +1373,12 @@ const HomePage = (() => {
 
   async function handleSubscribePay() {
     if (!user) return;
+    const freshSub = await SpaccleDB.getSubscription(user.userId);
+    if (freshSub?.status === 'active') { showToast('You already have an active subscription'); return; }
     const btn = document.getElementById('btn-subscribe-pay');
     setButtonLoading(btn, true);
+
+    let handler;
     try {
       const allPlans = await SpaccleDB.listPlans({ includeInactive: false });
       const selected = allPlans.find(p => p._id === selectedSubPlanId);
@@ -1144,7 +1400,7 @@ const HomePage = (() => {
       const amountNaira = selected.waitlistPrice || selected.price;
       const amountKobo = Math.round(Number(amountNaira) * 100);
 
-      const handler = window.PaystackPop.setup({
+      handler = window.PaystackPop.setup({
         key: pk,
         email,
         amount: amountKobo,
@@ -1164,14 +1420,18 @@ const HomePage = (() => {
         },
         onClose: function() {
           showToast('Payment closed');
+          setButtonLoading(btn, false);
         },
       });
-      handler.openIframe();
     } catch (err) {
       showToast('Could not subscribe: ' + (err?.message || 'unknown error'));
-    } finally {
       setButtonLoading(btn, false);
+      return;
     }
+
+    // Open iframe OUTSIDE try/finally so finally does not immediately re-enable the button
+    handler.openIframe();
+    // button loading cleared in callback/onClose
   }
 
   function normalizeDbName(name) {
@@ -1207,8 +1467,7 @@ const HomePage = (() => {
     const cfg = await SpaccleDB.getPreference('integrations_config', null);
     const key = (cfg?.mapsApiKey || getConfig().googleMaps?.apiKey || '').trim();
     if (!key) {
-      showToast('Add your Maps API key in Integrations');
-      openIntegrations();
+      showToast('Add your Maps API key in Admin → Config');
       return;
     }
 
@@ -1308,8 +1567,10 @@ const HomePage = (() => {
       user = SpaccleDB.getSession();
       document.getElementById('profile-name').textContent = updated.name;
       document.getElementById('home-greeting-name').textContent = (updated.name || '').split(' ')[0];
-      document.getElementById('home-avatar-letter').textContent = updated.name[0].toUpperCase();
-      document.getElementById('profile-avatar-lg').textContent = updated.name[0].toUpperCase();
+      if (updated.name?.length) {
+        document.getElementById('home-avatar-letter').textContent = updated.name[0].toUpperCase();
+        document.getElementById('profile-avatar-lg').textContent = updated.name[0].toUpperCase();
+      }
       closeAllSheets();
       showToast('Profile updated');
     } catch {
@@ -1849,9 +2110,28 @@ const HomePage = (() => {
     }, 2600);
   }
 
+  function showConfirm(message) {
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.className = 'spaccle-confirm-overlay';
+      overlay.innerHTML =
+        `<div class="spaccle-confirm-box">` +
+        `<p class="spaccle-confirm-msg">${message}</p>` +
+        `<div class="spaccle-confirm-row">` +
+        `<button class="btn btn--ghost spaccle-confirm-cancel">Cancel</button>` +
+        `<button class="btn btn--warn spaccle-confirm-ok">Confirm</button>` +
+        `</div></div>`;
+      document.body.appendChild(overlay);
+      const cleanup = val => { overlay.remove(); resolve(val); };
+      overlay.querySelector('.spaccle-confirm-ok').addEventListener('click', () => cleanup(true));
+      overlay.querySelector('.spaccle-confirm-cancel').addEventListener('click', () => cleanup(false));
+      overlay.addEventListener('click', e => { if (e.target === overlay) cleanup(false); });
+    });
+  }
+
   /* ── Cancel order (customer) ────────────────────────────────────── */
   async function handleCancelOrder(orderId) {
-    if (!confirm('Cancel this order? This cannot be undone.')) return;
+    if (!await showConfirm('Cancel this order? This cannot be undone.')) return;
     try {
       await SpaccleDB.setOrderStatus(orderId, 'cancelled');
       closeAllSheets();
@@ -1866,7 +2146,7 @@ const HomePage = (() => {
   async function handleCancelSubscription() {
     if (!user) { closeAllSheets(); return; }
     if (!subscription || subscription.status !== 'active') { closeAllSheets(); return; }
-    if (!confirm('Cancel your subscription? You will lose access at the end of this billing period.')) return;
+    if (!await showConfirm('Cancel your subscription? You will lose access at the end of this billing period.')) return;
     try {
       await SpaccleDB.cancelSubscription(user.userId);
       subscription = null;
@@ -1885,13 +2165,18 @@ const HomePage = (() => {
     try {
       const expired = await SpaccleDB.checkSubscriptionRenewal(user.userId);
       if (!expired) return;
-      const renew = confirm('Your subscription has expired. Renew now to keep your monthly benefits?');
+      const renew = await showConfirm('Your subscription has expired. Renew now to keep your monthly benefits?');
       if (renew) await openSubscriptionSheet();
     } catch { }
   }
 
   /* ── Re-order ────────────────────────────────────────────────────── */
   function handleReorder(order) {
+    appliedPromo = null;
+    const pi2 = document.getElementById('promo-code');
+    const ps2 = document.getElementById('promo-status');
+    if (pi2) pi2.value = '';
+    if (ps2) ps2.textContent = '';
     closeAllSheets();
     selectedService = order.service || selectedService;
     document.querySelectorAll('.service-pill').forEach(p =>
@@ -1900,6 +2185,7 @@ const HomePage = (() => {
     buildDatePicker();
     updateBillingUI();
     openSheet('sheet-schedule');
+    loadSavedAddresses();
     setTimeout(() => {
       const addrEl = document.getElementById('pickup-address');
       const timeEl = document.getElementById('pickup-time');
@@ -1929,7 +2215,7 @@ const HomePage = (() => {
           <span style="font-weight:700;color:${colour}">${used} / ${included}</span>
         </div>
         <div class="sub-usage-track">
-          <div class="sub-usage-fill" style="width:${pct}%;background:${colour}"></div>
+          <div class="sub-usage-fill" style="transform:scaleX(${pct / 100});background:${colour}"></div>
         </div>`;
     } catch { }
   }
@@ -2036,6 +2322,7 @@ const HomePage = (() => {
   let currentTicket = null;
 
   async function openMyTickets() {
+    if (!user) return;
     openSheet('sheet-my-tickets');
     const list = document.getElementById('my-tickets-list');
     list.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:24px 0">Loading…</div>';
@@ -2072,7 +2359,7 @@ const HomePage = (() => {
 
   async function openTicketThread(ticket) {
     currentTicket = ticket;
-    document.getElementById('ticket-thread-subject').textContent = ticket.subject || 'Support Ticket';
+    document.getElementById('sheet-ticket-thread-title').textContent = ticket.subject || 'Support Ticket';
     document.getElementById('ticket-thread-status').textContent =
       ticket.status === 'resolved' ? '✓ This ticket has been resolved.' : 'Status: Open';
 
@@ -2301,6 +2588,8 @@ const HomePage = (() => {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text) return;
+    const btn = document.getElementById('btn-chat-send');
+    btn.disabled = true;
     input.value = '';
     try {
       const msg = await SpaccleDB.createChatMessage({ userId: user.userId, text, fromAdmin: false });
@@ -2309,12 +2598,14 @@ const HomePage = (() => {
       container.scrollTop = container.scrollHeight;
     } catch {
       showToast('Could not send message');
+    } finally {
+      btn.disabled = false;
     }
   }
 
   /* ── Legal reader ────────────────────────────────────────────────── */
   async function openLegalSheet(type) {
-    const titleEl = document.getElementById('legal-sheet-title');
+    const titleEl = document.getElementById('sheet-legal-title');
     const contentEl = document.getElementById('legal-content');
     titleEl.textContent = type === 'terms' ? 'Terms of Service' : 'Privacy Policy';
     contentEl.innerHTML = '<p style="color:#aaa;font-size:13px">Loading…</p>';

@@ -168,3 +168,257 @@
     padding-bottom: 18px;
   }
 }
+
+/* ── Role Select Screen ─────────────────────────────────────── */
+.page--role-select {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 20px) var(--gutter) env(safe-area-inset-bottom, 24px);
+}
+
+.role-select__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.role-select__header {
+  text-align: center;
+  padding: 28px 0 28px;
+}
+
+.role-select__title {
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 800;
+  color: var(--text-1);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.role-select__sub {
+  margin-top: 10px;
+  font-size: clamp(14px, 2.2vw, 16px);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.role-select__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+/* ── Base role card ── */
+.role-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 22px 20px;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-smooth), box-shadow 0.2s var(--ease-smooth);
+  text-align: left;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+}
+
+.role-card:active {
+  transform: scale(0.975);
+}
+
+.role-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.role-card__icon {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.role-card__badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  line-height: 1;
+}
+
+.role-card__title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+
+.role-card__desc {
+  font-size: 14px;
+  line-height: 1.58;
+  margin-bottom: 18px;
+}
+
+.role-card__features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.role-card__features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.role-card__features li::before {
+  content: '✓';
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  line-height: 20px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  display: block;
+}
+
+.role-card__cta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  border-top: 1px solid transparent;
+  padding-top: 16px;
+  margin-top: auto;
+  transition: gap 0.2s var(--ease-smooth);
+}
+
+.role-card:active .role-card__cta {
+  gap: 11px;
+}
+
+/* ── Customer card ── */
+.role-card--customer {
+  background: var(--surface);
+  border-color: rgba(74, 144, 226, 0.22);
+  box-shadow: 0 4px 20px rgba(74, 144, 226, 0.08);
+}
+
+.role-card--customer:active {
+  background: rgba(74, 144, 226, 0.03);
+}
+
+.role-card--customer .role-card__badge--customer {
+  background: rgba(74, 144, 226, 0.12);
+  color: #3A7BD5;
+}
+
+.role-card--customer .role-card__title {
+  color: var(--text-1);
+}
+
+.role-card--customer .role-card__desc {
+  color: var(--text-2);
+}
+
+.role-card--customer .role-card__features li {
+  color: var(--text-2);
+}
+
+.role-card--customer .role-card__features li::before {
+  background: rgba(74, 144, 226, 0.13);
+  color: #3A7BD5;
+}
+
+.role-card--customer .role-card__cta {
+  color: #3A7BD5;
+  border-top-color: rgba(74, 144, 226, 0.12);
+}
+
+/* ── Rider card (dark) ── */
+.role-card--rider {
+  background: linear-gradient(148deg, #0D2B25 0%, #1C4D42 60%, #0F3A31 100%);
+  border-color: rgba(6, 214, 160, 0.2);
+  box-shadow: 0 8px 32px rgba(6, 214, 160, 0.14);
+}
+
+.role-card--rider:active {
+  filter: brightness(1.1);
+}
+
+.role-card--rider .role-card__icon {
+  background: rgba(6, 214, 160, 0.14);
+}
+
+.role-card--rider .role-card__badge--rider {
+  background: rgba(6, 214, 160, 0.18);
+  color: #06D6A0;
+}
+
+.role-card--rider .role-card__title {
+  color: #FFFFFF;
+}
+
+.role-card--rider .role-card__desc {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.role-card--rider .role-card__features li {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.role-card--rider .role-card__features li::before {
+  background: rgba(6, 214, 160, 0.18);
+  color: #06D6A0;
+}
+
+.role-card--rider .role-card__cta {
+  color: #06D6A0;
+  border-top-color: rgba(6, 214, 160, 0.15);
+}
+
+/* ── Footer ── */
+.role-select__footer {
+  padding-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (orientation: landscape) and (min-width: 600px) {
+  .role-select__header {
+    padding: 16px 0 20px;
+  }
+
+  .role-select__cards {
+    flex-direction: row;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .role-card {
+    flex: 1;
+  }
+}

@@ -92,7 +92,7 @@ const SpaccleDB = (() => {
     const userDoc = {
       _id: userId,
       type: 'user',
-      role: role || 'user',
+      role: role || 'customer',
       name: name.trim(),
       email: emailLower,
       phone: (phone || '').trim(),
@@ -135,7 +135,7 @@ const SpaccleDB = (() => {
       userId: userDoc._id,
       name: userDoc.name,
       email: userDoc.email,
-      role: userDoc.role || 'user',
+      role: userDoc.role || 'customer',
       loginAt: new Date().toISOString(),
     };
 
@@ -143,7 +143,7 @@ const SpaccleDB = (() => {
     return session;
   }
 
-  async function ensureAdminUser({ email, password, name }) {
+async function ensureAdminUser({ email, password, name }) {
     const emailLower = email.toLowerCase().trim();
     const existingId = 'user_email_' + emailLower.replace(/[^a-z0-9]/g, '_');
     try {
@@ -156,6 +156,23 @@ const SpaccleDB = (() => {
       if (e.status !== 404) return;
       try {
         await createUser({ name: name || 'Admin', email: emailLower, phone: '', password, recoveryQuestion: '', recoveryAnswer: '', role: 'admin' });
+      } catch {}
+    }
+  }
+
+  async function ensureRiderUser({ email, password, name, phone }) {
+    const emailLower = email.toLowerCase().trim();
+    const existingId = 'user_email_' + emailLower.replace(/[^a-z0-9]/g, '_');
+    try {
+      const idx = await db.get(existingId);
+      const userDoc = await db.get(idx.userId);
+      if (userDoc.role !== 'rider') {
+        await db.put({ ...userDoc, role: 'rider', updatedAt: new Date().toISOString() });
+      }
+    } catch (e) {
+      if (e.status !== 404) return;
+      try {
+        await createUser({ name: name || 'Rider', email: emailLower, phone: phone || '', password, recoveryQuestion: '', recoveryAnswer: '', role: 'rider' });
       } catch {}
     }
   }
@@ -302,12 +319,17 @@ const SpaccleDB = (() => {
 
   async function listAllOrders() {
     const res = await db.allDocs({ include_docs: true, startkey: 'order_\uffff', endkey: 'order_', descending: true });
-    return res.rows.map(r => r.doc).filter(Boolean);
+    return res.rows.map(r => r.doc).filter(d => d && d.type === 'order');
   }
 
-  async function listAllUsers() {
-    const res = await db.allDocs({ include_docs: true, startkey: 'user_', endkey: 'user_\uffff' });
+async function listAllUsers() {
+    const res = await db.allDocs({ include_docs: true });
     return res.rows.map(r => r.doc).filter(d => d && d.type === 'user');
+  }
+
+  async function listAllRiders() {
+    const users = await listAllUsers();
+    return users.filter(u => u.role === 'rider');
   }
 
   async function listAllSubscriptions() {
@@ -322,6 +344,38 @@ const SpaccleDB = (() => {
     return res.rows.map(r => r.doc).filter(Boolean);
   }
 
+  async function getRiderOrders() {
+    const res = await db.allDocs({ include_docs: true, startkey: 'order_\uffff', endkey: 'order_', descending: true });
+    const orders = res.rows.map(r => r.doc).filter(d => d && d.type === 'order');
+    return orders;
+  }
+
+  async function updateOrderStatus(orderId, status, meta = {}) {
+    const doc = await db.get(orderId);
+    const nowIso = new Date().toISOString();
+    const events = Array.isArray(doc.events) ? doc.events.slice() : [];
+    events.push({ status, at: nowIso, ...meta });
+    const updated = { ...doc, status, events, updatedAt: nowIso, ...meta };
+    await db.put(updated);
+    return updated;
+  }
+
+  async function addTip(orderId, amount) {
+    const doc = await db.get(orderId);
+    const nowIso = new Date().toISOString();
+    const updated = { ...doc, tip: amount, tipAt: nowIso, updatedAt: nowIso };
+    await db.put(updated);
+    return updated;
+  }
+
+  async function assignRider(orderId, riderId) {
+    const doc = await db.get(orderId);
+    const nowIso = new Date().toISOString();
+    const updated = { ...doc, riderId, status: 'assigned', updatedAt: nowIso };
+    await db.put(updated);
+    return updated;
+  }
+
   async function listAllSupportTickets() {
     const res = await db.allDocs({ include_docs: true, startkey: 'ticket_\uffff', endkey: 'ticket_', descending: true });
     return res.rows.map(r => r.doc).filter(Boolean);
@@ -333,7 +387,7 @@ const SpaccleDB = (() => {
   }
 
   function isOrderActive(order) {
-    return order && !['delivered', 'cancelled'].includes(order.status);
+    return order && !['delivered', 'completed', 'cancelled'].includes(order.status);
   }
 
   async function getActiveOrder(userId) {
@@ -342,7 +396,7 @@ const SpaccleDB = (() => {
   }
 
   function nextStatus(current) {
-    const flow = ['scheduled', 'picked_up', 'cleaning', 'ready', 'delivered'];
+    const flow = ['scheduled', 'confirmed', 'assigned', 'picked_up', 'processing', 'cleaning', 'ready', 'in_transit', 'delivered', 'completed'];
     const idx = flow.indexOf(current);
     if (idx === -1) return current;
     return flow[Math.min(idx + 1, flow.length - 1)];
@@ -360,6 +414,9 @@ const SpaccleDB = (() => {
 
   async function advanceOrder(orderId) {
     const doc = await db.get(orderId);
+    if (['completed', 'cancelled'].includes(doc.status)) {
+      throw new Error('ORDER_IS_TERMINAL');
+    }
     const status = nextStatus(doc.status);
     if (status === doc.status) return doc;
     return setOrderStatus(orderId, status);
@@ -601,7 +658,16 @@ const SpaccleDB = (() => {
   async function setRecurringPickup(userId, schedule) {
     if (!userId) throw new Error('MISSING_USER');
     const docId = subscriptionDocId(userId);
-    const sub = await db.get(docId);
+    let sub;
+    try {
+      sub = await db.get(docId);
+    } catch (e) {
+      if (e.status === 404) {
+        sub = { _id: docId, type: 'subscription', userId };
+      } else {
+        throw e;
+      }
+    }
     await db.put({ ...sub, recurringPickup: schedule, updatedAt: new Date().toISOString() });
   }
 
@@ -682,10 +748,10 @@ const SpaccleDB = (() => {
     if (!userId) throw new Error('MISSING_USER');
     const doc = await db.get(userId);
     const currentHash = await hashPassword(currentPassword, doc.salt);
-    if (currentHash !== doc.password) throw new Error('WRONG_PASSWORD');
+    if (currentHash !== doc.passwordHash) throw new Error('WRONG_PASSWORD');
     const newSalt = generateSalt();
     const newHash = await hashPassword(newPassword, newSalt);
-    await db.put({ ...doc, password: newHash, salt: newSalt, updatedAt: new Date().toISOString() });
+    await db.put({ ...doc, passwordHash: newHash, salt: newSalt, updatedAt: new Date().toISOString() });
   }
 
   /* ── Promo / discount codes ─────────────────────────────────────── */
@@ -721,18 +787,57 @@ const SpaccleDB = (() => {
     return res.rows.map(r => r.doc).filter(d => d && d.type === 'promo_code');
   }
 
-  /* ── Driver assignment ──────────────────────────────────────────── */
+  /* ── Driver/rider assignment ────────────────────────────────── */
   async function assignDriver(orderId, driverName) {
     const doc = await db.get(orderId);
     await db.put({ ...doc, assignedDriver: driverName || null, updatedAt: new Date().toISOString() });
   }
 
+  async function assignRiderToOrder(orderId, riderId = null, riderName = null) {
+    const doc = await db.get(orderId);
+    const nowIso = new Date().toISOString();
+    await db.put({
+      ...doc,
+      riderId: riderId || null,
+      assignedDriver: riderName || null,
+      status: riderId || riderName ? 'assigned' : doc.status,
+      assignedAt: nowIso,
+      updatedAt: nowIso
+    });
+    if (riderId || riderName) {
+      await createNotification({
+        title: 'New Order Assigned',
+        message: `You have been assigned to order ${doc.orderId || orderId.slice(-6)}. Tap to view details.`,
+        riderId: riderId
+      });
+    }
+  }
+
   /* ── Broadcasts ─────────────────────────────────────────────────── */
-  async function createBroadcast({ title, message }) {
+  async function createBroadcast({ title, message, riderId = null }) {
     const id = `broadcast_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const doc = { _id: id, type: 'broadcast', title, message, createdAt: new Date().toISOString() };
+    const doc = { _id: id, type: 'broadcast', title, message, riderId, createdAt: new Date().toISOString() };
     await db.put(doc);
     return doc;
+  }
+
+  async function createNotification({ title, message, riderId = null, orderId = null }) {
+    const id = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const doc = { _id: id, type: 'notification', title, message, riderId, orderId, read: false, createdAt: new Date().toISOString() };
+    await db.put(doc);
+    return doc;
+  }
+
+  async function listAllNotifications() {
+    const res = await db.allDocs({ include_docs: true, startkey: 'notif_', endkey: 'notif_\uffff', descending: true });
+    return res.rows.map(r => r.doc).filter(d => d && d.type === 'notification');
+  }
+
+  async function markNotificationRead(notifId) {
+    try {
+      const doc = await db.get(notifId);
+      await db.put({ ...doc, read: true });
+    } catch {}
   }
 
   async function listNewBroadcasts(sinceIso) {
@@ -973,6 +1078,43 @@ const SpaccleDB = (() => {
     return db.put(doc);
   }
 
+  /* ── Rider payout requests ──────────────────────────────────────── */
+  function payoutId(riderId) {
+    return `payout_${riderId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  }
+
+  async function createPayoutRequest({ riderId, riderName, amount }) {
+    if (!riderId) throw new Error('MISSING_RIDER');
+    if (!amount || amount < 1) throw new Error('INVALID_AMOUNT');
+    const nowIso = new Date().toISOString();
+    const doc = {
+      _id: payoutId(riderId),
+      type: 'payout_request',
+      riderId,
+      riderName: riderName || '',
+      amount: Number(amount),
+      status: 'pending',
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    await db.put(doc);
+    return doc;
+  }
+
+  async function getRiderPayoutRequests(riderId) {
+    if (!riderId) return [];
+    const prefix = `payout_${riderId}_`;
+    const res = await db.allDocs({ include_docs: true, startkey: prefix + '￿', endkey: prefix, descending: true });
+    return res.rows.map(r => r.doc).filter(d => d && d.type === 'payout_request');
+  }
+
+  async function updatePayoutStatus(payoutId, status) {
+    const doc = await db.get(payoutId);
+    const updated = { ...doc, status, updatedAt: new Date().toISOString() };
+    await db.put(updated);
+    return updated;
+  }
+
   /* ── Live changes feed ──────────────────────────────────────────── */
   let _changesHandler = null;
 
@@ -994,6 +1136,7 @@ const SpaccleDB = (() => {
     createUser,
     loginUser,
     ensureAdminUser,
+    ensureRiderUser,
     getSession,
     logout,
     getRecoveryQuestion,
@@ -1017,8 +1160,14 @@ const SpaccleDB = (() => {
     listAllSupportTickets,
     setTicketStatus,
     listAllUsers,
+    listAllRiders,
     listAllSubscriptions,
     getOrdersByUser,
+    getRiderOrders,
+    updateOrderStatus,
+    addTip,
+    assignRider,
+    onSyncStateChange,
     upsertPlan,
     listPlans,
     ensureDefaultPlans,
@@ -1033,7 +1182,6 @@ const SpaccleDB = (() => {
     startSync,
     stopSync,
     getSyncState,
-    onSyncStateChange,
     ensureDefaultItemPricing,
     getItemPricing,
     saveItemPricing,
@@ -1053,7 +1201,11 @@ const SpaccleDB = (() => {
     redeemPromoCode,
     listAllPromoCodes,
     assignDriver,
+    assignRiderToOrder,
     createBroadcast,
+    createNotification,
+    listAllNotifications,
+    markNotificationRead,
     listNewBroadcasts,
     markBroadcastSeen,
     listTicketsByUser,
@@ -1063,5 +1215,8 @@ const SpaccleDB = (() => {
     stopWatchChanges,
     getDocument,
     saveDocument,
+    createPayoutRequest,
+    getRiderPayoutRequests,
+    updatePayoutStatus,
   };
 })();

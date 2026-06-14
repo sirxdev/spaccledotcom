@@ -8,6 +8,7 @@
   --accent-dark:    #04B589;
   --warn:           #FF6B6B;
   --warn-alpha:     rgba(255, 107, 107, 0.12);
+  --error:          #FF4444;
   --gold:           #FFD166;
 
   --bg:             #F7F8FF;
@@ -350,9 +351,11 @@ select { font-family: var(--font); }
 
 .password-strength__fill {
   height: 100%;
+  width: 100%;
   border-radius: var(--radius-full);
-  transition: width 0.4s var(--ease-smooth), background 0.4s;
-  width: 0;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.4s var(--ease-smooth), background 0.4s;
 }
 
 .password-strength__label {
@@ -423,3 +426,70 @@ select { font-family: var(--font); }
 .auth__alert.error { background: var(--warn-alpha); color: var(--warn); }
 .auth__alert.success { background: rgba(6,214,160,0.12); color: var(--accent-dark); }
 .auth__alert.info { background: rgba(91,79,190,0.10); color: #5B4FBE; }
+
+/* ── Danger button variant ───────────────────────────────────────── */
+.btn--warn {
+  background: var(--warn);
+  color: white;
+  box-shadow: 0 4px 16px rgba(255,107,107,0.30);
+}
+.btn--warn:hover { background: #ff5252; }
+
+.btn--sm {
+  padding: 8px 14px;
+  font-size: 13px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Custom confirm dialog ───────────────────────────────────────── */
+.spaccle-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28,27,58,0.55);
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.spaccle-confirm-box {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px 20px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: var(--shadow-lg);
+}
+
+.spaccle-confirm-msg {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-1);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.spaccle-confirm-row {
+  display: flex;
+  gap: 10px;
+}
+
+.spaccle-confirm-row .btn {
+  flex: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light) {
+    --bg: #0F0F1A;
+    --surface: #1A1A2E;
+    --surface-2: #252540;
+    --border: #2A2A45;
+    --text-1: #F0F0FF;
+    --text-2: #B0B0CC;
+    --text-3: #707090;
+    --primary: #7B72D4;
+    --accent: #2DEDB5;
+  }
+}

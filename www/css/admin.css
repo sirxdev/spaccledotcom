@@ -208,7 +208,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
   white-space: nowrap;
 }
 .admin-filter-pill.active {
@@ -265,9 +265,11 @@
   color: #5B4FBE;
   text-transform: capitalize;
 }
-.admin-card__pill--open     { background: #FFF3E0; color: #E65100; }
-.admin-card__pill--resolved { background: #E8F5E9; color: #2E7D32; }
-.admin-card__pill--cancelled { background: #FCE4EC; color: #C62828; }
+.admin-card__pill--open       { background: #FFF3E0; color: #E65100; }
+.admin-card__pill--resolved   { background: #E8F5E9; color: #2E7D32; }
+.admin-card__pill--cancelled  { background: #FCE4EC; color: #C62828; }
+.admin-card__pill--processing { background: #EDE7F6; color: #512DA8; }
+.admin-card__pill--transit    { background: #E3F2FD; color: #1565C0; }
 
 /* ── Plan card ────────────────────────────────────────────────────────── */
 .admin-plan-card {
@@ -399,8 +401,8 @@
   background: #F4F4F8;
   border: none;
   color: #888;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   font-size: 14px;
   cursor: pointer;
@@ -501,9 +503,10 @@
 .auth__admin-zone-link:hover { color: rgba(28,27,58,0.5); }
 
 /* ── Shared button helpers ────────────────────────────────────────────── */
-.btn--sm {
+.page--admin .btn--sm {
   padding: 8px 14px;
   font-size: 12px;
+  min-height: 44px;
   border-radius: 8px;
 }
 .btn--ghost {
@@ -619,3 +622,26 @@
 .admin-notif-item__title { font-size: 13px; font-weight: 500; color: #1C1B3A; }
 .admin-notif-item__sub   { font-size: 12px; color: #666; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .admin-notif-item__time  { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+/* ── Payout rows with action buttons ─────────────────────────────── */
+.admin-detail-row--payout {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.admin-payout-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-payout-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-payout-actions .btn {
+  flex: 1;
+}

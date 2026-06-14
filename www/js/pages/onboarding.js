@@ -111,7 +111,7 @@ const OnboardingPage = (() => {
 
   async function finish() {
     await SpaccleDB.setPreference('onboarding_complete', true);
-    App.navigate('auth');
+    App.navigate('roleSelect');
   }
 
   return { init };

@@ -6,10 +6,12 @@
 const App = (() => {
 
   const pages = {
-    splash:     { id: 'page-splash',     module: null },
+    splash:      { id: 'page-splash',      module: null },
     onboarding: { id: 'page-onboarding', module: null },
+    roleSelect:  { id: 'page-role-select',  module: null },
     auth:       { id: 'page-auth',       module: null },
     home:       { id: 'page-home',       module: null },
+    rider:      { id: 'page-rider',      module: null },
     admin:      { id: 'page-admin',      module: null },
   };
 
@@ -38,10 +40,12 @@ const App = (() => {
 
     earlySync();
 
-    pages.splash.module     = SplashPage;
+    pages.splash.module      = SplashPage;
     pages.onboarding.module = OnboardingPage;
+    pages.roleSelect.module  = RoleSelectPage;
     pages.auth.module       = AuthPage;
     pages.home.module       = HomePage;
+    pages.rider.module      = RiderPage;
     pages.admin.module      = AdminPage;
 
     try {
@@ -51,16 +55,29 @@ const App = (() => {
       }
     } catch {}
 
+    try {
+      const riderCfg = window.SpaccleConfig?.rider;
+      if (riderCfg?.email && riderCfg?.password) {
+        SpaccleDB.ensureRiderUser({ email: riderCfg.email, password: riderCfg.password, name: riderCfg.name, phone: riderCfg.phone }).catch(() => {});
+      }
+    } catch {}
+
     current = 'splash';
     SplashPage.init();
   }
 
   async function navigate(pageName, data = {}) {
     const nextPage = pages[pageName];
-    if (!nextPage) return;
+    if (!nextPage) { 
+      console.log('Navigate: page not found:', pageName);
+      return; 
+    }
 
     const nextEl = document.getElementById(nextPage.id);
-    if (!nextEl) return;
+    if (!nextEl) { 
+      console.log('Navigate: element not found:', nextPage.id);
+      return; 
+    }
 
     // Exit current
     if (current && current !== pageName) {

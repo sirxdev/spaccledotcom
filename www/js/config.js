@@ -24,4 +24,10 @@ window.SpaccleConfig = {
     password: 'Spaccle@Admin2025!',
     name: 'Spaccle Admin',
   },
+  rider: {
+    email: 'rider@spaccle.com',
+    password: 'Spaccle@Rider2025!',
+    name: 'Quick Rider',
+    phone: '+234 800 123 4567',
+  },
 };

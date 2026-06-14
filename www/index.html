@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://js.paystack.co https://checkout.paystack.com; connect-src 'self' https://db.debtrecuva.com https://*.paystack.co https://api.paystack.co https://checkout.paystack.com https://maps.googleapis.com; frame-src 'self' https://js.paystack.co https://checkout.paystack.com; child-src 'self' https://checkout.paystack.com;" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="msapplication-tap-highlight" content="no" />
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/onboarding.css" />
   <link rel="stylesheet" href="css/auth.css" />
   <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/rider.css" />
   <link rel="stylesheet" href="css/admin.css" />
 </head>
 <body>
@@ -146,6 +147,82 @@
       </div>
     </div>
 
+    <!-- Role Select Screen -->
+    <div id="page-role-select" class="page page--role-select">
+      <div class="role-select__content">
+        <div class="role-select__header">
+          <h1 class="role-select__title">Who are you?</h1>
+          <p class="role-select__sub">Select how you want to use Spaccle</p>
+        </div>
+
+        <div class="role-select__cards">
+          <!-- Customer card -->
+          <button class="role-card role-card--customer" id="btn-role-customer" data-role="customer">
+            <div class="role-card__top">
+              <div class="role-card__icon" style="background: linear-gradient(135deg, #E8F4FF 0%, #D1E8FF 100%);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="12" cy="7" r="4" stroke="#4A90E2" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <span class="role-card__badge role-card__badge--customer">Most Popular</span>
+            </div>
+            <h3 class="role-card__title">Customer</h3>
+            <p class="role-card__desc">Get fresh laundry without leaving home. We pick up, clean, and deliver back to you.</p>
+            <ul class="role-card__features">
+              <li>Schedule pickups anytime</li>
+              <li>Track your order in real-time</li>
+              <li>Contactless door delivery</li>
+            </ul>
+            <div class="role-card__cta">
+              <span>Get started</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </button>
+
+          <!-- Rider card -->
+          <button class="role-card role-card--rider" id="btn-role-rider" data-role="rider">
+            <div class="role-card__top">
+              <div class="role-card__icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <circle cx="18.5" cy="5.5" r="2.5" stroke="#06D6A0" stroke-width="1.8"/>
+                  <path d="M14 10h5l2 4" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M21 14v5" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M3 15h9M3 19h9" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M10 10H5a2 2 0 0 0-2 2v3" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="role-card__badge role-card__badge--rider">Earn Money</span>
+            </div>
+            <h3 class="role-card__title">Rider</h3>
+            <p class="role-card__desc">Earn on your own schedule. Deliver laundry orders in your area and get paid fast.</p>
+            <ul class="role-card__features">
+              <li>Flexible working hours</li>
+              <li>Fast weekly payouts</li>
+              <li>In-app delivery navigation</li>
+            </ul>
+            <div class="role-card__cta">
+              <span>Start earning</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </button>
+        </div>
+
+        <div class="role-select__footer">
+          <button class="btn btn--ghost btn--text" id="btn-role-back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Auth Screen -->
     <div id="page-auth" class="page page--auth">
       <div class="auth__header">
@@ -161,6 +238,15 @@
             </svg>
             <span class="auth__logo-text">Spaccle</span>
           </div>
+          <span class="auth__rider-tag" id="auth-rider-tag">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <circle cx="18.5" cy="5.5" r="2.5" stroke="currentColor" stroke-width="2"/>
+              <path d="M14 10h5l2 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 14v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M3 15h9M3 19h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Rider
+          </span>
         </div>
       </div>
 
@@ -239,6 +325,33 @@
             <div class="auth__greeting">
               <h2 class="auth__form-title">Join Spaccle</h2>
               <p class="auth__form-sub">Create your free account</p>
+            </div>
+
+            <div class="form-group" id="reg-role-group">
+              <label class="form-label">I want to use Spaccle as a</label>
+              <div class="reg-role-options">
+                <label class="reg-role-option active" data-role="customer">
+                  <input type="radio" name="reg-role" value="customer" checked />
+                  <div class="reg-role-option__icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#4A90E2" stroke-width="1.8"/>
+                      <circle cx="12" cy="7" r="4" stroke="#4A90E2" stroke-width="1.8"/>
+                    </svg>
+                  </div>
+                  <span>Customer</span>
+                </label>
+                <label class="reg-role-option" data-role="rider">
+                  <input type="radio" name="reg-role" value="rider" />
+                  <div class="reg-role-option__icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M14 18V16a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="#06D6A0" stroke-width="1.8"/>
+                      <path d="M18 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#06D6A0" stroke-width="1.8"/>
+                      <path d="M14 10h4l2 4h2" stroke="#06D6A0" stroke-width="1.8"/>
+                    </svg>
+                  </div>
+                  <span>Rider</span>
+                </label>
+              </div>
             </div>
 
             <div class="form-group">
@@ -385,7 +498,7 @@
 
       <div class="auth__social">
         <button class="btn btn--social">
-          <svg width="20" height="20" viewBox="0 0 24 24">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -394,7 +507,7 @@
           Google
         </button>
         <button class="btn btn--social">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
           </svg>
           Facebook
@@ -685,6 +798,13 @@
                   </div>
                 </div>
               </div>
+              <button class="btn btn--ghost btn--full btn--sm" id="btn-order-track-map" style="margin-top:12px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.8"/>
+                  <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                Track on Map
+              </button>
             </div>
           </div>
 
@@ -833,7 +953,7 @@
           </div>
 
           <!-- Chat quick-access card -->
-          <div class="chat-quick-card" id="btn-home-chat-quick">
+          <div class="chat-quick-card" id="btn-home-chat-quick" role="button" tabindex="0" aria-label="Chat with us">
             <div class="chat-quick-card__icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
             </div>
@@ -925,7 +1045,7 @@
             <div class="track-actions">
               <button class="btn btn--ghost btn--pill" id="btn-track-details" data-i18n="View Details">View Details</button>
               <button class="btn btn--ghost btn--pill" id="btn-track-map">Map</button>
-              <button class="btn btn--primary btn--pill" id="btn-track-advance">Update Status</button>
+              <button class="btn btn--primary btn--pill" id="btn-track-advance" style="display:none">Update Status</button>
             </div>
 
             <div class="track-map" id="track-map" style="display:none"></div>
@@ -1001,14 +1121,20 @@
                 <div class="profile-menu__item-icon" style="background:#E6FBF6">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#06D6A0" stroke-width="1.8" fill="none"/></svg>
                 </div>
-                <span data-i18n="Help &amp; Support">Help &amp; Support</span>
+                <div class="profile-menu__item-body">
+                  <span>Live Chat</span>
+                  <span class="profile-menu__item-sub">Quick questions — get a fast reply</span>
+                </div>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
               <button class="profile-menu__item" id="btn-open-my-tickets">
                 <div class="profile-menu__item-icon" style="background:#E8F4FF">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 14l2 2 4-4" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round"/></svg>
                 </div>
-                <span data-i18n="My Support Tickets">My Support Tickets</span>
+                <div class="profile-menu__item-body">
+                  <span>Support Tickets</span>
+                  <span class="profile-menu__item-sub">Report an issue — we'll follow up</span>
+                </div>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
               <button class="profile-menu__item" id="btn-open-chat">
@@ -1104,11 +1230,11 @@
 
     <div class="sheet-overlay" id="sheet-overlay" aria-hidden="true"></div>
 
-    <div class="sheet" id="sheet-schedule" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-schedule" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-schedule-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow" data-i18n="New Order">New Order</p>
-          <h3 class="sheet__title" data-i18n="Schedule Pickup">Schedule Pickup</h3>
+          <h3 class="sheet__title" id="sheet-schedule-title" data-i18n="Schedule Pickup">Schedule Pickup</h3>
         </div>
         <button class="sheet__close" id="btn-schedule-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1197,7 +1323,14 @@
 
         <div class="form-group">
           <label class="form-label" for="pickup-address">Pickup address</label>
+          <div id="saved-address-pills" class="saved-address-pills" style="display:none"></div>
           <input class="form-input" id="pickup-address" placeholder="Apartment, street, city" autocomplete="street-address" />
+          <button type="button" class="save-address-btn" id="btn-save-address" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            Save this address
+          </button>
         </div>
 
         <div class="form-group">
@@ -1224,11 +1357,11 @@
       </div>
     </div>
 
-    <div class="sheet" id="sheet-subscription" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-subscription" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-subscription-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Subscription</p>
-          <h3 class="sheet__title">Choose a plan</h3>
+          <h3 class="sheet__title" id="sheet-subscription-title">Choose a plan</h3>
         </div>
         <button class="sheet__close" id="btn-subscription-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1250,11 +1383,11 @@
       </div>
     </div>
 
-    <div class="sheet" id="sheet-order" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-order" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-order-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Order</p>
-          <h3 class="sheet__title" id="order-sheet-title">SP-000000</h3>
+          <h3 class="sheet__title" id="sheet-order-title">SP-000000</h3>
         </div>
         <button class="sheet__close" id="btn-order-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1266,6 +1399,7 @@
           <div style="display:flex;gap:8px;margin-bottom:8px">
             <button class="btn btn--ghost btn--pill btn--full" id="btn-order-cancel" style="display:none;color:#E53935;border-color:#E53935">Cancel Order</button>
             <button class="btn btn--ghost btn--pill btn--full" id="btn-order-reorder" style="display:none">Re-order</button>
+            <button class="btn btn--primary btn--pill btn--full" id="btn-order-rate" style="display:none">Rate this Order</button>
           </div>
           <div class="sheet__footer--split">
             <button class="btn btn--ghost btn--pill" id="btn-order-support">Support</button>
@@ -1275,11 +1409,11 @@
       </div>
     </div>
 
-    <div class="sheet" id="sheet-support" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-support" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-support-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Support</p>
-          <h3 class="sheet__title">Help &amp; Support</h3>
+          <h3 class="sheet__title" id="sheet-support-title">Help &amp; Support</h3>
         </div>
         <button class="sheet__close" id="btn-support-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1334,11 +1468,11 @@
     </div>
 
     <!-- Profile: Personal Information -->
-    <div class="sheet" id="sheet-profile-info" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-profile-info" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-profile-info-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Profile</p>
-          <h3 class="sheet__title">Personal Information</h3>
+          <h3 class="sheet__title" id="sheet-profile-info-title">Personal Information</h3>
         </div>
         <button class="sheet__close" id="btn-profile-info-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1367,11 +1501,11 @@
     </div>
 
     <!-- Profile: Saved Addresses -->
-    <div class="sheet" id="sheet-profile-addresses" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-profile-addresses" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-profile-addresses-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Profile</p>
-          <h3 class="sheet__title">Saved Addresses</h3>
+          <h3 class="sheet__title" id="sheet-profile-addresses-title">Saved Addresses</h3>
         </div>
         <button class="sheet__close" id="btn-profile-addresses-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1414,11 +1548,11 @@
     </div>
 
     <!-- Profile: Payment Methods -->
-    <div class="sheet" id="sheet-profile-payment" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-profile-payment" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-profile-payment-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Profile</p>
-          <h3 class="sheet__title">Payment Methods</h3>
+          <h3 class="sheet__title" id="sheet-profile-payment-title">Payment Methods</h3>
         </div>
         <button class="sheet__close" id="btn-profile-payment-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1442,11 +1576,11 @@
     </div>
 
     <!-- Profile: Notifications -->
-    <div class="sheet" id="sheet-profile-notifications" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-profile-notifications" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-profile-notifications-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Profile</p>
-          <h3 class="sheet__title">Notifications</h3>
+          <h3 class="sheet__title" id="sheet-profile-notifications-title">Notifications</h3>
         </div>
         <button class="sheet__close" id="btn-profile-notifications-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1489,11 +1623,11 @@
     </div>
 
     <!-- Profile: App Settings -->
-    <div class="sheet" id="sheet-profile-settings" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-profile-settings" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-profile-settings-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Profile</p>
-          <h3 class="sheet__title">App Settings</h3>
+          <h3 class="sheet__title" id="sheet-profile-settings-title">App Settings</h3>
         </div>
         <button class="sheet__close" id="btn-profile-settings-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1553,11 +1687,11 @@
     </div>
 
     <!-- Notification Panel -->
-    <div class="sheet" id="sheet-notifications" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-notifications" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-notifications-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Inbox</p>
-          <h3 class="sheet__title">Notifications</h3>
+          <h3 class="sheet__title" id="sheet-notifications-title">Notifications</h3>
         </div>
         <button class="sheet__close" id="btn-notif-panel-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1575,11 +1709,11 @@
     </div>
 
     <!-- Rating Sheet -->
-    <div class="sheet" id="sheet-rating" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-rating" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-rating-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Delivered 🎉</p>
-          <h3 class="sheet__title">Rate Your Experience</h3>
+          <h3 class="sheet__title" id="sheet-rating-title">Rate Your Experience</h3>
         </div>
         <button class="sheet__close" id="btn-rating-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1588,11 +1722,11 @@
       <div class="sheet__content">
         <p style="color:#888;font-size:14px;margin-bottom:20px">How was your laundry experience? Your feedback helps us improve.</p>
         <div class="rating-stars" id="rating-stars">
-          <button class="rating-star" data-star="1">★</button>
-          <button class="rating-star" data-star="2">★</button>
-          <button class="rating-star" data-star="3">★</button>
-          <button class="rating-star" data-star="4">★</button>
-          <button class="rating-star" data-star="5">★</button>
+          <button class="rating-star" data-star="1" aria-label="1 star">★</button>
+          <button class="rating-star" data-star="2" aria-label="2 stars">★</button>
+          <button class="rating-star" data-star="3" aria-label="3 stars">★</button>
+          <button class="rating-star" data-star="4" aria-label="4 stars">★</button>
+          <button class="rating-star" data-star="5" aria-label="5 stars">★</button>
         </div>
         <input type="hidden" id="rating-order-id">
         <div class="form-group" style="margin-top:16px">
@@ -1608,12 +1742,68 @@
       </div>
     </div>
 
+    <!-- Order Map Tracking Sheet -->
+    <div class="sheet" id="sheet-order-map" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-order-map-title">
+      <div class="sheet__header">
+        <h3 class="sheet__title" id="sheet-order-map-title">Track Order</h3>
+        <button class="sheet__close" id="btn-order-map-close" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="order-map-container" id="order-map-container">
+        <div class="order-map" id="order-map" style="width:100%;height:100%;min-height:300px;display:none"></div>
+        <div class="order-map-loading" id="order-map-loading">
+          <div class="order-map-loading__spinner"></div>
+          <p>Loading map...</p>
+        </div>
+        <div class="order-map-empty" id="order-map-empty" style="display:none">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="var(--text-3)" stroke-width="1.5"/>
+            <circle cx="12" cy="10" r="3" stroke="var(--text-3)" stroke-width="1.5"/>
+          </svg>
+          <p>Map unavailable</p>
+        </div>
+      </div>
+      <div class="order-map-info" id="order-map-info">
+        <div class="order-map-info__row">
+          <div class="order-map-info__icon" style="background:#E8F4FF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#4A90E2" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <span class="order-map-info__label">Pickup</span>
+            <span class="order-map-info__addr" id="order-map-pickup">-</span>
+          </div>
+        </div>
+        <div class="order-map-info__row">
+          <div class="order-map-info__icon" style="background:#E6FBF6">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L8 6H5l1 14h12L19 6h-3L12 2z" stroke="#06D6A0" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <span class="order-map-info__label">Delivery</span>
+            <span class="order-map-info__addr" id="order-map-delivery">-</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--full" id="btn-order-chat-rider">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        Chat with Rider
+      </button>
+    </div>
+
     <!-- Chat Sheet -->
-    <div class="sheet" id="sheet-chat" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-chat" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-chat-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Spaccle</p>
-          <h3 class="sheet__title">Chat with Us</h3>
+          <h3 class="sheet__title" id="sheet-chat-title">Chat with Us</h3>
         </div>
         <button class="sheet__close" id="btn-chat-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1631,11 +1821,11 @@
     </div>
 
     <!-- Legal Reader Sheet -->
-    <div class="sheet" id="sheet-legal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-legal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-legal-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Spaccle</p>
-          <h3 class="sheet__title" id="legal-sheet-title">Legal</h3>
+          <h3 class="sheet__title" id="sheet-legal-title">Legal</h3>
         </div>
         <button class="sheet__close" id="btn-legal-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1647,11 +1837,11 @@
     </div>
 
     <!-- Price Guide Sheet -->
-    <div class="sheet" id="sheet-pricing-guide" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-pricing-guide" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-pricing-guide-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Spaccle</p>
-          <h3 class="sheet__title">Price Guide</h3>
+          <h3 class="sheet__title" id="sheet-pricing-guide-title">Price Guide</h3>
         </div>
         <button class="sheet__close" id="btn-pricing-guide-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1667,11 +1857,11 @@
     </div>
 
     <!-- Change Password Sheet -->
-    <div class="sheet" id="sheet-change-password" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-change-password" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-change-password-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Security</p>
-          <h3 class="sheet__title">Change Password</h3>
+          <h3 class="sheet__title" id="sheet-change-password-title">Change Password</h3>
         </div>
         <button class="sheet__close" id="btn-change-password-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1700,11 +1890,11 @@
     </div>
 
     <!-- My Support Tickets Sheet -->
-    <div class="sheet" id="sheet-my-tickets" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-my-tickets" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-my-tickets-title">
       <div class="sheet__header">
         <div>
           <p class="sheet__eyebrow">Support</p>
-          <h3 class="sheet__title">My Tickets</h3>
+          <h3 class="sheet__title" id="sheet-my-tickets-title">My Tickets</h3>
         </div>
         <button class="sheet__close" id="btn-my-tickets-close" aria-label="Close">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1719,11 +1909,11 @@
     </div>
 
     <!-- Ticket Thread Sheet (user side) -->
-    <div class="sheet" id="sheet-ticket-thread" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet" id="sheet-ticket-thread" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheet-ticket-thread-title">
       <div class="sheet__header">
         <div style="flex:1;min-width:0">
           <p class="sheet__eyebrow">Support Ticket</p>
-          <h3 class="sheet__title" id="ticket-thread-subject" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">–</h3>
+          <h3 class="sheet__title" id="sheet-ticket-thread-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">–</h3>
         </div>
         <button class="sheet__close" id="btn-ticket-thread-back" aria-label="Back">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
@@ -1742,6 +1932,498 @@
     </div>
 
   </div><!-- #page-home -->
+
+  <!-- ── Rider Dashboard ───────────────────────────────────────── -->
+  <div id="page-rider" class="page page--rider">
+
+    <!-- Toast -->
+    <div class="rider-toast" id="rider-toast">Order updated</div>
+
+    <!-- Top bar -->
+    <header class="rider-topbar">
+      <div class="rider-greeting">
+        <p class="rider-greeting__sub" id="rider-greeting-sub">Good morning,</p>
+        <h1 class="rider-greeting__name" id="rider-greeting-name">there</h1>
+      </div>
+      <div class="rider-topbar__right">
+        <button class="rider-availability-toggle" id="btn-rider-availability" aria-label="Toggle availability">
+          <span class="rider-availability-toggle__dot"></span>
+          <span class="rider-availability-toggle__label" id="rider-availability-label">Online</span>
+        </button>
+        <div class="rider-sync-status" id="rider-sync-status">Synced</div>
+        <button class="rider-avatar" id="btn-rider-avatar">
+          <span id="rider-avatar-letter">?</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab content -->
+    <div class="rider-content">
+
+      <!-- Orders Tab -->
+      <div class="rider-tab active" id="rider-tab-orders">
+        <div class="rider-scroll">
+
+          <!-- Active order card -->
+          <div class="rider-active-card" id="rider-active-card">
+            <div class="rider-active-card__header">
+              <span class="rider-active-card__eyebrow">Active Order</span>
+              <span class="rider-active-card__status" id="rider-active-status">Assigned</span>
+            </div>
+            <div class="rider-active-card__id">#<span id="rider-active-id">SP-0001</span></div>
+            <div class="rider-active-card__addresses">
+              <div class="rider-active-card__addr">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.8"/>
+                  <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                <div>
+                  <span class="rider-active-card__addr-type">Pickup</span>
+                  <span id="rider-active-pickup">Loading...</span>
+                </div>
+              </div>
+              <div class="rider-active-card__addr">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L8 6H5l1 14h12L19 6h-3L12 2z" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M12 10v8" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+                <div>
+                  <span class="rider-active-card__addr-type">Delivery</span>
+                  <span id="rider-active-delivery">Loading...</span>
+                </div>
+              </div>
+            </div>
+            <div class="rider-active-card__items">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M3 10h18" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <span id="rider-active-items">0 items</span>
+            </div>
+            <div class="rider-active-card__progress" id="rider-active-progress"></div>
+          </div>
+
+          <!-- No active order -->
+          <div class="rider-no-active-card" id="rider-no-active-card">
+            <div class="rider-no-active-card__illo">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="var(--primary)" stroke-width="1.5"/>
+                <path d="M8 12h8M12 8v8" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="rider-no-active-card__title">No active orders</p>
+            <p class="rider-no-active-card__sub">Check your orders below</p>
+          </div>
+
+          <!-- Stats row -->
+          <div class="rider-stats">
+            <div class="rider-stat">
+              <span class="rider-stat__val" id="rider-stat-today">0</span>
+              <span class="rider-stat__label">Today</span>
+            </div>
+            <div class="rider-stat">
+              <span class="rider-stat__val" id="rider-stat-pending">0</span>
+              <span class="rider-stat__label">Pending</span>
+            </div>
+            <div class="rider-stat">
+              <span class="rider-stat__val" id="rider-stat-completed">0</span>
+              <span class="rider-stat__label">Done</span>
+            </div>
+          </div>
+
+          <!-- Pending orders -->
+          <div class="rider-section">
+            <div class="rider-section__head">
+              <h3 class="rider-section__title">Pending</h3>
+            </div>
+            <div class="rider-order-list" id="rider-pending-list"></div>
+          </div>
+
+          <!-- Completed orders -->
+          <div class="rider-section">
+            <div class="rider-section__head">
+              <h3 class="rider-section__title">Completed</h3>
+            </div>
+            <div class="rider-order-list" id="rider-completed-list"></div>
+          </div>
+
+          <!-- Empty state -->
+          <div class="rider-orders-empty" id="rider-orders-empty">
+            <div class="rider-orders-empty__icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 10h10" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <p class="rider-orders-empty__title">No orders yet</p>
+            <p class="rider-orders-empty__sub">Your assigned orders will appear here</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Earnings Tab -->
+      <div class="rider-tab" id="rider-tab-earnings">
+        <div class="rider-scroll">
+          <div class="rider-earn-hero">
+            <div class="rider-earn-hero__card">
+              <span class="rider-earn-hero__label">Total Earnings</span>
+              <span class="rider-earn-hero__val" id="rider-earnings-total">₦0</span>
+            </div>
+          </div>
+          <div class="rider-earn-cards">
+            <div class="rider-earn-card">
+              <div class="rider-earn-card__icon" style="background:#E8F4FF">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="rider-earn-card__body">
+                <span class="rider-earn-card__label">Today</span>
+                <span class="rider-earn-card__val" id="rider-earnings-today">₦0</span>
+              </div>
+            </div>
+            <div class="rider-earn-card">
+              <div class="rider-earn-card__icon" style="background:#E6FBF6">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 12H4M4 12l4-4m-4 4l4 4" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="rider-earn-card__body">
+                <span class="rider-earn-card__label">Tips</span>
+                <span class="rider-earn-card__val" id="rider-earnings-tips">₦0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rider-payout-section">
+            <h3 class="rider-payout-section__title">Payout Requests</h3>
+            <div id="rider-payout-history"></div>
+            <div class="rider-payout-form">
+              <label class="form-label">Request an amount (₦)</label>
+              <input type="number" class="form-input" id="rider-payout-amount" placeholder="Enter amount" inputmode="numeric" />
+              <button class="btn btn--primary btn--full" id="btn-rider-payout-request" style="margin-top:10px">
+                Request Payout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div class="rider-tab" id="rider-tab-profile">
+        <div class="rider-scroll">
+          <div class="rider-profile-card">
+            <div class="rider-profile-card__avatar">
+              <span id="rider-profile-avatar">?</span>
+            </div>
+            <h2 class="rider-profile-card__name" id="rider-profile-name">Rider</h2>
+            <p class="rider-profile-card__email" id="rider-profile-email">rider@spaccle.com</p>
+            <p class="rider-profile-card__phone" id="rider-profile-phone">+234 000 000 0000</p>
+            <p class="rider-profile-card__role">Rider</p>
+          </div>
+          <div class="rider-profile-menu">
+            <button class="rider-profile-menu__item" id="btn-rider-settings">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span>Settings</span>
+            </button>
+            <button class="rider-profile-menu__item" id="btn-rider-notifications">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span>Notifications</span>
+              <span class="rider-profile-badge" id="rider-notif-badge">0</span>
+            </button>
+            <button class="rider-profile-menu__item" id="btn-rider-support">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.8"/>
+                <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span>Support</span>
+            </button>
+            <button class="rider-profile-menu__item rider-profile-menu__item--danger" id="btn-rider-logout">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8"/>
+                <polyline points="16 17 21 12 16 7" stroke="currentColor" stroke-width="1.8"/>
+                <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div class="rider-tab" id="rider-tab-settings">
+        <div class="rider-scroll">
+          <div class="rider-settings-header">
+            <button class="rider-back-btn" id="btn-settings-back">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <h2 class="rider-settings-title">Settings</h2>
+          </div>
+          <div class="rider-settings-section">
+            <h3 class="rider-settings-section__title">Profile</h3>
+            <div class="rider-settings-item">
+              <div class="rider-settings-item__icon" style="background:#E8F4FF">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#4A90E2" stroke-width="1.8"/>
+                  <circle cx="12" cy="7" r="4" stroke="#4A90E2" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="rider-settings-item__body">
+                <span class="rider-settings-item__label">Name</span>
+                <span class="rider-settings-item__value" id="rider-setting-name">-</span>
+              </div>
+            </div>
+            <div class="rider-settings-item">
+              <div class="rider-settings-item__icon" style="background:#E8F4FF">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="#4A90E2" stroke-width="1.8"/>
+                  <polyline points="22,6 12,13 2,6" stroke="#4A90E2" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="rider-settings-item__body">
+                <span class="rider-settings-item__label">Email</span>
+                <span class="rider-settings-item__value" id="rider-setting-email">-</span>
+              </div>
+            </div>
+            <div class="rider-settings-item">
+              <div class="rider-settings-item__icon" style="background:#E6FBF6">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 11.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z" stroke="#06D6A0" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="rider-settings-item__body">
+                <span class="rider-settings-item__label">Phone</span>
+                <span class="rider-settings-item__value" id="rider-setting-phone">-</span>
+              </div>
+            </div>
+          </div>
+          <div class="rider-settings-section">
+            <h3 class="rider-settings-section__title">App</h3>
+            <div class="rider-settings-item">
+              <div class="rider-settings-item__icon" style="background:#FFF3E0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L8 6H5l1 14h12L19 6h-3L12 2z" stroke="#FF9800" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="rider-settings-item__body">
+                <span class="rider-settings-item__label">App Version</span>
+                <span class="rider-settings-item__value">1.0.0</span>
+              </div>
+            </div>
+            <div class="rider-settings-item">
+              <div class="rider-settings-item__icon" style="background:#F0EEFF">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="#5B4FBE" stroke-width="1.8"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="#5B4FBE" stroke-width="1.8"/>
+                  <circle cx="12" cy="17" r="1" fill="#5B4FBE"/>
+                </svg>
+              </div>
+              <div class="rider-settings-item__body">
+                <span class="rider-settings-item__label">Help & Support</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Tab -->
+      <div class="rider-tab" id="rider-tab-notifications">
+        <div class="rider-scroll">
+          <div class="rider-settings-header">
+            <button class="rider-back-btn" id="btn-notif-back">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <h2 class="rider-settings-title">Notifications</h2>
+          </div>
+          <div class="rider-notif-list" id="rider-notif-list">
+            <div class="rider-notif-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <p>No notifications yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom nav -->
+      <div class="rider-bottom-nav" id="rider-bottom-nav">
+        <button class="rider-tab-btn active" data-tab="orders">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M7 10h10M7 14h4" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span>Orders</span>
+        </button>
+        <button class="rider-tab-btn" data-tab="earnings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span>Earnings</span>
+        </button>
+        <button class="rider-tab-btn" data-tab="profile">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span>Profile</span>
+        </button>
+      </div>
+
+      <!-- Bottom nav for settings/notifications -->
+      <div class="rider-bottom-nav" id="rider-nav-back" style="display:none">
+        <button class="rider-tab-btn active" data-tab-back="profile">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Back</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Order Details Sheet -->
+    <div class="rider-order-sheet" id="rider-order-sheet">
+      <div class="rider-sheet-backdrop"></div>
+      <div class="rider-sheet">
+        <div class="rider-sheet__handle"></div>
+        <div class="rider-sheet__header">
+          <button class="rider-sheet__close" id="btn-rider-order-close" aria-label="Close order details">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="rider-sheet__id">#<span id="rider-sheet-order-id">SP-0001</span></div>
+        <div class="rider-sheet__status" id="rider-sheet-order-status">Assigned</div>
+        <div class="rider-sheet__addresses">
+          <div class="rider-sheet__addr">
+            <div class="rider-sheet__addr-icon" style="background:#E8F4FF">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#4A90E2" stroke-width="1.8"/>
+                <circle cx="12" cy="10" r="3" stroke="#4A90E2" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <div class="rider-sheet__addr-body">
+              <span class="rider-sheet__addr-type">Pickup</span>
+              <span id="rider-sheet-pickup">Loading...</span>
+            </div>
+          </div>
+          <div class="rider-sheet__addr">
+            <div class="rider-sheet__addr-icon" style="background:#E6FBF6">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L8 6H5l1 14h12L19 6h-3L12 2z" stroke="#06D6A0" stroke-width="1.8"/>
+                <path d="M12 10v8" stroke="#06D6A0" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <div class="rider-sheet__addr-body">
+              <span class="rider-sheet__addr-type">Delivery</span>
+              <span id="rider-sheet-delivery">Loading...</span>
+            </div>
+          </div>
+        </div>
+        <div class="rider-sheet__info">
+          <div class="rider-sheet__row">
+            <span>Items</span>
+            <span id="rider-sheet-items">0 items</span>
+          </div>
+          <div class="rider-sheet__row">
+            <span>Customer</span>
+            <span id="rider-sheet-customer">N/A</span>
+          </div>
+          <div class="rider-sheet__row">
+            <span>Phone</span>
+            <span id="rider-sheet-phone">N/A</span>
+          </div>
+        </div>
+        <div class="rider-sheet__progress" id="rider-sheet-progress"></div>
+        <div class="rider-facility-note" id="rider-facility-note" style="display:none"></div>
+        <div class="rider-sheet__actions" id="rider-sheet-actions"></div>
+        <div class="rider-sheet__msg-row">
+          <button class="btn btn--ghost btn--sm rider-sheet__msg-btn" id="btn-rider-msg-customer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            </svg>
+            Message Customer
+          </button>
+        </div>
+        <div class="rider-msg-compose" id="rider-msg-compose" style="display:none">
+          <textarea class="rider-msg-textarea" id="rider-msg-input" placeholder="E.g. I'm at the gate, please come down…" rows="3"></textarea>
+          <button class="btn btn--primary btn--sm btn--full" id="btn-rider-msg-send">Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tip Sheet -->
+    <div class="rider-tip-sheet" id="rider-tip-sheet">
+      <div class="rider-sheet-backdrop"></div>
+      <div class="rider-sheet">
+        <div class="rider-sheet__handle"></div>
+        <div class="rider-sheet__header">
+          <button class="rider-sheet__close" id="btn-rider-tip-close" aria-label="Close tip sheet">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="rider-tip-sheet__title">Add Tip</div>
+        <div class="rider-tip-sheet__order">Order #<span id="rider-tip-order-id">SP-0001</span></div>
+        <div class="rider-tip-sheet__customer">for <span id="rider-tip-customer">Customer</span></div>
+        <div class="rider-tip-sheet__amounts">
+          <button class="rider-tip-amount" data-amount="200">₦200</button>
+          <button class="rider-tip-amount" data-amount="500">₦500</button>
+          <button class="rider-tip-amount" data-amount="1000">₦1000</button>
+          <button class="rider-tip-amount" data-amount="2000">₦2000</button>
+        </div>
+        <div class="rider-tip-sheet__custom">
+          <label>Or enter custom amount</label>
+          <div class="rider-tip-input-wrap">
+            <span>₦</span>
+            <input type="number" id="rider-tip-input" placeholder="0" inputmode="numeric" />
+          </div>
+        </div>
+        <input type="hidden" id="rider-tip-amount" value="200" />
+        <button class="btn btn--accent btn--full btn--lg" id="btn-rider-tip-add">Add Tip</button>
+      </div>
+    </div>
+
+    <!-- Support Sheet -->
+    <div class="rider-order-sheet" id="rider-support-sheet">
+      <div class="rider-sheet-backdrop"></div>
+      <div class="rider-sheet">
+        <div class="rider-sheet__header">
+          <h3 class="rider-sheet__title">Support</h3>
+          <button class="rider-sheet__close" id="btn-rider-support-close" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="rider-support-thread" id="rider-support-thread"></div>
+        <div class="rider-support-bar">
+          <input class="rider-support-input form-input" id="rider-support-input" placeholder="Message Spaccle support…" />
+          <button class="btn btn--primary" id="btn-rider-support-send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- #page-rider -->
 
   <!-- ── Admin Dashboard ───────────────────────────────────────── -->
   <div id="page-admin" class="page page--admin">
@@ -1782,6 +2464,7 @@
       <button class="admin-tab" data-tab="users">Users</button>
       <button class="admin-tab" data-tab="support">Support</button>
       <button class="admin-tab" data-tab="messages">Messages</button>
+      <button class="admin-tab" data-tab="riders">Riders</button>
       <button class="admin-tab" data-tab="plans">Plans</button>
       <button class="admin-tab" data-tab="config">Config</button>
     </div>
@@ -1859,10 +2542,15 @@
         <div class="admin-filter-pills" id="admin-orders-filter">
           <button class="admin-filter-pill active" data-filter="all">All</button>
           <button class="admin-filter-pill" data-filter="scheduled">Scheduled</button>
+          <button class="admin-filter-pill" data-filter="confirmed">Confirmed</button>
+          <button class="admin-filter-pill" data-filter="assigned">Assigned</button>
           <button class="admin-filter-pill" data-filter="picked_up">Picked Up</button>
           <button class="admin-filter-pill" data-filter="processing">Processing</button>
+          <button class="admin-filter-pill" data-filter="cleaning">Cleaning</button>
           <button class="admin-filter-pill" data-filter="ready">Ready</button>
+          <button class="admin-filter-pill" data-filter="in_transit">In Transit</button>
           <button class="admin-filter-pill" data-filter="delivered">Delivered</button>
+          <button class="admin-filter-pill" data-filter="completed">Completed</button>
           <button class="admin-filter-pill" data-filter="cancelled">Cancelled</button>
         </div>
         <div id="admin-orders-list" class="admin-list"></div>
@@ -1898,6 +2586,37 @@
           <button class="btn btn--ghost btn--sm" id="btn-admin-messages-refresh">Refresh</button>
         </div>
         <div id="admin-messages-list" class="admin-list"></div>
+      </div>
+
+      <!-- Riders tab -->
+      <div class="admin-panel" id="admin-panel-riders">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">Riders</h2>
+          <button class="btn btn--ghost btn--sm" id="btn-admin-riders-refresh">Refresh</button>
+        </div>
+        <div id="admin-riders-list"></div>
+      </div>
+
+      <!-- Rider detail overlay -->
+      <div class="admin-overlay" id="admin-rider-overlay">
+        <div class="admin-overlay__backdrop" id="admin-rider-backdrop"></div>
+        <div class="admin-sheet">
+          <div class="admin-sheet__handle"></div>
+          <div class="admin-sheet__header">
+            <h3 class="admin-sheet__title" id="admin-rider-title">Rider</h3>
+            <button class="admin-sheet__close" id="btn-admin-rider-close" aria-label="Close">✕</button>
+          </div>
+          <div class="admin-sheet__body">
+            <div id="admin-rider-details" class="admin-detail-rows"></div>
+            <div class="admin-card__meta" style="font-weight:600;margin:16px 0 8px">Recent Deliveries</div>
+            <div id="admin-rider-orders"></div>
+            <div class="admin-card__meta" style="font-weight:600;margin:16px 0 8px">Payout Requests</div>
+            <div id="admin-rider-payouts"></div>
+            <div style="margin-top:20px">
+              <button class="btn btn--ghost btn--full" id="btn-admin-rider-toggle-active">Deactivate Rider</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Plans tab -->
@@ -2015,7 +2734,7 @@
         <div class="admin-sheet__handle"></div>
         <div class="admin-sheet__header">
           <h3 class="admin-sheet__title" id="admin-plan-editor-title">Edit Plan</h3>
-          <button class="admin-sheet__close" id="btn-admin-plan-editor-close">✕</button>
+          <button class="admin-sheet__close" id="btn-admin-plan-editor-close" aria-label="Close">✕</button>
         </div>
         <div class="admin-sheet__body">
           <input type="hidden" id="pe-id">
@@ -2057,7 +2776,7 @@
         <div class="admin-sheet__handle"></div>
         <div class="admin-sheet__header">
           <h3 class="admin-sheet__title" id="admin-order-title">Order</h3>
-          <button class="admin-sheet__close" id="btn-admin-order-close">✕</button>
+          <button class="admin-sheet__close" id="btn-admin-order-close" aria-label="Close">✕</button>
         </div>
         <div class="admin-sheet__body">
           <div class="admin-detail-rows" id="admin-order-details"></div>
@@ -2065,7 +2784,10 @@
             <span class="form-label" style="margin:0">Assign Driver / Agent</span>
           </div>
           <div style="display:flex;gap:8px;margin-bottom:16px">
-            <input type="text" class="form-input" id="admin-driver-input" placeholder="Driver name or phone…" style="flex:1">
+            <select class="form-input" id="admin-rider-select" style="flex:1">
+              <option value="">Select a rider…</option>
+            </select>
+            <input type="text" class="form-input" id="admin-driver-input" placeholder="Or enter name…" style="flex:1">
             <button class="btn btn--primary btn--sm" id="btn-admin-driver-assign">Assign</button>
           </div>
           <div class="admin-panel-header" style="margin-bottom:8px">
@@ -2083,7 +2805,7 @@
         <div class="admin-sheet__handle"></div>
         <div class="admin-sheet__header">
           <h3 class="admin-sheet__title" id="admin-user-title">User</h3>
-          <button class="admin-sheet__close" id="btn-admin-user-close">✕</button>
+          <button class="admin-sheet__close" id="btn-admin-user-close" aria-label="Close">✕</button>
         </div>
         <div class="admin-sheet__body">
           <div class="admin-detail-rows" id="admin-user-details"></div>
@@ -2105,7 +2827,7 @@
             <h3 class="admin-sheet__title" id="admin-ticket-subject" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Support Message</h3>
             <div class="admin-ticket-meta" id="admin-ticket-meta" style="font-size:11px;color:#999;margin-top:2px"></div>
           </div>
-          <button class="admin-sheet__close" id="btn-admin-ticket-close">✕</button>
+          <button class="admin-sheet__close" id="btn-admin-ticket-close" aria-label="Close">✕</button>
         </div>
         <div class="admin-sheet__body" style="display:flex;flex-direction:column;padding-bottom:0;height:100%">
           <!-- Status bar -->
@@ -2133,7 +2855,7 @@
         <div class="admin-sheet__handle"></div>
         <div class="admin-sheet__header">
           <h3 class="admin-sheet__title" id="admin-chat-title">Chat</h3>
-          <button class="admin-sheet__close" id="btn-admin-chat-close">✕</button>
+          <button class="admin-sheet__close" id="btn-admin-chat-close" aria-label="Close">✕</button>
         </div>
         <div class="admin-sheet__body" style="padding-bottom:0;display:flex;flex-direction:column;flex:1">
           <div id="admin-chat-messages" class="chat-messages" style="max-height:55vh;overflow-y:auto;flex:1"></div>
@@ -2156,7 +2878,7 @@
           <h3 class="admin-sheet__title">Notifications</h3>
           <div style="display:flex;gap:8px;align-items:center">
             <button class="btn btn--ghost btn--sm" id="btn-admin-notif-clear">Clear all</button>
-            <button class="admin-sheet__close" id="btn-admin-notif-close">✕</button>
+            <button class="admin-sheet__close" id="btn-admin-notif-close" aria-label="Close">✕</button>
           </div>
         </div>
         <div class="admin-sheet__body" style="padding-top:0">
@@ -2175,8 +2897,10 @@
   <script src="js/db.js"></script>
   <script src="js/pages/splash.js"></script>
   <script src="js/pages/onboarding.js"></script>
+  <script src="js/pages/role-select.js"></script>
   <script src="js/pages/auth.js"></script>
   <script src="js/pages/home.js"></script>
+  <script src="js/pages/rider.js"></script>
   <script src="js/pages/admin.js"></script>
   <script src="js/app.js"></script>
 </body>

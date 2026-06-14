@@ -118,10 +118,11 @@
 .auth__tab-indicator {
   position: absolute;
   bottom: -1.5px;
+  left: 0;
   height: 2.5px;
   background: var(--primary);
   border-radius: var(--radius-full) var(--radius-full) 0 0;
-  transition: left 0.3s var(--ease-spring), width 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring);
 }
 
 /* Forms */
@@ -276,8 +277,10 @@
   height: 100%;
   background: var(--primary);
   border-radius: var(--radius-full);
-  width: 0%;
-  transition: width 0.5s var(--ease-smooth);
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease-smooth);
 }
 
 /* Step body transitions */
@@ -467,8 +470,10 @@
   height: 100%;
   background: var(--accent);
   border-radius: var(--radius-full);
-  width: 0%;
-  transition: width 0.5s var(--ease-smooth);
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease-smooth);
 }
 
 /* Forgot steps */
@@ -539,4 +544,110 @@
   color: var(--text-2);
   line-height: 1.6;
   max-width: 280px;
+}
+
+/* Role selector on registration */
+.reg-role-group {
+  margin-bottom: 16px;
+}
+
+.reg-role-options {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.reg-role-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 12px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.reg-role-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reg-role-option.active,
+.reg-role-option:focus-within {
+  border-color: var(--primary);
+  background: rgba(91, 79, 190, 0.05);
+}
+
+.reg-role-option__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reg-role-option.active .reg-role-option__icon {
+  background: rgba(91, 79, 190, 0.1);
+}
+
+.reg-role-option span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+/* ── Rider Portal tag in auth header ─────────────────────────── */
+.auth__rider-tag {
+  display: none;
+  margin-left: auto;
+  align-items: center;
+  gap: 5px;
+  background: rgba(6, 214, 160, 0.18);
+  border: 1px solid rgba(6, 214, 160, 0.35);
+  border-radius: var(--radius-full);
+  padding: 6px 13px 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Rider mode: teal auth header ────────────────────────────── */
+.page--auth--rider .auth__rider-tag {
+  display: flex;
+}
+
+.page--auth--rider .auth__header-bg {
+  background: linear-gradient(148deg, #0B3629 0%, #0D6B52 100%);
+}
+
+.page--auth--rider .auth__header-bg::before {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 0%, transparent 70%);
+}
+
+.page--auth--rider .auth__header-bg::after {
+  background: radial-gradient(circle, rgba(6, 214, 160, 0.22) 0%, transparent 70%);
+  width: 240px;
+  height: 240px;
+  top: -80px;
+  right: -40px;
+  bottom: auto;
+  left: auto;
+}
+
+.page--auth--rider .auth__tab.active {
+  color: #06A07A;
+}
+
+.page--auth--rider .auth__tab-indicator {
+  background: #06D6A0;
 }

@@ -1,6 +1,12 @@
 /* ── Admin Page ─────────────────────────────────────────────────────── */
 const AdminPage = (() => {
 
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   let user = null;
   let activeTab = 'dashboard';
   let editingPlanId = null;
@@ -11,16 +17,23 @@ const AdminPage = (() => {
   let currentOrderFilter = 'all';
   let currentSupportFilter = 'all';
 
-  function init(data = {}) {
-    user = data.user || SpaccleDB.getSession();
-    const sub = document.getElementById('admin-topbar-sub');
-    if (sub) sub.textContent = user?.email || 'Administrator';
+function init(data = {}) {
+    user = data.user;
     setupTabs();
     setupActions();
-    loadTab('dashboard');
-    updateAdminNotifBadge();
-    startAdminNotifWatch();
+    setupSearch();
+    switchTab('orders');
+    renderUser();
     initAdminTheme();
+    startAdminNotifWatch();
+  }
+
+  function renderUser() {
+    // Admin identity display — no dedicated header element; no-op unless one is added
+  }
+
+  function setupSearch() {
+    // Per-tab search bars are wired inside loadOrders() / loadUsers() on first render
   }
 
   /* ── Tabs ────────────────────────────────────────────────────────── */
@@ -45,6 +58,7 @@ const AdminPage = (() => {
     if (tab === 'users')     loadUsers();
     if (tab === 'support')   loadSupport(currentSupportFilter);
     if (tab === 'messages')  loadMessages();
+    if (tab === 'riders')    loadRiders();
     if (tab === 'plans')     loadPlans();
     if (tab === 'config')    loadConfig();
   }
@@ -74,6 +88,12 @@ const AdminPage = (() => {
     });
     document.getElementById('btn-admin-order-close').addEventListener('click', closeOrderDetail);
     document.getElementById('admin-order-backdrop').addEventListener('click', closeOrderDetail);
+
+    // Riders
+    document.getElementById('btn-admin-riders-refresh').addEventListener('click', loadRiders);
+    document.getElementById('btn-admin-rider-close').addEventListener('click', closeRiderDetail);
+    document.getElementById('admin-rider-backdrop').addEventListener('click', closeRiderDetail);
+    document.getElementById('btn-admin-rider-toggle-active').addEventListener('click', handleRiderToggleActive);
 
     // Users
     document.getElementById('btn-admin-users-refresh').addEventListener('click', loadUsers);
@@ -262,6 +282,9 @@ const AdminPage = (() => {
   let orderSearchTerm = '';
 
   async function loadOrders(filter) {
+    orderSearchTerm = '';
+    const searchEl = document.getElementById('admin-orders-search');
+    if (searchEl) searchEl.value = '';
     currentOrderFilter = filter || 'all';
     const list = document.getElementById('admin-orders-list');
     list.innerHTML = '<div class="admin-empty">Loading…</div>';
@@ -273,9 +296,13 @@ const AdminPage = (() => {
       bar.innerHTML =
         `<input class="form-input" id="admin-orders-search" placeholder="Search by ID, address, notes…" style="margin-bottom:8px">`;
       panel.insertBefore(bar, document.getElementById('admin-orders-filter'));
+      let searchDebounce = null;
       document.getElementById('admin-orders-search').addEventListener('input', e => {
-        orderSearchTerm = e.target.value.toLowerCase();
-        renderFilteredOrders();
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+          orderSearchTerm = e.target.value.toLowerCase();
+          renderFilteredOrders();
+        }, 200);
       });
     }
 
@@ -313,6 +340,13 @@ const AdminPage = (() => {
       card.addEventListener('click', () => openOrderDetail(order));
       list.appendChild(card);
     });
+    if (filtered.length > 150) {
+      const notice = document.createElement('div');
+      notice.className = 'admin-empty';
+      notice.style.cssText = 'padding:8px 0;font-size:12px;color:var(--text-3)';
+      notice.textContent = `Showing first 150 of ${filtered.length} results`;
+      list.appendChild(notice);
+    }
   }
 
   function buildOrderCard(order) {
@@ -354,35 +388,38 @@ const AdminPage = (() => {
 
     const detailEl = document.getElementById('admin-order-details');
     const rows = [
-      ['Status',       statusLabel(order.status)],
-      ['Service',      serviceLabel(order.service)],
+      ['Status',       escapeHtml(statusLabel(order.status))],
+      ['Service',      escapeHtml(serviceLabel(order.service))],
       ['Billing',      order.billingMode === 'subscription' ? 'Subscription' : 'Pay As You Go'],
-      ['Items',        order.itemsCount || '—'],
+      ['Items',        escapeHtml(String(order.itemsCount || '—'))],
       ['Amount Paid',  order.amountPaid ? `₦${formatNaira(order.amountPaid)}` : '—'],
-      ['Paystack Ref', order.paystackRef || '—'],
-      ['Pickup Day',   order.pickupDay   || '—'],
-      ['Pickup Time',  order.pickupTime  || '—'],
-      ['Address',      order.address     || '—'],
-      ['Notes',        order.notes       || '—'],
-      ['Created',      formatDateTime(order.createdAt)],
+      ['Paystack Ref', escapeHtml(order.paystackRef || '—')],
+      ['Pickup Day',   escapeHtml(order.pickupDay   || '—')],
+      ['Pickup Time',  escapeHtml(order.pickupTime  || '—')],
+      ['Address',      escapeHtml(order.address     || '—')],
+      ['Notes',        escapeHtml(order.notes       || '—')],
+      ['Created',      escapeHtml(formatDateTime(order.createdAt))],
     ];
-    if (order.exceedsItems)    rows.push(['⚠ Exceeds Plan', `Yes — ${order.extraItemsCount || 0} extra items`]);
+    if (order.exceedsItems)    rows.push(['⚠ Exceeds Plan', `Yes — ${escapeHtml(String(order.extraItemsCount || 0))} extra items`]);
     if (order.recurring)       rows.push(['Recurring',      'Set as recurring pickup']);
-    if (order.rating)          rows.push(['Rating', '★'.repeat(order.rating) + ' ' + (order.ratingNote || '')]);
+    if (order.rating)          rows.push(['Rating', '★'.repeat(order.rating) + ' ' + escapeHtml(order.ratingNote || '')]);
     detailEl.innerHTML = rows.map(([l, v]) =>
       `<div class="admin-detail-row">` +
-      `<span class="admin-detail-row__label">${l}</span>` +
+      `<span class="admin-detail-row__label">${escapeHtml(l)}</span>` +
       `<span class="admin-detail-row__value">${v}</span></div>`
     ).join('');
 
     const actionsEl = document.getElementById('admin-order-status-actions');
     actionsEl.innerHTML = '';
     const btnDefs = [
-      { label: 'Confirm Pick Up',  status: 'picked_up',  trigger: ['scheduled', 'confirmed'],       ghost: false },
-      { label: 'Mark Processing',  status: 'processing', trigger: ['picked_up'],                    ghost: false },
-      { label: 'Mark Ready',       status: 'ready',      trigger: ['processing', 'cleaning'],        ghost: false },
-      { label: 'Mark Delivered',   status: 'delivered',  trigger: ['ready'],                        ghost: false },
-      { label: 'Cancel Order',     status: 'cancelled',  trigger: ['scheduled', 'confirmed', 'picked_up'], ghost: true },
+      { label: 'Confirm Order',        status: 'confirmed',  trigger: ['scheduled'],                                       ghost: false },
+      { label: 'Mark Picked Up',       status: 'picked_up',  trigger: ['confirmed', 'assigned'],                          ghost: false },
+      { label: 'Mark Processing',      status: 'processing', trigger: ['picked_up'],                                      ghost: false },
+      { label: 'Mark Cleaning',        status: 'cleaning',   trigger: ['processing'],                                     ghost: false },
+      { label: 'Mark Ready',           status: 'ready',      trigger: ['cleaning', 'processing'],                         ghost: false },
+      { label: 'Mark In Transit',      status: 'in_transit', trigger: ['ready'],                                          ghost: false },
+      { label: 'Mark Completed',       status: 'completed',  trigger: ['delivered', 'in_transit'],                        ghost: false },
+      { label: 'Cancel Order',         status: 'cancelled',  trigger: ['scheduled', 'confirmed', 'assigned', 'picked_up'], ghost: true },
     ];
     btnDefs.forEach(def => {
       if (!def.trigger.includes(order.status)) return;
@@ -398,6 +435,7 @@ const AdminPage = (() => {
         '<div class="admin-empty" style="padding:8px 0;font-size:12px">No further actions available.</div>';
     }
 
+    loadRidersForSelect();
     document.getElementById('admin-order-overlay').classList.add('open');
   }
 
@@ -423,19 +461,36 @@ const AdminPage = (() => {
 
   async function handleDriverAssign() {
     if (!currentOrderId) return;
+    const select = document.getElementById('admin-rider-select');
     const input = document.getElementById('admin-driver-input');
-    const name  = (input?.value || '').trim();
-    if (!name) { showToast('Enter a driver name'); return; }
+    const riderId = select?.value;
+    const riderName = input?.value?.trim();
+    if (!riderId && !riderName) { showToast('Select or enter a rider'); return; }
     const btn = document.getElementById('btn-admin-driver-assign');
     btn.classList.add('loading');
     try {
-      await SpaccleDB.assignDriver(currentOrderId, name);
-      input.value = '';
-      showToast('Driver assigned: ' + name);
+      await SpaccleDB.assignRiderToOrder(currentOrderId, riderId || null, riderName || null);
+      if (input) input.value = '';
+      if (select) select.value = '';
+      showToast('Rider assigned');
+      closeOrderDetail();
+      await loadOrders(currentOrderFilter);
     } catch {
-      showToast('Could not assign driver');
+      showToast('Could not assign rider');
     } finally {
       btn.classList.remove('loading');
+    }
+  }
+
+  async function loadRidersForSelect() {
+    const select = document.getElementById('admin-rider-select');
+    if (!select) return;
+    try {
+      const riders = await SpaccleDB.listAllRiders();
+      select.innerHTML = '<option value="">Select a rider…</option>' +
+        riders.map(r => `<option value="${r._id}">${r.name}</option>`).join('');
+    } catch {
+      select.innerHTML = '<option value="">Select a rider…</option>';
     }
   }
 
@@ -505,18 +560,18 @@ const AdminPage = (() => {
 
     const detailEl = document.getElementById('admin-user-details');
     const rows = [
-      ['Name',    u.name  || '—'],
-      ['Email',   u.email || '—'],
-      ['Phone',   u.phone || '—'],
-      ['Role',    u.role  || 'user'],
-      ['Joined',  formatDateTime(u.createdAt)],
+      ['Name',    escapeHtml(u.name  || '—')],
+      ['Email',   escapeHtml(u.email || '—')],
+      ['Phone',   escapeHtml(u.phone || '—')],
+      ['Role',    escapeHtml(u.role  || 'user')],
+      ['Joined',  escapeHtml(formatDateTime(u.createdAt))],
     ];
     if (sub) {
-      rows.push(['Plan',        sub.planId   || '—']);
+      rows.push(['Plan',        escapeHtml(sub.planId   || '—')]);
       rows.push(['Sub Status',  sub.active !== false ? 'Active' : 'Inactive']);
-      rows.push(['Sub Price',   sub.pricePaid ? `₦${formatNaira(sub.pricePaid)}` : '—']);
-      rows.push(['Items Used',  sub.itemsUsed != null ? sub.itemsUsed : '—']);
-      rows.push(['Sub Started', formatDateTime(sub.createdAt)]);
+      rows.push(['Sub Price',   sub.pricePaid ? `₦${escapeHtml(formatNaira(sub.pricePaid))}` : '—']);
+      rows.push(['Items Used',  escapeHtml(String(sub.itemsUsed != null ? sub.itemsUsed : '—'))]);
+      rows.push(['Sub Started', escapeHtml(formatDateTime(sub.createdAt))]);
     } else {
       rows.push(['Subscription', 'None (Pay As You Go)']);
     }
@@ -548,6 +603,199 @@ const AdminPage = (() => {
   function closeUserDetail() {
     document.getElementById('admin-user-overlay').classList.remove('open');
     currentUserId = null;
+  }
+
+  /* ── Riders ─────────────────────────────────────────────────────── */
+  let currentRiderId = null;
+
+  async function loadRiders() {
+    const list = document.getElementById('admin-riders-list');
+    list.innerHTML = '<div class="admin-empty">Loading…</div>';
+    try {
+      const [riders, orders] = await Promise.all([
+        SpaccleDB.listAllRiders(),
+        SpaccleDB.listAllOrders(),
+      ]);
+
+      list.innerHTML = '';
+      if (!riders.length) {
+        list.innerHTML = '<div class="admin-empty">No riders yet.</div>';
+        return;
+      }
+
+      riders.forEach(r => {
+        const riderOrders = orders.filter(o =>
+          o.riderId === r._id || o.assignedDriver === r.name || o.assignedDriver === r._id);
+        const completed = riderOrders.filter(o => ['delivered', 'completed'].includes(o.status));
+        const active = r.isAvailable !== false;
+
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.style.cursor = 'pointer';
+
+        const left = document.createElement('div');
+        left.className = 'admin-card__left';
+
+        const title = document.createElement('div');
+        title.className = 'admin-card__title';
+        title.textContent = r.name || '(No name)';
+
+        const meta = document.createElement('div');
+        meta.className = 'admin-card__meta';
+        meta.textContent = (r.email || '') + ` · ${completed.length} deliveries`;
+
+        const right = document.createElement('div');
+        right.className = 'admin-card__right';
+        right.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:4px';
+
+        const statusPill = document.createElement('div');
+        statusPill.className = 'admin-card__pill';
+        statusPill.textContent = active ? 'Online' : 'Offline';
+        statusPill.style.cssText = active
+          ? 'background:rgba(6,214,160,0.12);color:#06A07A'
+          : 'background:#F5F5F5;color:#999';
+
+        left.appendChild(title);
+        left.appendChild(meta);
+        right.appendChild(statusPill);
+        card.appendChild(left);
+        card.appendChild(right);
+        card.addEventListener('click', () => openRiderDetail(r, riderOrders));
+        list.appendChild(card);
+      });
+    } catch {
+      list.innerHTML = '<div class="admin-empty">Failed to load riders.</div>';
+    }
+  }
+
+  async function openRiderDetail(r, riderOrders) {
+    currentRiderId = r._id;
+    document.getElementById('admin-rider-title').textContent = r.name || 'Rider';
+
+    const detailEl = document.getElementById('admin-rider-details');
+    const completed = (riderOrders || []).filter(o => ['delivered', 'completed'].includes(o.status));
+    const totalEarnings = completed.reduce((s, o) => s + (Number(o.riderEarnings || o.deliveryFee) || 0), 0);
+    const totalTips = completed.reduce((s, o) => s + (Number(o.tip) || 0), 0);
+
+    detailEl.innerHTML = [
+      ['Name',        escapeHtml(r.name  || '—')],
+      ['Email',       escapeHtml(r.email || '—')],
+      ['Phone',       escapeHtml(r.phone || '—')],
+      ['Status',      r.isAvailable !== false ? 'Online' : 'Offline'],
+      ['Active',      r.active !== false ? 'Yes' : 'Deactivated'],
+      ['Joined',      escapeHtml(formatDateTime(r.createdAt))],
+      ['Deliveries',  completed.length],
+      ['Total Earned', `₦${formatNaira(totalEarnings)}`],
+      ['Total Tips',  `₦${formatNaira(totalTips)}`],
+    ].map(([l, v]) =>
+      `<div class="admin-detail-row"><span class="admin-detail-row__label">${escapeHtml(l)}</span><span class="admin-detail-row__value">${v}</span></div>`
+    ).join('');
+
+    const toggleBtn = document.getElementById('btn-admin-rider-toggle-active');
+    if (toggleBtn) {
+      toggleBtn.textContent = r.active !== false ? 'Deactivate Rider' : 'Reactivate Rider';
+      toggleBtn.dataset.riderId = r._id;
+      toggleBtn.dataset.currentActive = r.active !== false ? 'true' : 'false';
+    }
+
+    // Recent orders
+    const ordersEl = document.getElementById('admin-rider-orders');
+    ordersEl.innerHTML = '';
+    if (!riderOrders || !riderOrders.length) {
+      ordersEl.innerHTML = '<div class="admin-empty" style="font-size:12px;padding:8px 0">No deliveries yet.</div>';
+    } else {
+      riderOrders.slice(0, 8).forEach(o => ordersEl.appendChild(buildOrderCard(o)));
+    }
+
+    // Payout requests
+    const payoutsEl = document.getElementById('admin-rider-payouts');
+    payoutsEl.removeEventListener('click', handlePayoutAction);
+    payoutsEl.addEventListener('click', handlePayoutAction);
+    payoutsEl.innerHTML = '<div class="admin-empty" style="font-size:12px;padding:8px 0">Loading…</div>';
+    try {
+      const payouts = await SpaccleDB.getRiderPayoutRequests(r._id);
+      payoutsEl.innerHTML = '';
+      if (!payouts.length) {
+        payoutsEl.innerHTML = '<div class="admin-empty" style="font-size:12px;padding:8px 0">No payout requests.</div>';
+      } else {
+        payouts.forEach(p => {
+          const row = document.createElement('div');
+          row.className = 'admin-detail-row admin-detail-row--payout';
+          const statusLabel = p.status === 'approved' ? 'Approved' : p.status === 'paid' ? 'Paid' : p.status === 'rejected' ? 'Rejected' : 'Pending';
+          let actionsHtml = '';
+          if (!p.status || p.status === 'pending') {
+            actionsHtml = `
+              <div class="admin-payout-actions">
+                <button class="btn btn--sm btn--primary" data-payout-id="${p._id}" data-payout-action="approved">Approve</button>
+                <button class="btn btn--sm btn--warn" data-payout-id="${p._id}" data-payout-action="rejected">Reject</button>
+              </div>`;
+          } else if (p.status === 'approved') {
+            actionsHtml = `
+              <div class="admin-payout-actions">
+                <button class="btn btn--sm btn--primary" data-payout-id="${p._id}" data-payout-action="paid">Mark Paid</button>
+              </div>`;
+          }
+          row.innerHTML =
+            `<div class="admin-payout-info">` +
+            `<span class="admin-detail-row__label">${formatTime(p.createdAt)}</span>` +
+            `<span class="admin-detail-row__value">₦${formatNaira(p.amount)} — <em>${statusLabel}</em></span>` +
+            `</div>` +
+            actionsHtml;
+          payoutsEl.appendChild(row);
+        });
+      }
+    } catch {
+      payoutsEl.innerHTML = '<div class="admin-empty" style="font-size:12px;padding:8px 0">Could not load.</div>';
+    }
+
+    document.getElementById('admin-rider-overlay').classList.add('open');
+  }
+
+  function closeRiderDetail() {
+    document.getElementById('admin-rider-overlay').classList.remove('open');
+    currentRiderId = null;
+  }
+
+  async function handlePayoutAction(e) {
+    const btn = e.target.closest('[data-payout-id]');
+    if (!btn) return;
+    const payoutId = btn.dataset.payoutId;
+    const action = btn.dataset.payoutAction;
+    if (!payoutId || !action) return;
+    btn.disabled = true;
+    try {
+      await SpaccleDB.updatePayoutStatus(payoutId, action);
+      const riderId = currentRiderId;
+      if (riderId) {
+        const riderDoc = await SpaccleDB.getDocument(riderId);
+        const allRiderOrders = await SpaccleDB.getRiderOrders();
+        const riderOrders = allRiderOrders.filter(o => o.riderId === riderId || o.assignedDriver === riderId);
+        await openRiderDetail(riderDoc, riderOrders);
+      }
+      showToast(action === 'paid' ? 'Marked as paid' : action === 'approved' ? 'Payout approved' : 'Payout rejected');
+    } catch {
+      showToast('Could not update payout');
+      btn.disabled = false;
+    }
+  }
+
+  async function handleRiderToggleActive() {
+    const btn = document.getElementById('btn-admin-rider-toggle-active');
+    const riderId = btn?.dataset.riderId;
+    const isCurrentlyActive = btn?.dataset.currentActive === 'true';
+    if (!riderId) return;
+    btn.classList.add('loading');
+    try {
+      const doc = await SpaccleDB.getDocument(riderId);
+      await SpaccleDB.saveDocument({ ...doc, active: !isCurrentlyActive });
+      closeRiderDetail();
+      await loadRiders();
+      showToast(isCurrentlyActive ? 'Rider deactivated' : 'Rider reactivated');
+    } catch {
+      showToast('Could not update rider');
+    } finally {
+      btn.classList.remove('loading');
+    }
   }
 
   /* ── Support ────────────────────────────────────────────────────── */
@@ -879,11 +1127,17 @@ const AdminPage = (() => {
         document.getElementById('admin-cfg-couch-user').value  = s.couchdb?.username   || '';
       }
       updateSyncStatusLabel();
-    } catch {}
+    } catch (e) {
+      showToast('Could not load config settings');
+      console.error(e);
+    }
     try {
       const svcCfg = await SpaccleDB.ensureDefaultServices();
       renderServicePriceForm(svcCfg);
-    } catch {}
+    } catch (e) {
+      showToast('Could not load service pricing');
+      console.error(e);
+    }
     await loadItemPricingForm();
     await loadLegalEditor();
     await loadPromos();
@@ -1074,14 +1328,19 @@ const AdminPage = (() => {
   async function handleAdminChatSend() {
     if (!currentChatUserId) return;
     const input = document.getElementById('admin-chat-input');
+    const btn = document.getElementById('btn-admin-chat-send');
     const text = input.value.trim();
     if (!text) return;
     input.value = '';
+    if (btn) { btn.classList.add('loading'); btn.disabled = true; }
     try {
       await SpaccleDB.createChatMessage({ userId: currentChatUserId, text, fromAdmin: true });
       await loadAdminChatThread(currentChatUserId);
     } catch {
       showToast('Could not send message');
+      input.value = text;
+    } finally {
+      if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
     }
   }
 
@@ -1104,7 +1363,10 @@ const AdminPage = (() => {
         form.appendChild(label);
         form.appendChild(input);
       });
-    } catch {}
+    } catch (e) {
+      showToast('Could not load item pricing');
+      console.error(e);
+    }
   }
 
   async function handleItemPricingSave() {
@@ -1136,7 +1398,10 @@ const AdminPage = (() => {
       const privacyEl = document.getElementById('admin-legal-privacy');
       if (termsEl)   termsEl.value   = terms   || '';
       if (privacyEl) privacyEl.value = privacy || '';
-    } catch {}
+    } catch (e) {
+      showToast('Could not load legal content');
+      console.error(e);
+    }
   }
 
   async function handleLegalSave() {
@@ -1217,15 +1482,16 @@ const AdminPage = (() => {
     const orders = allOrders.length ? allOrders : [];
     const rows = orders.slice(0, 200).map(o =>
       `<tr>
-        <td>${o.publicId || o._id.slice(-8).toUpperCase()}</td>
-        <td>${statusLabel(o.status)}</td>
-        <td>${serviceLabel(o.service)}</td>
-        <td>${o.billingMode === 'subscription' ? 'Sub' : 'PAYG'}</td>
-        <td>₦${formatNaira(o.amountPaid || 0)}</td>
-        <td>${formatTime(o.createdAt)}</td>
+        <td>${escapeHtml(o.publicId || o._id.slice(-8).toUpperCase())}</td>
+        <td>${escapeHtml(statusLabel(o.status))}</td>
+        <td>${escapeHtml(serviceLabel(o.service))}</td>
+        <td>${escapeHtml(o.billingMode === 'subscription' ? 'Sub' : 'PAYG')}</td>
+        <td>₦${escapeHtml(formatNaira(o.amountPaid || 0))}</td>
+        <td>${escapeHtml(formatTime(o.createdAt))}</td>
       </tr>`
     ).join('');
     const win = window.open('', '_blank');
+    if (!win) { showToast('Popup blocked — allow popups for this site'); return; }
     win.document.write(`<!DOCTYPE html><html><head>
       <title>Spaccle Orders Export</title>
       <style>
@@ -1503,6 +1769,13 @@ const AdminPage = (() => {
           tab:   'orders',
           docId: doc._id,
         };
+      } else if (doc.type === 'payout_request' && doc.status === 'pending') {
+        notif = {
+          title: 'Payout Request',
+          body:  (doc.riderName || 'A rider') + ' requested ₦' + Number(doc.amount).toLocaleString(),
+          tab:   'riders',
+          docId: doc._id,
+        };
       }
 
       if (notif) {
@@ -1515,7 +1788,7 @@ const AdminPage = (() => {
 
   function escapeAdminHtml(str) {
     return String(str || '')
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   function updateSyncStatusLabel() {
@@ -1563,16 +1836,26 @@ const AdminPage = (() => {
 
   function statusLabel(s) {
     return ({
-      scheduled: 'Scheduled', confirmed: 'Confirmed', picked_up: 'Picked Up',
-      processing: 'Processing', cleaning: 'Cleaning', ready: 'Ready',
-      delivered: 'Delivered', cancelled: 'Cancelled',
+      scheduled:  'Scheduled',
+      confirmed:  'Confirmed',
+      assigned:   'Assigned to Rider',
+      picked_up:  'Picked Up',
+      processing: 'Processing',
+      cleaning:   'Cleaning',
+      ready:      'Ready for Delivery',
+      in_transit: 'Out for Delivery',
+      delivered:  'Delivered',
+      completed:  'Completed',
+      cancelled:  'Cancelled',
     })[s] || s || 'Unknown';
   }
 
   function statusPillClass(s) {
-    if (['delivered'].includes(s))             return 'admin-card__pill--resolved';
-    if (['cancelled'].includes(s))             return 'admin-card__pill--cancelled';
-    if (['scheduled', 'confirmed'].includes(s)) return 'admin-card__pill--open';
+    if (['delivered', 'completed'].includes(s))              return 'admin-card__pill--resolved';
+    if (['cancelled'].includes(s))                           return 'admin-card__pill--cancelled';
+    if (['scheduled', 'confirmed'].includes(s))              return 'admin-card__pill--open';
+    if (['processing', 'cleaning', 'ready'].includes(s))     return 'admin-card__pill--processing';
+    if (['assigned', 'picked_up', 'in_transit'].includes(s)) return 'admin-card__pill--transit';
     return '';
   }
 
