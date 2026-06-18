@@ -36,3 +36,5 @@ signing-key-credentials.txt
 *.zip
 www/js.zip
 www/index.zip
+
+docs/

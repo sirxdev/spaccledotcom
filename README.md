@@ -44,6 +44,12 @@ Spaccle is a hybrid laundry pickup and delivery app built with Apache Cordova. T
 
 ## Running the app locally
 
+# If Cordova CLI is not installed globally, run:
+> npm install -g cordova
+
+# Or use npx if you prefer not to install it globally
+> npx cordova prepare browser
+
 Install dependencies:
 
 ```bash

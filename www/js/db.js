@@ -369,10 +369,15 @@ async function listAllUsers() {
   }
 
   async function assignRider(orderId, riderId) {
-    const doc = await db.get(orderId);
     const nowIso = new Date().toISOString();
-    const updated = { ...doc, riderId, status: 'assigned', updatedAt: nowIso };
-    await db.put(updated);
+    // Use updateOrderStatus so the event history is appended and meta is stored on the doc
+    const updated = await updateOrderStatus(orderId, 'assigned', { riderId, assignedAt: nowIso });
+    // ensure riderId is present on the document
+    if (updated.riderId !== riderId) {
+      const patched = { ...updated, riderId, updatedAt: nowIso };
+      await db.put(patched).catch(() => {});
+      return patched;
+    }
     return updated;
   }
 
@@ -789,21 +794,33 @@ async function listAllUsers() {
 
   /* ── Driver/rider assignment ────────────────────────────────── */
   async function assignDriver(orderId, driverName) {
-    const doc = await db.get(orderId);
-    await db.put({ ...doc, assignedDriver: driverName || null, updatedAt: new Date().toISOString() });
+    const nowIso = new Date().toISOString();
+    // Record driver assignment in the event history
+    const updated = await updateOrderStatus(orderId, 'assigned', { assignedDriver: driverName || null, assignedAt: nowIso });
+    if (updated.assignedDriver !== driverName) {
+      const patched = { ...updated, assignedDriver: driverName || null, updatedAt: nowIso };
+      await db.put(patched).catch(() => {});
+      return patched;
+    }
+    return updated;
   }
 
   async function assignRiderToOrder(orderId, riderId = null, riderName = null) {
     const doc = await db.get(orderId);
     const nowIso = new Date().toISOString();
-    await db.put({
-      ...doc,
+    // Use updateOrderStatus to append event metadata and update status
+    const updated = await updateOrderStatus(orderId, riderId || riderName ? 'assigned' : doc.status, {
       riderId: riderId || null,
       assignedDriver: riderName || null,
-      status: riderId || riderName ? 'assigned' : doc.status,
       assignedAt: nowIso,
-      updatedAt: nowIso
     });
+
+    // Ensure rider fields are present on the document
+    if (updated.riderId !== (riderId || null) || updated.assignedDriver !== (riderName || null)) {
+      const patched = { ...updated, riderId: riderId || null, assignedDriver: riderName || null, updatedAt: nowIso };
+      await db.put(patched).catch(() => {});
+    }
+
     if (riderId || riderName) {
       await createNotification({
         title: 'New Order Assigned',
