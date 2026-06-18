@@ -846,7 +846,7 @@ async function listAllUsers() {
   }
 
   async function listAllNotifications() {
-    const res = await db.allDocs({ include_docs: true, startkey: 'notif_', endkey: 'notif_\uffff', descending: true });
+    const res = await db.allDocs({ include_docs: true, startkey: 'notif_\uffff', endkey: 'notif_', descending: true });
     return res.rows.map(r => r.doc).filter(d => d && d.type === 'notification');
   }
 
