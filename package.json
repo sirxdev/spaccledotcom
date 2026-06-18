@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "cordova prepare browser && concurrently --names \"SYNC,SERVER\" --prefix-colors \"cyan,magenta\" \"chokidar 'www/**/*' -c 'cordova prepare browser'\" \"live-server platforms/browser/www --port=3000 --no-browser --quiet\"",
     "start": "npm run dev",
-    "build": "cordova build browser"
+    "build": "cordova build browser",
+    "e2e": "node scripts/e2e-validation.mjs"
   },
   "keywords": [
     "ecosystem:cordova"
