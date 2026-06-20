@@ -2,20 +2,6 @@
 
 Spaccle is a hybrid laundry pickup and delivery app built with Apache Cordova. The repository contains the customer-facing app, rider/admin interfaces, and some website/backend content.
 
-## What this repo contains
-
-- `package.json` — Cordova app package, dependencies, and scripts
-- `config.xml` — Cordova app manifest and Android preferences
-- `build.json` — Android release signing configuration
-- `www/` — Cordova web app source
-  - `index.html` — single-page app shell
-  - `css/` — styles for app screens
-  - `js/` — JavaScript app logic
-  - `js/pages/` — page-specific scripts for home, auth, rider, admin, etc.
-- `res/` — icon assets for Android
-- `SpaccleWebsite/` — separate static website pages
-- `api/` — backend PHP endpoints used by the website
-
 ## Stack
 
 - Apache Cordova hybrid app
@@ -33,14 +19,6 @@ Spaccle is a hybrid laundry pickup and delivery app built with Apache Cordova. T
 - Order status tracking and assignment status flow
 - Support/chat thread handling
 - Admin order management, rider assignment, broadcast/notifications
-
-## How authentication and data sync work
-
-- User signup/login are handled in `www/js/db.js`.
-- A signup creates a local PouchDB user doc and stores hashed credentials.
-- The app uses `SpaccleDB.startSync()` to sync local PouchDB data with remote CouchDB.
-- The remote CouchDB connection is configured in `www/js/config.js`.
-- Login will work across devices only after the user document has synced successfully to remote CouchDB.
 
 ## Running the app locally
 

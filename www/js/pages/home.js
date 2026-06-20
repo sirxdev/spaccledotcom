@@ -649,6 +649,13 @@ const HomePage = (() => {
       return;
     }
 
+    if (!time) {
+      const timeEl = document.getElementById('pickup-time');
+      if (timeEl) timeEl.focus();
+      showToast('Please select a pickup time');
+      return;
+    }
+
     if (billingMode === 'payg' && (!itemsCount || itemsCount <= 0)) {
       const el = document.getElementById('pickup-items');
       if (el) el.focus();
