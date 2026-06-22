@@ -154,6 +154,12 @@ function init(data = {}) {
 
     // Order overlay: driver assign
     document.getElementById('btn-admin-driver-assign').addEventListener('click', handleDriverAssign);
+    document.getElementById('btn-admin-rider-change')?.addEventListener('click', () => {
+      const info = document.getElementById('admin-order-rider-info');
+      const form = document.getElementById('admin-order-assign-form');
+      if (info) info.style.display = 'none';
+      if (form) form.style.display = '';
+    });
   }
 
   function handleLogout() {
@@ -403,6 +409,8 @@ function init(data = {}) {
     if (order.exceedsItems)    rows.push(['⚠ Exceeds Plan', `Yes — ${escapeHtml(String(order.extraItemsCount || 0))} extra items`]);
     if (order.recurring)       rows.push(['Recurring',      'Set as recurring pickup']);
     if (order.rating)          rows.push(['Rating', '★'.repeat(order.rating) + ' ' + escapeHtml(order.ratingNote || '')]);
+    if (order.assignedDriver)  rows.push(['Driver / Agent', escapeHtml(order.assignedDriver)]);
+    else if (order.riderId)    rows.push(['Rider ID',      escapeHtml(order.riderId)]);
     detailEl.innerHTML = rows.map(([l, v]) =>
       `<div class="admin-detail-row">` +
       `<span class="admin-detail-row__label">${escapeHtml(l)}</span>` +
@@ -436,6 +444,22 @@ function init(data = {}) {
     }
 
     loadRidersForSelect();
+
+    const hasRider = !!(order.riderId || order.assignedDriver);
+    const riderInfo = document.getElementById('admin-order-rider-info');
+    const assignForm = document.getElementById('admin-order-assign-form');
+    if (riderInfo) {
+      if (hasRider) {
+        document.getElementById('admin-order-current-rider').textContent =
+          'Currently: ' + (order.assignedDriver || order.riderId);
+        riderInfo.style.display = '';
+        if (assignForm) assignForm.style.display = 'none';
+      } else {
+        riderInfo.style.display = 'none';
+        if (assignForm) assignForm.style.display = '';
+      }
+    }
+
     document.getElementById('admin-order-overlay').classList.add('open');
   }
 

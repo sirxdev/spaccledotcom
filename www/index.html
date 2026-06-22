@@ -2780,15 +2780,28 @@
         </div>
         <div class="admin-sheet__body">
           <div class="admin-detail-rows" id="admin-order-details"></div>
-          <div class="admin-panel-header" style="margin-top:16px;margin-bottom:8px">
-            <span class="form-label" style="margin:0">Assign Driver / Agent</span>
+          <!-- Assigned rider info (shown when rider already assigned) -->
+          <div id="admin-order-rider-info" style="display:none">
+            <div class="admin-panel-header" style="margin-top:16px;margin-bottom:8px">
+              <span class="form-label" style="margin:0">Driver / Agent</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+              <span style="flex:1;font-size:13px;color:var(--text)" id="admin-order-current-rider"></span>
+              <button class="btn btn--ghost btn--sm" id="btn-admin-rider-change">Change</button>
+            </div>
           </div>
-          <div style="display:flex;gap:8px;margin-bottom:16px">
-            <select class="form-input" id="admin-rider-select" style="flex:1">
-              <option value="">Select a rider…</option>
-            </select>
-            <input type="text" class="form-input" id="admin-driver-input" placeholder="Or enter name…" style="flex:1">
-            <button class="btn btn--primary btn--sm" id="btn-admin-driver-assign">Assign</button>
+          <!-- Assign form (hidden when rider already assigned) -->
+          <div id="admin-order-assign-form">
+            <div class="admin-panel-header" style="margin-top:16px;margin-bottom:8px">
+              <span class="form-label" style="margin:0">Assign Driver / Agent</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:16px">
+              <select class="form-input" id="admin-rider-select" style="flex:1">
+                <option value="">Select a rider…</option>
+              </select>
+              <input type="text" class="form-input" id="admin-driver-input" placeholder="Or enter name…" style="flex:1">
+              <button class="btn btn--primary btn--sm" id="btn-admin-driver-assign">Assign</button>
+            </div>
           </div>
           <div class="admin-panel-header" style="margin-bottom:8px">
             <span class="form-label" style="margin:0">Update Status</span>
