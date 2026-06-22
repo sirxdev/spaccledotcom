@@ -386,7 +386,9 @@ function setupSheets() {
   async function renderOrders() {
     try {
       const orders = await SpaccleDB.getRiderOrders();
+      console.log('DEBUG: All retrieved orders:', orders);
       const riderOrders = orders.filter(o => o.riderId === user._id || o.assignedDriver === user.name || o.assignedDriver === user._id);
+      console.log('DEBUG: Filtered riderOrders:', riderOrders);
       const pending = riderOrders.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.IN_TRANSIT || o.status === ORDER_STATUS.PROCESSING || o.status === ORDER_STATUS.CLEANING);
       const completed = riderOrders.filter(o => o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED);
       const today = riderOrders.filter(o => isToday(o.updatedAt));
