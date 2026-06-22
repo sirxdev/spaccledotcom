@@ -830,6 +830,24 @@ async function listAllUsers() {
     }
   }
 
+  async function unassignRider(orderId) {
+    const doc = await db.get(orderId);
+    const nowIso = new Date().toISOString();
+    const events = Array.isArray(doc.events) ? doc.events.slice() : [];
+    events.push({ status: 'confirmed', at: nowIso, note: 'Rider declined assignment' });
+    const updated = {
+      ...doc,
+      status: 'confirmed',
+      events,
+      updatedAt: nowIso,
+      riderId: null,
+      assignedDriver: null,
+      assignedAt: null,
+    };
+    await db.put(updated);
+    return updated;
+  }
+
   /* ── Broadcasts ─────────────────────────────────────────────────── */
   async function createBroadcast({ title, message, riderId = null }) {
     const id = `broadcast_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -1219,6 +1237,7 @@ async function listAllUsers() {
     listAllPromoCodes,
     assignDriver,
     assignRiderToOrder,
+    unassignRider,
     createBroadcast,
     createNotification,
     listAllNotifications,

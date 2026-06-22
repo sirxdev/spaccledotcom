@@ -601,7 +601,6 @@ function setupSheets() {
       pickup:    ORDER_STATUS.PICKED_UP,
       transit:   ORDER_STATUS.IN_TRANSIT,
       delivered: ORDER_STATUS.DELIVERED,
-      cancel:    ORDER_STATUS.CANCELLED,
     };
 
     if (action === 'tip') {
@@ -611,6 +610,15 @@ function setupSheets() {
 
     if (action === 'cancel') {
       if (!await showConfirm('Decline this order?')) return;
+      try {
+        await SpaccleDB.unassignRider(order._id);
+        closeOrderSheet();
+        await renderOrders();
+        showToast('Order declined');
+      } catch {
+        showToast('Failed to decline order');
+      }
+      return;
     }
 
     // Proof of delivery — require a note before marking delivered
@@ -626,7 +634,7 @@ function setupSheets() {
       await SpaccleDB.updateOrderStatus(order._id, newStatus);
       closeOrderSheet();
       await renderOrders();
-      showToast(action === 'cancel' ? 'Order declined' : 'Order updated');
+      showToast('Order updated');
     } catch (err) {
       showToast('Failed to update order');
     }
