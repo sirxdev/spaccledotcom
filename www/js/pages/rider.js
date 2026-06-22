@@ -167,7 +167,7 @@ const RiderPage = (() => {
   async function loadNotifications() {
     try {
       const notifs = await SpaccleDB.listAllNotifications();
-      const riderNotifs = notifs.filter(n => n.riderId === user._id || !n.riderId);
+      const riderNotifs = notifs.filter(n => n.riderId === user.userId || !n.riderId);
       renderNotifications(riderNotifs);
       updateNotifBadge(riderNotifs.length);
     } catch {
@@ -252,7 +252,7 @@ const RiderPage = (() => {
     try {
       await SpaccleDB.setPreference('rider_availability', isAvailable ? 'online' : 'offline');
       if (user) {
-        const doc = await SpaccleDB.getDocument(user._id).catch(() => null);
+        const doc = await SpaccleDB.getDocument(user.userId).catch(() => null);
         if (doc) await SpaccleDB.saveDocument({ ...doc, isAvailable });
       }
     } catch(e) {}
@@ -282,7 +282,7 @@ const RiderPage = (() => {
     if (!thread || !user) return;
     thread.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:16px">Loading…</div>';
     try {
-      const msgs = await SpaccleDB.getChatHistory(user._id);
+      const msgs = await SpaccleDB.getChatHistory(user.userId);
       if (!msgs.length) {
         thread.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:24px">No messages yet. Send us a message below.</div>';
         return;
@@ -313,7 +313,7 @@ const RiderPage = (() => {
     if (!text || !user) return;
     input.value = '';
     try {
-      await SpaccleDB.createChatMessage({ userId: user._id, text, fromAdmin: false });
+      await SpaccleDB.createChatMessage({ userId: user.userId, text, fromAdmin: false });
       await loadSupportThread();
     } catch {
       showToast('Could not send message');
@@ -387,7 +387,7 @@ function setupSheets() {
     try {
       const orders = await SpaccleDB.getRiderOrders();
       console.log('DEBUG: All retrieved orders:', orders);
-      const riderOrders = orders.filter(o => o.riderId === user._id || o.assignedDriver === user.name || o.assignedDriver === user._id);
+      const riderOrders = orders.filter(o => o.riderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId);
       console.log('DEBUG: Filtered riderOrders:', riderOrders);
       const pending = riderOrders.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.IN_TRANSIT || o.status === ORDER_STATUS.PROCESSING || o.status === ORDER_STATUS.CLEANING);
       const completed = riderOrders.filter(o => o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED);
@@ -718,7 +718,7 @@ function setupSheets() {
       const orders = await SpaccleDB.getRiderOrders();
       const completed = orders.filter(o =>
         (o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED) &&
-        (o.riderId === user._id || o.assignedDriver === user.name || o.assignedDriver === user._id)
+        (o.riderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId)
       );
 
       let totalEarnings = 0;
@@ -748,7 +748,7 @@ function setupSheets() {
   async function checkNewAdminMessages() {
     try {
       if (!user) return;
-      const msgs = await SpaccleDB.getChatHistory(user._id);
+      const msgs = await SpaccleDB.getChatHistory(user.userId);
       const unread = msgs.filter(m => m.fromAdmin && !m.read);
       if (unread.length > 0) {
         const badge = document.getElementById('rider-notif-badge');
@@ -783,7 +783,7 @@ function setupSheets() {
     const btn = document.getElementById('btn-rider-payout-request');
     if (btn) btn.classList.add('loading');
     try {
-      await SpaccleDB.createPayoutRequest({ riderId: user._id, riderName: user.name, amount });
+      await SpaccleDB.createPayoutRequest({ riderId: user.userId, riderName: user.name, amount });
       if (amountEl) amountEl.value = '';
       showToast('Payout request submitted');
       renderPayoutHistory();
@@ -798,7 +798,7 @@ function setupSheets() {
     const el = document.getElementById('rider-payout-history');
     if (!el || !user) return;
     try {
-      const payouts = await SpaccleDB.getRiderPayoutRequests(user._id);
+      const payouts = await SpaccleDB.getRiderPayoutRequests(user.userId);
       if (!payouts.length) {
         el.innerHTML = '<p style="font-size:13px;color:var(--text-3);margin-bottom:16px">No payout requests yet.</p>';
         return;
@@ -854,9 +854,9 @@ function setupSheets() {
 
         // New order assigned to this rider
         if (doc.type === 'order' && doc.status === ORDER_STATUS.ASSIGNED) {
-          const isForMe = doc.riderId === user._id ||
+          const isForMe = doc.riderId === user.userId ||
             doc.assignedDriver === user.name ||
-            doc.assignedDriver === user._id;
+            doc.assignedDriver === user.userId;
           if (!isForMe) return;
           showNewOrderAlert(doc);
           refresh();
@@ -865,9 +865,9 @@ function setupSheets() {
 
         // Order status updated for an order belonging to this rider
         if (doc.type === 'order') {
-          const isForMe = doc.riderId === user._id ||
+          const isForMe = doc.riderId === user.userId ||
             doc.assignedDriver === user.name ||
-            doc.assignedDriver === user._id;
+            doc.assignedDriver === user.userId;
           if (!isForMe) return;
           // Refresh silently when admin moves an order to READY
           if (doc.status === ORDER_STATUS.READY) {
