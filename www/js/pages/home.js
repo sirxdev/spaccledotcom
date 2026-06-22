@@ -675,14 +675,42 @@ const HomePage = (() => {
     setButtonLoading(btn, true);
 
     if (billingMode === 'subscription') {
+      let order;
+      try {
+        order = await SpaccleDB.createOrder({
+          userId: user.userId,
+          service: selectedService,
+          billingMode,
+          planId: subscription?.planId,
+          itemsCount: Number(itemsCount) || null,
+          pickupDay: day,
+          pickupTime: time,
+          address,
+          notes,
+          amountPaid: null,
+        });
+        if (document.getElementById('chk-recurring-pickup')?.checked) {
+          SpaccleDB.setRecurringPickup(user.userId, { dayOfWeek: new Date(day).getDay(), time, address, setAt: new Date().toISOString() }).catch(() => {});
+        }
+      } catch (createErr) {
+        showToast('Could not schedule: ' + (createErr?.message || 'unknown error'));
+        setButtonLoading(btn, false);
+        return;
+      }
       try {
         await SpaccleDB.consumeSubscription({ userId: user.userId, itemsCount });
-        await placeOrder({ userId: user.userId, day, time, address, notes, itemsCount });
-      } catch (err) {
-        showToast('Could not schedule: ' + (err?.message || 'unknown error'));
-      } finally {
-        setButtonLoading(btn, false);
+      } catch {
+        console.warn('Order created but subscription consumption failed — admin may need to debit manually');
       }
+      document.getElementById('pickup-address').value = '';
+      document.getElementById('pickup-notes').value = '';
+      if (document.getElementById('pickup-items')) document.getElementById('pickup-items').value = '';
+      closeAllSheets();
+      showToast('Pickup scheduled');
+      selectedOrderId = order._id;
+      switchTab('track');
+      setButtonLoading(btn, false);
+      await refresh();
       return;
     }
 
