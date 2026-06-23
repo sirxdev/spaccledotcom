@@ -40,7 +40,7 @@ Run in browser mode:
 npm run dev
 ```
 
-This starts a live-server and prepares the Cordova browser platform.
+This starts an http-server and watches for file changes via chokidar.
 
 ## Building for Android
 
@@ -62,7 +62,8 @@ Note: `package.json` currently defines `build` as `cordova build browser`, so An
 
 ## Important security notes
 
-- `www/js/config.js` currently contains CouchDB credentials and Paystack test keys.
+- `www/js/config.defaults.js` contains dev/test credentials and is committed. For production, create `www/js/config.js` (gitignored) with overrides — see the file for the merge pattern.
+- `www/js/config.js` is gitignored and was removed from git tracking. Existing clones should recreate it from `config.defaults.js` with production values.
 - `build.json` contains Android signing details and should never be committed in a public repo.
 
 ## Project structure summary

@@ -115,6 +115,18 @@ const SpaccleDB = (() => {
     return { _id: userId, name: userDoc.name, email: emailLower };
   }
 
+  async function deleteUser(userId) {
+    const doc = await db.get(userId);
+    const emailNorm = (doc.email || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    const indexId = 'user_email_' + emailNorm;
+    try {
+      const indexDoc = await db.get(indexId);
+      await db.bulkDocs([{ ...doc, _deleted: true }, { ...indexDoc, _deleted: true }]);
+    } catch {
+      await db.put({ ...doc, _deleted: true });
+    }
+  }
+
   async function loginUser({ email, password }) {
     const emailLower = email.toLowerCase().trim();
     const existingId = 'user_email_' + emailLower.replace(/[^a-z0-9]/g, '_');
@@ -1262,6 +1274,7 @@ async function listAllUsers() {
     stopWatchChanges,
     getDocument,
     saveDocument,
+    deleteUser,
     createPayoutRequest,
     getRiderPayoutRequests,
     updatePayoutStatus,

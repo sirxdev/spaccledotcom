@@ -94,6 +94,16 @@ function init(data = {}) {
     document.getElementById('btn-admin-rider-close').addEventListener('click', closeRiderDetail);
     document.getElementById('admin-rider-backdrop').addEventListener('click', closeRiderDetail);
     document.getElementById('btn-admin-rider-toggle-active').addEventListener('click', handleRiderToggleActive);
+    document.getElementById('btn-admin-rider-add').addEventListener('click', handleRiderAdd);
+    document.getElementById('btn-admin-rider-form-save').addEventListener('click', handleRiderFormSave);
+    document.getElementById('btn-admin-rider-form-cancel').addEventListener('click', () => {
+      document.getElementById('admin-rider-form').style.display = 'none';
+      document.getElementById('admin-rider-form').dataset.editId = '';
+      document.getElementById('rider-form-password').required = true;
+      document.getElementById('rider-form-password').parentElement.style.display = '';
+    });
+    document.getElementById('btn-admin-rider-edit').addEventListener('click', handleRiderEdit);
+    document.getElementById('btn-admin-rider-delete').addEventListener('click', handleRiderDelete);
 
     // Users
     document.getElementById('btn-admin-users-refresh').addEventListener('click', loadUsers);
@@ -832,6 +842,86 @@ function init(data = {}) {
       showToast(isCurrentlyActive ? 'Rider deactivated' : 'Rider reactivated');
     } catch {
       showToast('Could not update rider');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  async function handleRiderAdd() {
+    const form = document.getElementById('admin-rider-form');
+    form.style.display = form.style.display === 'none' ? '' : 'none';
+    if (form.style.display !== 'none') {
+      form.dataset.editId = '';
+      ['rider-form-name','rider-form-email','rider-form-phone','rider-form-password'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('rider-form-password').required = true;
+      document.getElementById('rider-form-password').parentElement.style.display = '';
+    }
+  }
+
+  async function handleRiderFormSave() {
+    const form = document.getElementById('admin-rider-form');
+    const editId = form.dataset.editId || '';
+    const name = document.getElementById('rider-form-name').value.trim();
+    const email = document.getElementById('rider-form-email').value.trim();
+    const phone = document.getElementById('rider-form-phone').value.trim();
+    const password = document.getElementById('rider-form-password').value;
+    if (!name || !email) { showToast('Name and email are required'); return; }
+    if (!editId && !password) { showToast('Password is required for new riders'); return; }
+    const btn = document.getElementById('btn-admin-rider-form-save');
+    btn.classList.add('loading');
+    try {
+      if (editId) {
+        const doc = await SpaccleDB.getDocument(editId);
+        await SpaccleDB.saveDocument({ ...doc, name, email, phone, updatedAt: new Date().toISOString() });
+        showToast('Rider updated');
+      } else {
+        await SpaccleDB.createUser({ name, email, phone, password, role: 'rider', recoveryQuestion: '', recoveryAnswer: '' });
+        showToast('Rider added');
+      }
+      form.style.display = 'none';
+      form.dataset.editId = '';
+      document.getElementById('rider-form-password').required = true;
+      document.getElementById('rider-form-password').parentElement.style.display = '';
+      ['rider-form-name','rider-form-email','rider-form-phone','rider-form-password'].forEach(id => document.getElementById(id).value = '');
+      closeRiderDetail();
+      await loadRiders();
+    } catch (e) {
+      showToast(e?.message === 'EMAIL_TAKEN' ? 'Email already in use' : 'Could not save rider');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  async function handleRiderEdit() {
+    const riderId = currentRiderId;
+    if (!riderId) return;
+    const doc = await SpaccleDB.getDocument(riderId);
+    const form = document.getElementById('admin-rider-form');
+    document.getElementById('rider-form-name').value = doc.name || '';
+    document.getElementById('rider-form-email').value = doc.email || '';
+    document.getElementById('rider-form-phone').value = doc.phone || '';
+    document.getElementById('rider-form-password').value = '';
+    document.getElementById('rider-form-password').required = false;
+    document.getElementById('rider-form-password').parentElement.style.display = 'none';
+    form.dataset.editId = riderId;
+    form.style.display = '';
+    closeRiderDetail();
+  }
+
+  async function handleRiderDelete() {
+    const riderId = currentRiderId;
+    if (!riderId) return;
+    const doc = await SpaccleDB.getDocument(riderId);
+    if (!confirm(`Delete rider "${doc.name || 'Unnamed'}"? This cannot be undone.`)) return;
+    const btn = document.getElementById('btn-admin-rider-delete');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.deleteUser(riderId);
+      closeRiderDetail();
+      await loadRiders();
+      showToast('Rider deleted');
+    } catch {
+      showToast('Could not delete rider');
     } finally {
       btn.classList.remove('loading');
     }
