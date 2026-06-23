@@ -253,7 +253,7 @@ const HomePage = (() => {
 
   async function loadSavedAddresses() {
     const pillsEl = document.getElementById('saved-address-pills');
-    const addrInput = document.getElementById('pickup-address');
+    let addrInput = document.getElementById('pickup-address');
     const saveBtn = document.getElementById('btn-save-address');
     if (!pillsEl || !addrInput) return;
 
@@ -292,6 +292,7 @@ const HomePage = (() => {
     // Clone to remove any previously-attached listeners from earlier sheet opens
     const freshInput = addrInput.cloneNode(true);
     addrInput.replaceWith(freshInput);
+    addrInput = freshInput;
     freshInput.addEventListener('input', () => {
       if (saveBtn) saveBtn.style.display = freshInput.value.trim() ? '' : 'none';
     });
