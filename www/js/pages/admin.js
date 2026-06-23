@@ -409,7 +409,7 @@ function init(data = {}) {
     if (order.exceedsItems)    rows.push(['⚠ Exceeds Plan', `Yes — ${escapeHtml(String(order.extraItemsCount || 0))} extra items`]);
     if (order.recurring)       rows.push(['Recurring',      'Set as recurring pickup']);
     if (order.rating)          rows.push(['Rating', '★'.repeat(order.rating) + ' ' + escapeHtml(order.ratingNote || '')]);
-    if (order.assignedDriver)  rows.push(['Driver / Agent', escapeHtml(order.assignedDriver)]);
+    if (order.assignedDriver)  rows.push(['Rider', escapeHtml(order.assignedDriver)]);
     else if (order.riderId)    rows.push(['Rider ID',      escapeHtml(order.riderId)]);
     detailEl.innerHTML = rows.map(([l, v]) =>
       `<div class="admin-detail-row">` +
