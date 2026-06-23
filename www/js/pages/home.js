@@ -1450,6 +1450,7 @@ const HomePage = (() => {
               showToast('Subscription active!');
               billingMode = 'subscription';
               updateBillingUI();
+              setTimeout(() => openSheet('sheet-schedule'), 400);
             })
             .catch(function() { showToast('Subscribed but could not update UI — please restart'); });
         },
