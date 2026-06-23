@@ -848,6 +848,15 @@ async function listAllUsers() {
     return updated;
   }
 
+  async function autoAssignRider(orderId) {
+    const riders = await listAllRiders();
+    const online = riders.filter(r => r.isAvailable !== false);
+    if (!online.length) return null;
+    const rider = online[0];
+    await assignRiderToOrder(orderId, rider._id, rider.name);
+    return rider;
+  }
+
   /* ── Broadcasts ─────────────────────────────────────────────────── */
   async function createBroadcast({ title, message, riderId = null }) {
     const id = `broadcast_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -1238,6 +1247,7 @@ async function listAllUsers() {
     assignDriver,
     assignRiderToOrder,
     unassignRider,
+    autoAssignRider,
     createBroadcast,
     createNotification,
     listAllNotifications,

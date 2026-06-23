@@ -472,6 +472,22 @@ function init(data = {}) {
     btn.classList.add('loading');
     try {
       await SpaccleDB.setOrderStatus(order._id, newStatus);
+
+      if (newStatus === 'confirmed') {
+        try {
+          const rider = await SpaccleDB.autoAssignRider(order._id);
+          if (rider) {
+            closeOrderDetail();
+            await loadOrders(currentOrderFilter);
+            if (activeTab === 'dashboard') loadDashboard();
+            showToast('Order confirmed — ' + (rider.name || 'Rider') + ' assigned automatically');
+            return;
+          }
+        } catch {
+          // Auto-assign failed — order stays confirmed for manual assignment
+        }
+      }
+
       closeOrderDetail();
       await loadOrders(currentOrderFilter);
       if (activeTab === 'dashboard') loadDashboard();
