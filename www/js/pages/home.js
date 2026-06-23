@@ -677,6 +677,10 @@ const HomePage = (() => {
 
     if (billingMode === 'subscription') {
       let order;
+      const exceedsEl = document.getElementById('chk-exceeds-plan');
+      const extraEl = document.getElementById('extra-items-count');
+      const exceedsItems = exceedsEl?.checked;
+      const extraItemsCount = exceedsItems ? (parseInt(extraEl?.value) || 0) : null;
       try {
         order = await SpaccleDB.createOrder({
           userId: user.userId,
@@ -684,6 +688,7 @@ const HomePage = (() => {
           billingMode,
           planId: subscription?.planId,
           itemsCount: Number(itemsCount) || null,
+          extraItemsCount,
           pickupDay: day,
           pickupTime: time,
           address,
@@ -700,8 +705,12 @@ const HomePage = (() => {
       }
       try {
         await SpaccleDB.consumeSubscription({ userId: user.userId, itemsCount });
-      } catch {
-        console.warn('Order created but subscription consumption failed — admin may need to debit manually');
+      } catch (consumeErr) {
+        if (consumeErr.message === 'NOT_ENOUGH_ITEMS') {
+          showToast('Not enough items remaining in your plan — reduce the count or check "Exceeds plan" for extra items');
+        } else {
+          console.warn('Order created but subscription consumption failed — admin may need to debit manually');
+        }
       }
       document.getElementById('pickup-address').value = '';
       document.getElementById('pickup-notes').value = '';
@@ -1233,7 +1242,7 @@ const HomePage = (() => {
 
     const isSub = billingMode === 'subscription';
     // For subscription users items count is optional (no validation), for PAYG it's required
-    if (itemsGroup) itemsGroup.style.display = isSub ? 'none' : '';
+    if (itemsGroup) itemsGroup.style.display = '';
 
     const exceedGroup = document.getElementById('exceed-plan-group');
     if (exceedGroup) exceedGroup.style.display = isSub ? '' : 'none';
