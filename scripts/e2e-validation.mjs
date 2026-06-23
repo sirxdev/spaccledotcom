@@ -120,29 +120,22 @@ async function run() {
     notes: 'E2E test order',
   });
 
-  assert('1', order.status === 'scheduled', `Order created with status scheduled (got ${order.status})`);
+  // Order is auto-assigned during creation; status may be 'assigned' if rider available
+  assert('1', order.status === 'assigned', `Order created and auto-assigned (got ${order.status})`);
   assert('1b', hasEvent(order, 'scheduled'), 'events contains scheduled entry');
 
-  // 2 — Admin confirms
-  let updated = await SpaccleDB.setOrderStatus(order._id, 'confirmed');
-  assert('2', updated.status === 'confirmed', `Admin confirm → confirmed (got ${updated.status})`);
-  assert('2b', hasEvent(updated, 'confirmed'), 'events contains confirmed entry');
-
-  // 3 — Admin assigns rider
+  // 2 — Order auto-assigned during creation (no admin confirm needed)
+  let updated = await SpaccleDB.getOrder(order._id);
   const riders = await SpaccleDB.listAllRiders();
   const rider = riders.find(r => r.email === 'rider@spaccle.com');
-  assert('3-pre', !!rider, 'Quick Rider exists in DB');
 
-  await SpaccleDB.assignRiderToOrder(order._id, rider._id, rider.name);
-  updated = await SpaccleDB.getOrder(order._id);
-
-  assert('3', updated.status === 'assigned', `Assign rider → assigned (got ${updated.status})`);
-  assert('3b', updated.riderId === rider._id, 'order doc has riderId');
-  assert('3c', !!updated.assignedAt, 'order doc has assignedAt');
-  assert('3d', hasEvent(updated, 'assigned', e => e.riderId === rider._id), 'events contains assigned with riderId');
+  assert('2', updated.status === 'assigned', `Order auto-assigned → assigned (got ${updated.status})`);
+  assert('2b', !!updated.riderId, 'order doc has riderId');
+  assert('2c', !!updated.assignedAt, 'order doc has assignedAt');
+  assert('2d', hasEvent(updated, 'assigned'), 'events contains assigned entry');
 
   const notifs = await SpaccleDB.listAllNotifications();
-  assert('3e', notifs.some(n => n.riderId === rider._id && n.title === 'New Order Assigned'), 'rider assignment notification created');
+  assert('2e', notifs.some(n => n.riderId === rider._id && n.title === 'New Order Assigned'), 'rider assignment notification created');
 
   // 4 — Rider picks up
   updated = await SpaccleDB.updateOrderStatus(order._id, 'picked_up');
@@ -185,7 +178,7 @@ async function run() {
   assert('post-events', events.length >= 9, `events array has ${events.length} entries (expected ≥9)`);
   assert('post-chrono', chronological, 'events are chronologically ordered');
 
-  const expectedFlow = ['scheduled', 'confirmed', 'assigned', 'picked_up', 'processing', 'cleaning', 'ready', 'in_transit', 'delivered', 'completed'];
+  const expectedFlow = ['scheduled', 'assigned', 'picked_up', 'processing', 'cleaning', 'ready', 'in_transit', 'delivered', 'completed'];
   const eventStatuses = events.map(e => e.status);
   const flowOk = expectedFlow.every(s => eventStatuses.includes(s));
   assert('post-flow', flowOk, `events cover full lifecycle (${eventStatuses.join(' → ')})`);

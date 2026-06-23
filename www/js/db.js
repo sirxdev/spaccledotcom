@@ -303,7 +303,8 @@ async function ensureAdminUser({ email, password, name }) {
     };
 
     await db.put(doc);
-    return doc;
+    const rider = await autoAssignRider(_id).catch(() => null);
+    return rider ? db.get(_id) : doc;
   }
 
   async function getOrder(orderId) {
