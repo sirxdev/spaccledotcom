@@ -16,7 +16,6 @@ window.SpaccleConfig = {
   },
   paystack: {
     publicKey: 'pk_test_24974050c73158123114cb38e06a32ccdd33cbf1',
-    secretKey: 'sk_test_7f5362e8d5e17571dc71026883807ae9a58d9e32',
     currency: 'NGN',
   },
   admin: {

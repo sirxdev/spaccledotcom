@@ -2904,7 +2904,8 @@
   </div><!-- #page-admin -->
 
   <script src="js/paystack_inline.js"></script>
-  <script src="js/config.js"></script>
+  <script src="js/config.defaults.js"></script>
+  <script>try{var x=new XMLHttpRequest;x.open('GET','js/config.js',false);x.send();if(x.status===200||x.status===0)new Function(x.responseText)()}catch(e){}</script>
   <script src="cordova.js"></script>
   <script src="js/pouchdb.min.js"></script>
   <script src="js/db.js"></script>
