@@ -1025,7 +1025,7 @@ const HomePage = (() => {
 
       const meta = document.createElement('div');
       meta.className = 'order-item__meta';
-      meta.textContent = `${order.pickupDay || '—'}, ${order.pickupTime || '—'}`;
+      meta.textContent = `Ordered ${formatTime(order.createdAt)}`;
 
       left.appendChild(id);
       left.appendChild(title);
@@ -1100,6 +1100,7 @@ const HomePage = (() => {
       <div class="order-detail__row"><strong>Amount:</strong> ${order.amountPaid ? '₦' + Number(order.amountPaid).toLocaleString() : '—'}</div>
       <div class="order-detail__row"><strong>Rider:</strong> ${escapeHtml(order.assignedDriver || order.riderId || '—')}</div>
       <div class="order-detail__row"><strong>Status:</strong> ${escapeHtml(statusLabel(order.status))}</div>
+      <div class="order-detail__row"><strong>Ordered:</strong> ${escapeHtml(formatTime(order.createdAt))}</div>
       <div style="height:12px"></div>
       ${timeline}
     `;

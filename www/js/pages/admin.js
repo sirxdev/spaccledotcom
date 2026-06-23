@@ -421,7 +421,6 @@ function init(data = {}) {
     actionsEl.innerHTML = '';
     const btnDefs = [
       { label: 'Confirm Order',        status: 'confirmed',  trigger: ['scheduled'],                                       ghost: false },
-      { label: 'Mark Picked Up',       status: 'picked_up',  trigger: ['confirmed', 'assigned'],                          ghost: false },
       { label: 'Mark Processing',      status: 'processing', trigger: ['picked_up'],                                      ghost: false },
       { label: 'Mark Cleaning',        status: 'cleaning',   trigger: ['processing'],                                     ghost: false },
       { label: 'Mark Ready',           status: 'ready',      trigger: ['cleaning', 'processing'],                         ghost: false },
