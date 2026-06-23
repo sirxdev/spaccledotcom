@@ -83,6 +83,7 @@ function init(data = {}) {
         currentOrderFilter = pill.dataset.filter;
         document.querySelectorAll('#admin-orders-filter .admin-filter-pill')
           .forEach(p => p.classList.toggle('active', p === pill));
+        orderPage[currentOrderFilter] = 0;
         renderFilteredOrders();
       });
     });
@@ -95,15 +96,11 @@ function init(data = {}) {
     document.getElementById('admin-rider-backdrop').addEventListener('click', closeRiderDetail);
     document.getElementById('btn-admin-rider-toggle-active').addEventListener('click', handleRiderToggleActive);
     document.getElementById('btn-admin-rider-add').addEventListener('click', handleRiderAdd);
-    document.getElementById('btn-admin-rider-form-save').addEventListener('click', handleRiderFormSave);
-    document.getElementById('btn-admin-rider-form-cancel').addEventListener('click', () => {
-      document.getElementById('admin-rider-form').style.display = 'none';
-      document.getElementById('admin-rider-form').dataset.editId = '';
-      document.getElementById('rider-form-password').required = true;
-      document.getElementById('rider-form-password').parentElement.style.display = '';
-    });
     document.getElementById('btn-admin-rider-edit').addEventListener('click', handleRiderEdit);
     document.getElementById('btn-admin-rider-delete').addEventListener('click', handleRiderDelete);
+    document.getElementById('btn-admin-rider-editor-save').addEventListener('click', handleRiderEditorSave);
+    document.getElementById('btn-admin-rider-editor-close').addEventListener('click', closeRiderEditor);
+    document.getElementById('admin-rider-editor-backdrop').addEventListener('click', closeRiderEditor);
 
     // Users
     document.getElementById('btn-admin-users-refresh').addEventListener('click', loadUsers);
@@ -296,8 +293,11 @@ function init(data = {}) {
 
   /* ── Orders ─────────────────────────────────────────────────────── */
   let orderSearchTerm = '';
+  let orderPage = {};
+  const ORDER_PAGE_SIZE = 30;
 
   async function loadOrders(filter) {
+    orderPage = {};
     orderSearchTerm = '';
     const searchEl = document.getElementById('admin-orders-search');
     if (searchEl) searchEl.value = '';
@@ -345,24 +345,44 @@ function init(data = {}) {
       });
     }
 
+    const page = orderPage[currentOrderFilter] || 0;
+    const totalPages = Math.ceil(filtered.length / ORDER_PAGE_SIZE) || 1;
+    const start = 0;
+    const end = Math.min((page + 1) * ORDER_PAGE_SIZE, filtered.length);
+
     list.innerHTML = '';
     if (!filtered.length) {
       list.innerHTML = '<div class="admin-empty">No orders found.</div>';
       return;
     }
-    filtered.slice(0, 150).forEach(order => {
+    filtered.slice(start, end).forEach(order => {
       const card = buildOrderCard(order);
       card.style.cursor = 'pointer';
       card.addEventListener('click', () => openOrderDetail(order));
       list.appendChild(card);
     });
-    if (filtered.length > 150) {
-      const notice = document.createElement('div');
-      notice.className = 'admin-empty';
-      notice.style.cssText = 'padding:8px 0;font-size:12px;color:var(--text-3)';
-      notice.textContent = `Showing first 150 of ${filtered.length} results`;
-      list.appendChild(notice);
+
+    const nav = document.createElement('div');
+    nav.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0';
+    if (page > 0) {
+      const prev = document.createElement('button');
+      prev.className = 'btn btn--ghost btn--sm';
+      prev.textContent = '← Previous';
+      prev.addEventListener('click', () => { orderPage[currentOrderFilter] = page - 1; renderFilteredOrders(); });
+      nav.appendChild(prev);
     }
+    const info = document.createElement('span');
+    info.style.cssText = 'font-size:12px;color:var(--text-3)';
+    info.textContent = `${end} of ${filtered.length}`;
+    nav.appendChild(info);
+    if (end < filtered.length) {
+      const next = document.createElement('button');
+      next.className = 'btn btn--ghost btn--sm';
+      next.textContent = 'Next →';
+      next.addEventListener('click', () => { orderPage[currentOrderFilter] = page + 1; renderFilteredOrders(); });
+      nav.appendChild(next);
+    }
+    list.appendChild(nav);
   }
 
   function buildOrderCard(order) {
@@ -672,6 +692,15 @@ function init(data = {}) {
         return;
       }
 
+      const seen = new Map();
+      riders = riders.filter(r => {
+        const key = (r.email || r.name || '').toLowerCase().trim();
+        if (!key) return true;
+        if (seen.has(key)) return false;
+        seen.set(key, true);
+        return true;
+      });
+
       riders.forEach(r => {
         const riderOrders = orders.filter(o =>
           o.riderId === r._id || o.assignedDriver === r.name || o.assignedDriver === r._id);
@@ -847,27 +876,49 @@ function init(data = {}) {
     }
   }
 
-  async function handleRiderAdd() {
-    const form = document.getElementById('admin-rider-form');
-    form.style.display = form.style.display === 'none' ? '' : 'none';
-    if (form.style.display !== 'none') {
-      form.dataset.editId = '';
-      ['rider-form-name','rider-form-email','rider-form-phone','rider-form-password'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('rider-form-password').required = true;
-      document.getElementById('rider-form-password').parentElement.style.display = '';
-    }
+  let riderEditorMode = 'add';
+
+  function openRiderEditor(mode, riderId = '') {
+    riderEditorMode = mode;
+    document.getElementById('admin-rider-editor-title').textContent = mode === 'edit' ? 'Edit Rider' : 'Add Rider';
+    document.getElementById('admin-rider-editor-overlay').classList.add('open');
+    const passwordRow = document.getElementById('rider-form-password');
+    passwordRow.required = mode === 'add';
+    passwordRow.parentElement.style.display = mode === 'add' ? '' : 'none';
+    document.getElementById('btn-admin-rider-editor-save').dataset.editId = riderId;
   }
 
-  async function handleRiderFormSave() {
-    const form = document.getElementById('admin-rider-form');
-    const editId = form.dataset.editId || '';
+  function closeRiderEditor() {
+    document.getElementById('admin-rider-editor-overlay').classList.remove('open');
+    document.getElementById('btn-admin-rider-editor-save').dataset.editId = '';
+    ['rider-form-name','rider-form-email','rider-form-phone','rider-form-password'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  async function handleRiderAdd() {
+    openRiderEditor('add');
+  }
+
+  async function handleRiderEdit() {
+    const riderId = currentRiderId;
+    if (!riderId) return;
+    const doc = await SpaccleDB.getDocument(riderId);
+    document.getElementById('rider-form-name').value = doc.name || '';
+    document.getElementById('rider-form-email').value = doc.email || '';
+    document.getElementById('rider-form-phone').value = doc.phone || '';
+    document.getElementById('rider-form-password').value = '';
+    closeRiderDetail();
+    openRiderEditor('edit', riderId);
+  }
+
+  async function handleRiderEditorSave() {
+    const editId = document.getElementById('btn-admin-rider-editor-save').dataset.editId || '';
     const name = document.getElementById('rider-form-name').value.trim();
     const email = document.getElementById('rider-form-email').value.trim();
     const phone = document.getElementById('rider-form-phone').value.trim();
     const password = document.getElementById('rider-form-password').value;
     if (!name || !email) { showToast('Name and email are required'); return; }
     if (!editId && !password) { showToast('Password is required for new riders'); return; }
-    const btn = document.getElementById('btn-admin-rider-form-save');
+    const btn = document.getElementById('btn-admin-rider-editor-save');
     btn.classList.add('loading');
     try {
       if (editId) {
@@ -878,34 +929,13 @@ function init(data = {}) {
         await SpaccleDB.createUser({ name, email, phone, password, role: 'rider', recoveryQuestion: '', recoveryAnswer: '' });
         showToast('Rider added');
       }
-      form.style.display = 'none';
-      form.dataset.editId = '';
-      document.getElementById('rider-form-password').required = true;
-      document.getElementById('rider-form-password').parentElement.style.display = '';
-      ['rider-form-name','rider-form-email','rider-form-phone','rider-form-password'].forEach(id => document.getElementById(id).value = '');
-      closeRiderDetail();
+      closeRiderEditor();
       await loadRiders();
     } catch (e) {
       showToast(e?.message === 'EMAIL_TAKEN' ? 'Email already in use' : 'Could not save rider');
     } finally {
       btn.classList.remove('loading');
     }
-  }
-
-  async function handleRiderEdit() {
-    const riderId = currentRiderId;
-    if (!riderId) return;
-    const doc = await SpaccleDB.getDocument(riderId);
-    const form = document.getElementById('admin-rider-form');
-    document.getElementById('rider-form-name').value = doc.name || '';
-    document.getElementById('rider-form-email').value = doc.email || '';
-    document.getElementById('rider-form-phone').value = doc.phone || '';
-    document.getElementById('rider-form-password').value = '';
-    document.getElementById('rider-form-password').required = false;
-    document.getElementById('rider-form-password').parentElement.style.display = 'none';
-    form.dataset.editId = riderId;
-    form.style.display = '';
-    closeRiderDetail();
   }
 
   async function handleRiderDelete() {

@@ -2597,18 +2597,6 @@
             <button class="btn btn--ghost btn--sm" id="btn-admin-riders-refresh">Refresh</button>
           </div>
         </div>
-        <div id="admin-rider-form" style="display:none;padding:12px 16px;border-bottom:1px solid var(--border-color,#eee)">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-            <input class="form-input" id="rider-form-name" placeholder="Full name">
-            <input class="form-input" id="rider-form-email" type="email" placeholder="Email address">
-            <input class="form-input" id="rider-form-phone" type="tel" placeholder="Phone number">
-            <input class="form-input" id="rider-form-password" type="password" placeholder="Password">
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn--primary btn--sm" id="btn-admin-rider-form-save">Save</button>
-            <button class="btn btn--ghost btn--sm" id="btn-admin-rider-form-cancel">Cancel</button>
-          </div>
-        </div>
         <div id="admin-riders-list"></div>
       </div>
 
@@ -2632,6 +2620,27 @@
               <button class="btn btn--ghost btn--full" id="btn-admin-rider-edit">Edit Rider</button>
               <button class="btn btn--warn btn--full" id="btn-admin-rider-delete">Delete Rider</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rider editor overlay -->
+      <div class="admin-overlay" id="admin-rider-editor-overlay">
+        <div class="admin-overlay__backdrop" id="admin-rider-editor-backdrop"></div>
+        <div class="admin-sheet">
+          <div class="admin-sheet__handle"></div>
+          <div class="admin-sheet__header">
+            <h3 class="admin-sheet__title" id="admin-rider-editor-title">Add Rider</h3>
+            <button class="admin-sheet__close" id="btn-admin-rider-editor-close" aria-label="Close">✕</button>
+          </div>
+          <div class="admin-sheet__body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+              <input class="form-input" id="rider-form-name" placeholder="Full name">
+              <input class="form-input" id="rider-form-email" type="email" placeholder="Email address">
+              <input class="form-input" id="rider-form-phone" type="tel" placeholder="Phone number">
+              <input class="form-input" id="rider-form-password" type="password" placeholder="Password">
+            </div>
+            <button class="btn btn--primary btn--full" id="btn-admin-rider-editor-save">Save Rider</button>
           </div>
         </div>
       </div>

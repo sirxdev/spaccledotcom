@@ -76,14 +76,6 @@ const SpaccleDB = (() => {
     const emailLower = email.toLowerCase().trim();
     const existingId = 'user_email_' + emailLower.replace(/[^a-z0-9]/g, '_');
 
-    try {
-      await db.get(existingId);
-      throw new Error('EMAIL_TAKEN');
-    } catch (e) {
-      if (e.message === 'EMAIL_TAKEN') throw e;
-      if (e.status !== 404) throw e;
-    }
-
     const salt = generateSalt();
     const passwordHash = await hashPassword(password, salt);
     const userId = generateId();
@@ -111,7 +103,18 @@ const SpaccleDB = (() => {
       email: emailLower,
     };
 
-    await db.bulkDocs([userDoc, indexDoc]);
+    try {
+      await db.put(indexDoc);
+    } catch (e) {
+      if (e.status === 409) throw new Error('EMAIL_TAKEN');
+      throw e;
+    }
+    try {
+      await db.put(userDoc);
+    } catch (e) {
+      await db.remove(indexDoc).catch(() => {});
+      throw e;
+    }
     return { _id: userId, name: userDoc.name, email: emailLower };
   }
 
