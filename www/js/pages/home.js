@@ -691,7 +691,7 @@ const HomePage = (() => {
           amountPaid: null,
         });
         if (document.getElementById('chk-recurring-pickup')?.checked) {
-          SpaccleDB.setRecurringPickup(user.userId, { dayOfWeek: new Date(day).getDay(), time, address, setAt: new Date().toISOString() }).catch(() => {});
+          SpaccleDB.setRecurringPickup(user.userId, { dayOfWeek: new Date(day).getDay(), time, address, setAt: new Date().toISOString() }).catch(() => showToast('Could not save recurring pickup'));
         }
       } catch (createErr) {
         showToast('Could not schedule: ' + (createErr?.message || 'unknown error'));
@@ -809,7 +809,7 @@ const HomePage = (() => {
 
     if (recurring && billingMode === 'subscription') {
       SpaccleDB.setRecurringPickup(userId, { dayOfWeek: new Date(day).getDay(), time, address, setAt: new Date().toISOString() })
-        .catch(() => {});
+        .catch(() => showToast('Could not save recurring pickup'));
     }
 
     const btn = document.getElementById('btn-schedule-confirm');
