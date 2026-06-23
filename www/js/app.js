@@ -48,19 +48,21 @@ const App = (() => {
     pages.rider.module      = RiderPage;
     pages.admin.module      = AdminPage;
 
-    try {
-      const adminCfg = window.SpaccleConfig?.admin;
-      if (adminCfg?.email && adminCfg?.password) {
-        SpaccleDB.ensureAdminUser({ email: adminCfg.email, password: adminCfg.password, name: adminCfg.name }).catch(() => {});
-      }
-    } catch {}
-
-    try {
-      const riderCfg = window.SpaccleConfig?.rider;
-      if (riderCfg?.email && riderCfg?.password) {
-        SpaccleDB.ensureRiderUser({ email: riderCfg.email, password: riderCfg.password, name: riderCfg.name, phone: riderCfg.phone }).catch(() => {});
-      }
-    } catch {}
+    if (window.SpaccleConfig?.env === 'test') {
+      try {
+        const adminCfg = window.SpaccleConfig?.admin;
+        if (adminCfg?.email && adminCfg?.password) {
+          SpaccleDB.ensureAdminUser({ email: adminCfg.email, password: adminCfg.password, name: adminCfg.name }).catch(() => {});
+        }
+      } catch {}
+      
+      try {
+        const riderCfg = window.SpaccleConfig?.rider;
+        if (riderCfg?.email && riderCfg?.password) {
+          SpaccleDB.ensureRiderUser({ email: riderCfg.email, password: riderCfg.password, name: riderCfg.name, phone: riderCfg.phone }).catch(() => {});
+        }
+      } catch {}
+    }
 
     current = 'splash';
     SplashPage.init();
