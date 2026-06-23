@@ -400,6 +400,8 @@ function setupSheets() {
       if (pending.length > 0) {
         activeOrder = pending[0];
         renderActiveOrder(pending[0]);
+        const eyebrow = document.querySelector('.rider-active-card__eyebrow');
+        if (eyebrow) eyebrow.textContent = pending.length > 1 ? `${pending.length} Active Orders` : 'Active Order';
       } else {
         clearActiveOrder();
       }
