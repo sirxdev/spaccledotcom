@@ -587,8 +587,9 @@ function setupSheets() {
     if (s === ORDER_STATUS.ASSIGNED) {
       actions.push({ id: 'pickup', label: 'Mark Picked Up from Customer', style: 'primary' });
       actions.push({ id: 'cancel', label: 'Decline Order', style: 'danger' });
-    } else if (s === ORDER_STATUS.PICKED_UP || s === ORDER_STATUS.PROCESSING || s === ORDER_STATUS.CLEANING) {
-      // Laundry is at facility — rider waits
+    } else if (s === ORDER_STATUS.PICKED_UP) {
+      actions.push({ id: 'facility', label: 'Dropped at Facility', style: 'primary' });
+    } else if (s === ORDER_STATUS.PROCESSING || s === ORDER_STATUS.CLEANING) {
       actionsEl.innerHTML = `
         <div class="rider-sheet-waiting">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -630,6 +631,7 @@ function setupSheets() {
   async function handleOrderAction(action, order) {
     const statusMap = {
       pickup:    ORDER_STATUS.PICKED_UP,
+      facility:  ORDER_STATUS.PROCESSING,
       transit:   ORDER_STATUS.IN_TRANSIT,
       delivered: ORDER_STATUS.DELIVERED,
     };
