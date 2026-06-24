@@ -537,6 +537,27 @@ function setupSheets() {
     document.getElementById('rider-sheet-items').textContent = (order.itemsCount || 0) + ' items';
     document.getElementById('rider-sheet-customer').textContent = order.customerName || 'N/A';
     document.getElementById('rider-sheet-phone').textContent = formatPhone(order.customerPhone);
+    document.getElementById('rider-sheet-time').textContent = order.pickupTime || '—';
+    document.getElementById('rider-sheet-notes').textContent = order.notes || '—';
+
+    const pickupStage = ['assigned', 'picked_up'].includes(order.status);
+    const deliveryStage = ['ready', 'in_transit'].includes(order.status);
+    const doneStage = ['delivered', 'completed'].includes(order.status);
+
+    const pickupAddr = document.getElementById('rider-sheet-addr-pickup');
+    const deliveryAddr = document.getElementById('rider-sheet-addr-delivery');
+    pickupAddr.style.opacity = '';
+    deliveryAddr.style.opacity = '';
+    document.getElementById('rider-sheet-pickup').style.fontWeight = '';
+    document.getElementById('rider-sheet-delivery').style.fontWeight = '';
+
+    pickupAddr.style.display = pickupStage || doneStage ? '' : 'none';
+    deliveryAddr.style.display = deliveryStage || doneStage ? '' : 'none';
+    document.getElementById('rider-sheet-row-time').style.display = pickupStage ? '' : 'none';
+    document.getElementById('rider-sheet-row-notes').style.display = pickupStage ? '' : 'none';
+
+    if (pickupStage) pickupAddr.style.opacity = '1';
+    if (deliveryStage) deliveryAddr.style.opacity = '1';
 
     renderOrderProgress(order.status, 'rider-sheet-progress', 'rider-facility-note');
     renderOrderActions(order);

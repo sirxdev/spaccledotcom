@@ -2309,7 +2309,7 @@
         <div class="rider-sheet__id">#<span id="rider-sheet-order-id">SP-0001</span></div>
         <div class="rider-sheet__status" id="rider-sheet-order-status">Assigned</div>
         <div class="rider-sheet__addresses">
-          <div class="rider-sheet__addr">
+          <div class="rider-sheet__addr" id="rider-sheet-addr-pickup">
             <div class="rider-sheet__addr-icon" style="background:#E8F4FF">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#4A90E2" stroke-width="1.8"/>
@@ -2321,7 +2321,7 @@
               <span id="rider-sheet-pickup">Loading...</span>
             </div>
           </div>
-          <div class="rider-sheet__addr">
+          <div class="rider-sheet__addr" id="rider-sheet-addr-delivery">
             <div class="rider-sheet__addr-icon" style="background:#E6FBF6">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M12 2L8 6H5l1 14h12L19 6h-3L12 2z" stroke="#06D6A0" stroke-width="1.8"/>
@@ -2335,6 +2335,10 @@
           </div>
         </div>
         <div class="rider-sheet__info">
+          <div class="rider-sheet__row" id="rider-sheet-row-time">
+            <span>Pickup Time</span>
+            <span id="rider-sheet-time">—</span>
+          </div>
           <div class="rider-sheet__row">
             <span>Items</span>
             <span id="rider-sheet-items">0 items</span>
@@ -2346,6 +2350,10 @@
           <div class="rider-sheet__row">
             <span>Phone</span>
             <span id="rider-sheet-phone">N/A</span>
+          </div>
+          <div class="rider-sheet__row" id="rider-sheet-row-notes">
+            <span>Pickup Notes</span>
+            <span id="rider-sheet-notes">—</span>
           </div>
         </div>
         <div class="rider-sheet__progress" id="rider-sheet-progress"></div>
