@@ -478,6 +478,7 @@ function setupSheets() {
     const steps = [
       { id: ORDER_STATUS.ASSIGNED,   label: 'Accepted' },
       { id: ORDER_STATUS.PICKED_UP,  label: 'Picked Up' },
+      { id: 'facility',              label: 'At Facility' },
       { id: ORDER_STATUS.READY,      label: 'Ready' },
       { id: ORDER_STATUS.IN_TRANSIT, label: 'Delivering' },
       { id: ORDER_STATUS.DELIVERED,  label: 'Delivered' },
@@ -493,12 +494,19 @@ function setupSheets() {
       ORDER_STATUS.DELIVERED,
       ORDER_STATUS.COMPLETED,
     ];
-    const currentIndex = statusOrder.indexOf(status);
 
-    // Map processing/cleaning onto the READY step visually
     const stepIndex = (s) => {
-      if (s === ORDER_STATUS.PROCESSING || s === ORDER_STATUS.CLEANING) return 1.5;
-      return steps.findIndex(st => st.id === s);
+      const map = {
+        [ORDER_STATUS.ASSIGNED]:   0,
+        [ORDER_STATUS.PICKED_UP]:  1,
+        [ORDER_STATUS.PROCESSING]: 2,
+        [ORDER_STATUS.CLEANING]:   2,
+        [ORDER_STATUS.READY]:      3,
+        [ORDER_STATUS.IN_TRANSIT]: 4,
+        [ORDER_STATUS.DELIVERED]:  5,
+        [ORDER_STATUS.COMPLETED]:  5,
+      };
+      return map[s] ?? 0;
     };
     const activeStepIndex = stepIndex(status);
 
