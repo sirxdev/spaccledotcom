@@ -294,7 +294,7 @@ function init(data = {}) {
   /* ── Orders ─────────────────────────────────────────────────────── */
   let orderSearchTerm = '';
   let orderPage = {};
-  const ORDER_PAGE_SIZE = 30;
+  const ORDER_PAGE_SIZE = 15;
 
   async function loadOrders(filter) {
     orderPage = {};
@@ -681,10 +681,9 @@ function init(data = {}) {
     const list = document.getElementById('admin-riders-list');
     list.innerHTML = '<div class="admin-empty">Loading…</div>';
     try {
-      const [riders, orders] = await Promise.all([
-        SpaccleDB.listAllRiders(),
-        SpaccleDB.listAllOrders(),
-      ]);
+      const riders = await SpaccleDB.listAllRiders();
+      let orders = [];
+      try { orders = await SpaccleDB.listAllOrders(); } catch (e) { console.warn('loadRiders: orders failed', e); }
 
       list.innerHTML = '';
       if (!riders.length) {
@@ -693,7 +692,7 @@ function init(data = {}) {
       }
 
       const seen = new Map();
-      riders = riders.filter(r => {
+      const unique = riders.filter(r => {
         const key = (r.email || r.name || '').toLowerCase().trim();
         if (!key) return true;
         if (seen.has(key)) return false;
@@ -701,7 +700,7 @@ function init(data = {}) {
         return true;
       });
 
-      riders.forEach(r => {
+      unique.forEach(r => {
         const riderOrders = orders.filter(o =>
           o.riderId === r._id || o.assignedDriver === r.name || o.assignedDriver === r._id);
         const completed = riderOrders.filter(o => ['delivered', 'completed'].includes(o.status));
@@ -741,7 +740,8 @@ function init(data = {}) {
         card.addEventListener('click', () => openRiderDetail(r, riderOrders));
         list.appendChild(card);
       });
-    } catch {
+    } catch (e) {
+      console.warn('loadRiders error:', e);
       list.innerHTML = '<div class="admin-empty">Failed to load riders.</div>';
     }
   }
