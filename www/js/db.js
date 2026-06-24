@@ -285,7 +285,7 @@ async function ensureAdminUser({ email, password, name }) {
     return `SP-${short.toUpperCase()}`;
   }
 
-  async function createOrder({ userId, service, billingMode = 'payg', planId = null, itemsCount = null, pickupDay, pickupTime, address, notes, paystackRef = null, amountPaid = null, exceedsItems = false, extraItemsCount = null, recurring = false }) {
+  async function createOrder({ userId, service, billingMode = 'payg', planId = null, itemsCount = null, pickupDay, pickupTime, address, deliveryAddress, notes, paystackRef = null, amountPaid = null, exceedsItems = false, extraItemsCount = null, recurring = false }) {
     if (!userId) throw new Error('MISSING_USER');
     const nowIso = new Date().toISOString();
     const _id = generateOrderId(userId);
@@ -307,6 +307,7 @@ async function ensureAdminUser({ email, password, name }) {
       pickupDay,
       pickupTime,
       address,
+      deliveryAddress,
       notes,
       exceedsItems,
       extraItemsCount,

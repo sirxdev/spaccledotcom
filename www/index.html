@@ -1334,6 +1334,19 @@
         </div>
 
         <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="deliver-back-checkbox" class="checkbox-input" checked>
+            <span class="checkbox-custom"></span>
+            <span class="checkbox-text">Deliver back to this address</span>
+          </label>
+        </div>
+
+        <div class="form-group" id="delivery-address-group" style="display:none">
+          <label class="form-label" for="delivery-address">Delivery address</label>
+          <input class="form-input" id="delivery-address" placeholder="Apartment, street, city" autocomplete="street-address" />
+        </div>
+
+        <div class="form-group">
           <label class="form-label" for="pickup-notes">Notes (optional)</label>
           <textarea class="form-input form-textarea" id="pickup-notes" rows="3" placeholder="Gate code, instructions, preferred drop-off…"></textarea>
         </div>

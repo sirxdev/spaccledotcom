@@ -401,6 +401,10 @@ const HomePage = (() => {
     });
 
     document.getElementById('btn-schedule-confirm').addEventListener('click', handleScheduleConfirm);
+    document.getElementById('deliver-back-checkbox').addEventListener('change', e => {
+      const group = document.getElementById('delivery-address-group');
+      if (group) group.style.display = e.target.checked ? 'none' : '';
+    });
     document.getElementById('btn-billing-payg').addEventListener('click', () => setBillingMode('payg'));
     document.getElementById('btn-billing-sub').addEventListener('click', () => setBillingMode('subscription'));
     document.getElementById('btn-open-subscribe').addEventListener('click', openSubscriptionSheet);
@@ -641,6 +645,10 @@ const HomePage = (() => {
     const addressEl = document.getElementById('pickup-address');
     const notes = document.getElementById('pickup-notes').value.trim();
     const address = addressEl.value.trim();
+    const deliverBackCheckbox = document.getElementById('deliver-back-checkbox');
+    const deliveryAddress = deliverBackCheckbox && deliverBackCheckbox.checked
+      ? address
+      : (document.getElementById('delivery-address')?.value.trim() || address);
     const itemsRaw = document.getElementById('pickup-items') ? document.getElementById('pickup-items').value : '';
     const itemsCount = Math.floor(Number(String(itemsRaw).replace(/[^0-9.]/g, '')) || 0);
 
@@ -692,6 +700,7 @@ const HomePage = (() => {
           pickupDay: day,
           pickupTime: time,
           address,
+          deliveryAddress,
           notes,
           amountPaid: null,
         });
@@ -750,7 +759,7 @@ const HomePage = (() => {
         const ps = document.getElementById('promo-status');
         if (pi) pi.value = '';
         if (ps) ps.textContent = '';
-        await placeOrder({ userId: user.userId, day, time, address, notes, itemsCount });
+        await placeOrder({ userId: user.userId, day, time, address, deliveryAddress, notes, itemsCount });
         return;
       }
 
@@ -768,7 +777,7 @@ const HomePage = (() => {
             const statusEl = document.getElementById('promo-status');
             if (statusEl) statusEl.textContent = '';
           }
-          placeOrder({ userId: user.userId, day, time, address, notes, itemsCount, paystackRef: reference })
+          placeOrder({ userId: user.userId, day, time, address, deliveryAddress, notes, itemsCount, paystackRef: reference })
             .catch(function() { showToast('Order save failed — contact support'); });
         },
         onClose: function() {
@@ -787,7 +796,7 @@ const HomePage = (() => {
     // button loading cleared in callback/onClose
   }
 
-  async function placeOrder({ userId, day, time, address, notes, itemsCount, paystackRef = null }) {
+  async function placeOrder({ userId, day, time, address, deliveryAddress, notes, itemsCount, paystackRef = null }) {
     const svcCfg = servicesConfig?.[selectedService] || {};
     const pricePerItem = svcCfg.pricePerItem || 900;
     const amountPaid = billingMode === 'payg' ? (Number(itemsCount) || 0) * pricePerItem : null;
@@ -808,6 +817,7 @@ const HomePage = (() => {
       pickupDay: day,
       pickupTime: time,
       address,
+      deliveryAddress,
       notes,
       paystackRef,
       amountPaid,
@@ -1105,6 +1115,7 @@ const HomePage = (() => {
       <div class="order-detail__row"><strong>Service:</strong> ${escapeHtml(serviceName(order.service))}</div>
       <div class="order-detail__row"><strong>Pickup:</strong> ${escapeHtml(`${order.pickupDay || '—'}, ${order.pickupTime || '—'}`)}</div>
       <div class="order-detail__row"><strong>Address:</strong> ${escapeHtml(order.address || '—')}</div>
+      <div class="order-detail__row"><strong>Delivery:</strong> ${escapeHtml(order.deliveryAddress || order.address || '—')}</div>
       <div class="order-detail__row"><strong>Items:</strong> ${escapeHtml(String(order.itemsCount || '—'))}</div>
       <div class="order-detail__row"><strong>Amount:</strong> ${order.amountPaid ? '₦' + Number(order.amountPaid).toLocaleString() : '—'}</div>
       <div class="order-detail__row"><strong>Rider:</strong> ${escapeHtml(order.assignedDriver || order.riderId || '—')}</div>
