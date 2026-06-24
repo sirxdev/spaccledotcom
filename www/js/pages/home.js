@@ -1002,7 +1002,6 @@ const HomePage = (() => {
       assigned:   0,
       picked_up:  1,
       processing: 1,
-      cleaning:   1,
       ready:      2,
       in_transit: 2,
       delivered:  3,
@@ -1174,7 +1173,7 @@ const HomePage = (() => {
     const flow = [
       { statuses: ['scheduled', 'confirmed'],              label: 'Scheduled',   sub: 'Pickup window confirmed.' },
       { statuses: ['assigned', 'picked_up'],               label: 'Picked up',   sub: 'Driver collected your laundry.' },
-      { statuses: ['processing', 'cleaning'],              label: 'Cleaning',    sub: 'Cleaning + quality check.' },
+      { statuses: ['processing'],              label: 'Cleaning',    sub: 'Cleaning + quality check.' },
       { statuses: ['ready', 'in_transit'],                 label: 'Out for Delivery', sub: 'On the way to you.' },
       { statuses: ['delivered', 'completed'],              label: 'Delivered',   sub: 'Delivered to your address.' },
     ];

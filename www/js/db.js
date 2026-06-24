@@ -418,7 +418,7 @@ async function listAllUsers() {
   }
 
   function nextStatus(current) {
-    const flow = ['scheduled', 'confirmed', 'assigned', 'picked_up', 'processing', 'cleaning', 'ready', 'in_transit', 'delivered', 'completed'];
+    const flow = ['scheduled', 'confirmed', 'assigned', 'picked_up', 'processing', 'ready', 'in_transit', 'delivered', 'completed'];
     const idx = flow.indexOf(current);
     if (idx === -1) return current;
     return flow[Math.min(idx + 1, flow.length - 1)];

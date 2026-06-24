@@ -149,7 +149,7 @@ async function run() {
   assert('4c', riderOrders.some(o => o._id === order._id), 'assigned order visible in rider order list');
 
   // 5 — Admin facility steps
-  for (const status of ['processing', 'cleaning', 'ready']) {
+  for (const status of ['processing', 'ready']) {
     updated = await SpaccleDB.setOrderStatus(order._id, status);
     assert(`5-${status}`, updated.status === status && hasEvent(updated, status), `Admin → ${status} with event`);
   }
@@ -175,10 +175,10 @@ async function run() {
   // Post-scenario: chronological events
   const events = finalOrder.events || [];
   const chronological = events.every((e, i) => i === 0 || e.at >= events[i - 1].at);
-  assert('post-events', events.length >= 9, `events array has ${events.length} entries (expected ≥9)`);
+  assert('post-events', events.length >= 8, `events array has ${events.length} entries (expected ≥8)`);
   assert('post-chrono', chronological, 'events are chronologically ordered');
 
-  const expectedFlow = ['scheduled', 'assigned', 'picked_up', 'processing', 'cleaning', 'ready', 'in_transit', 'delivered', 'completed'];
+  const expectedFlow = ['scheduled', 'assigned', 'picked_up', 'processing', 'ready', 'in_transit', 'delivered', 'completed'];
   const eventStatuses = events.map(e => e.status);
   const flowOk = expectedFlow.every(s => eventStatuses.includes(s));
   assert('post-flow', flowOk, `events cover full lifecycle (${eventStatuses.join(' → ')})`);

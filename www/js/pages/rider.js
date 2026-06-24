@@ -13,7 +13,6 @@ const RiderPage = (() => {
     ASSIGNED:   'assigned',
     PICKED_UP:  'picked_up',
     PROCESSING: 'processing',
-    CLEANING:   'cleaning',
     READY:      'ready',
     IN_TRANSIT: 'in_transit',
     DELIVERED:  'delivered',
@@ -389,7 +388,7 @@ function setupSheets() {
       console.log('DEBUG: All retrieved orders:', orders);
       const riderOrders = orders.filter(o => o.riderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId);
       console.log('DEBUG: Filtered riderOrders:', riderOrders);
-      const pending = riderOrders.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.IN_TRANSIT || o.status === ORDER_STATUS.PROCESSING || o.status === ORDER_STATUS.CLEANING);
+      const pending = riderOrders.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.IN_TRANSIT || o.status === ORDER_STATUS.PROCESSING);
       const completed = riderOrders.filter(o => o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED);
       const today = riderOrders.filter(o => isToday(o.updatedAt));
 
@@ -488,7 +487,6 @@ function setupSheets() {
       ORDER_STATUS.ASSIGNED,
       ORDER_STATUS.PICKED_UP,
       ORDER_STATUS.PROCESSING,
-      ORDER_STATUS.CLEANING,
       ORDER_STATUS.READY,
       ORDER_STATUS.IN_TRANSIT,
       ORDER_STATUS.DELIVERED,
@@ -500,7 +498,6 @@ function setupSheets() {
         [ORDER_STATUS.ASSIGNED]:   0,
         [ORDER_STATUS.PICKED_UP]:  1,
         [ORDER_STATUS.PROCESSING]: 2,
-        [ORDER_STATUS.CLEANING]:   2,
         [ORDER_STATUS.READY]:      3,
         [ORDER_STATUS.IN_TRANSIT]: 4,
         [ORDER_STATUS.DELIVERED]:  5,
@@ -525,7 +522,7 @@ function setupSheets() {
     }).join('');
 
     // Show a facility status note when laundry is being processed
-    const facilityStatuses = [ORDER_STATUS.PROCESSING, ORDER_STATUS.CLEANING];
+    const facilityStatuses = [ORDER_STATUS.PROCESSING];
     const noteEl = document.getElementById(noteId || 'rider-facility-note');
     if (noteEl) {
       noteEl.style.display = facilityStatuses.includes(status) ? '' : 'none';
@@ -589,7 +586,7 @@ function setupSheets() {
       actions.push({ id: 'cancel', label: 'Decline Order', style: 'danger' });
     } else if (s === ORDER_STATUS.PICKED_UP) {
       actions.push({ id: 'facility', label: 'Dropped at Facility', style: 'primary' });
-    } else if (s === ORDER_STATUS.PROCESSING || s === ORDER_STATUS.CLEANING) {
+    } else if (s === ORDER_STATUS.PROCESSING) {
       actionsEl.innerHTML = `
         <div class="rider-sheet-waiting">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -954,7 +951,6 @@ function setupSheets() {
       [ORDER_STATUS.ASSIGNED]:   'Assigned to You',
       [ORDER_STATUS.PICKED_UP]:  'Picked Up',
       [ORDER_STATUS.PROCESSING]: 'At Facility — Processing',
-      [ORDER_STATUS.CLEANING]:   'At Facility — Cleaning',
       [ORDER_STATUS.READY]:      'Ready for Delivery',
       [ORDER_STATUS.IN_TRANSIT]: 'Out for Delivery',
       [ORDER_STATUS.DELIVERED]:  'Delivered',
