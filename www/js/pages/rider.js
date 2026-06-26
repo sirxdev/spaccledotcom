@@ -465,6 +465,12 @@ function setupSheets() {
     document.getElementById('rider-active-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
     document.getElementById('rider-active-items').textContent = (order.itemsCount || 0) + ' items';
 
+    const atFacility = order.status === ORDER_STATUS.PROCESSING;
+    const pickupRow = document.getElementById('rider-active-pickup-row');
+    const deliveryRow = document.getElementById('rider-active-delivery-row');
+    if (pickupRow) pickupRow.style.display = atFacility ? 'none' : '';
+    if (deliveryRow) deliveryRow.style.display = atFacility ? 'none' : '';
+
     renderOrderProgress(order.status);
   }
 
@@ -526,9 +532,7 @@ function setupSheets() {
     const noteEl = document.getElementById(noteId || 'rider-facility-note');
     if (noteEl) {
       noteEl.style.display = facilityStatuses.includes(status) ? '' : 'none';
-      noteEl.textContent = status === ORDER_STATUS.PROCESSING
-        ? 'Laundry is being processed at the facility'
-        : 'Laundry is being cleaned — ready soon';
+      noteEl.textContent = 'At the facility — you\'ll be notified when ready for delivery';
     }
   }
 
@@ -950,7 +954,7 @@ function setupSheets() {
       [ORDER_STATUS.CONFIRMED]:  'Confirmed (legacy)',
       [ORDER_STATUS.ASSIGNED]:   'Assigned to You',
       [ORDER_STATUS.PICKED_UP]:  'Picked Up',
-      [ORDER_STATUS.PROCESSING]: 'At Facility — Processing',
+      [ORDER_STATUS.PROCESSING]: 'At Facility',
       [ORDER_STATUS.READY]:      'Ready for Delivery',
       [ORDER_STATUS.OUT_FOR_DELIVERY]: 'Out for Delivery',
       [ORDER_STATUS.DELIVERED]:  'Delivered',
