@@ -703,6 +703,19 @@ function init(data = {}) {
         meta.className = 'admin-card__meta';
         meta.textContent = (r.email || '') + ` · ${completed.length} deliveries`;
 
+        const zones = r.zoneIds || [];
+        if (zones.length) {
+          const zoneTags = document.createElement('div');
+          zoneTags.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;margin-top:4px';
+          zones.forEach(zId => {
+            const tag = document.createElement('span');
+            tag.style.cssText = 'font-size:10px;background:rgba(91,79,190,0.1);color:#5B4FBE;padding:1px 5px;border-radius:4px';
+            tag.textContent = zId.replace(/^zone_/i, '');
+            zoneTags.appendChild(tag);
+          });
+          meta.appendChild(zoneTags);
+        }
+
         const right = document.createElement('div');
         right.className = 'admin-card__right';
         right.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:4px';
@@ -744,6 +757,7 @@ function init(data = {}) {
       ['Status',      r.isAvailable !== false ? 'Online' : 'Offline'],
       ['Active',      r.active !== false ? 'Yes' : 'Deactivated'],
       ['Joined',      escapeHtml(formatDateTime(r.createdAt))],
+      ['Zones',       (r.zoneIds || []).length ? (r.zoneIds || []).map(z => escapeHtml(z.replace(/^zone_/i, ''))).join(', ') : 'None'],
       ['Deliveries',  completed.length],
       ['Total Earned', `₦${formatNaira(totalEarnings)}`],
       ['Total Tips',  `₦${formatNaira(totalTips)}`],
@@ -860,7 +874,7 @@ function init(data = {}) {
 
   let riderEditorMode = 'add';
 
-  function openRiderEditor(mode, riderId = '') {
+  async function openRiderEditor(mode, riderId = '', zoneIds = []) {
     riderEditorMode = mode;
     document.getElementById('admin-rider-editor-title').textContent = mode === 'edit' ? 'Edit Rider' : 'Add Rider';
     document.getElementById('admin-rider-editor-overlay').classList.add('open');
@@ -868,6 +882,7 @@ function init(data = {}) {
     passwordRow.required = mode === 'add';
     passwordRow.parentElement.style.display = mode === 'add' ? '' : 'none';
     document.getElementById('btn-admin-rider-editor-save').dataset.editId = riderId;
+    await renderZoneCheckboxes(zoneIds);
   }
 
   function closeRiderEditor() {
@@ -889,7 +904,7 @@ function init(data = {}) {
     document.getElementById('rider-form-phone').value = doc.phone || '';
     document.getElementById('rider-form-password').value = '';
     closeRiderDetail();
-    openRiderEditor('edit', riderId);
+    await openRiderEditor('edit', riderId, doc.zoneIds || []);
   }
 
   async function handleRiderEditorSave() {
@@ -900,15 +915,23 @@ function init(data = {}) {
     const password = document.getElementById('rider-form-password').value;
     if (!name || !email) { showToast('Name and email are required'); return; }
     if (!editId && !password) { showToast('Password is required for new riders'); return; }
+    const zoneIds = [];
+    document.querySelectorAll('#rider-zones-checkboxes input[type=checkbox]:checked').forEach(cb => {
+      zoneIds.push(cb.value);
+    });
     const btn = document.getElementById('btn-admin-rider-editor-save');
     btn.classList.add('loading');
     try {
       if (editId) {
         const doc = await SpaccleDB.getDocument(editId);
-        await SpaccleDB.saveDocument({ ...doc, name, email, phone, updatedAt: new Date().toISOString() });
+        await SpaccleDB.saveDocument({ ...doc, name, email, phone, zoneIds, updatedAt: new Date().toISOString() });
         showToast('Rider updated');
       } else {
-        await SpaccleDB.createUser({ name, email, phone, password, role: 'rider', recoveryQuestion: '', recoveryAnswer: '' });
+        const result = await SpaccleDB.createUser({ name, email, phone, password, role: 'rider', recoveryQuestion: '', recoveryAnswer: '' });
+        if (zoneIds.length) {
+          const doc = await SpaccleDB.getDocument(result._id);
+          await SpaccleDB.saveDocument({ ...doc, zoneIds });
+        }
         showToast('Rider added');
       }
       closeRiderEditor();
@@ -1804,6 +1827,25 @@ function init(data = {}) {
     } catch {
       showToast('Could not delete zone');
     }
+  }
+
+  async function renderZoneCheckboxes(selected = []) {
+    const container = document.getElementById('rider-zones-checkboxes');
+    if (!container) return;
+    container.innerHTML = '';
+    const zones = await SpaccleDB.listZones();
+    if (!zones.length) {
+      container.innerHTML = '<span style="font-size:12px;color:var(--text-3)">No zones configured. Add zones in Settings first.</span>';
+      return;
+    }
+    zones.forEach(z => {
+      const id = 'zone-cb-' + (z._id || z.name).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const checked = selected.includes(z._id) ? 'checked' : '';
+      const label = document.createElement('label');
+      label.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;padding:4px 8px;border-radius:6px;background:var(--bg-elevated, #f5f5f5)';
+      label.innerHTML = `<input type="checkbox" id="${id}" value="${escapeAdminHtml(z._id)}" ${checked}> ${escapeAdminHtml(z.name)}`;
+      container.appendChild(label);
+    });
   }
 
   /* ── Theme & language (admin) ───────────────────────────────────── */
