@@ -231,6 +231,8 @@ const RiderPage = (() => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendSupportMessage(); }
       });
       el('btn-rider-availability')?.addEventListener('click', toggleAvailability);
+      el('btn-rider-accept-order')?.addEventListener('click', handleAcceptOrder);
+      el('btn-rider-decline-order')?.addEventListener('click', handleDeclineOrder);
     } catch(e) { console.error('setupActions error:', e); }
   }
 
@@ -385,10 +387,10 @@ function setupSheets() {
   async function renderOrders() {
     try {
       const orders = await SpaccleDB.getRiderOrders();
-      console.log('DEBUG: All retrieved orders:', orders);
       const riderOrders = orders.filter(o => o.riderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId);
-      console.log('DEBUG: Filtered riderOrders:', riderOrders);
-      const pending = riderOrders.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.OUT_FOR_DELIVERY || o.status === ORDER_STATUS.PROCESSING);
+      const pendingAssignments = orders.filter(o => o.pendingRiderId === user.userId && o.status === 'scheduled' && !o.riderId);
+      const allActive = [...pendingAssignments, ...riderOrders];
+      const pending = allActive.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.OUT_FOR_DELIVERY || o.status === ORDER_STATUS.PROCESSING || (o.pendingRiderId === user.userId && !o.riderId));
       const completed = riderOrders.filter(o => o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED);
       const today = riderOrders.filter(o => isToday(o.updatedAt));
 
@@ -456,11 +458,12 @@ function setupSheets() {
   }
 
   function renderActiveOrder(order) {
+    const isPending = order.pendingRiderId === user.userId && !order.riderId;
     document.getElementById('rider-active-card').style.display = 'flex';
     document.getElementById('rider-no-active-card').style.display = 'none';
 
     document.getElementById('rider-active-id').textContent = order.orderId || order._id.slice(-6);
-    document.getElementById('rider-active-status').textContent = formatStatus(order.status);
+    document.getElementById('rider-active-status').textContent = isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
     document.getElementById('rider-active-pickup').textContent = order.pickupAddress || 'N/A';
     document.getElementById('rider-active-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
     document.getElementById('rider-active-items').textContent = (order.itemsCount || 0) + ' items';
@@ -468,15 +471,89 @@ function setupSheets() {
     const atFacility = order.status === ORDER_STATUS.PROCESSING;
     const pickupRow = document.getElementById('rider-active-pickup-row');
     const deliveryRow = document.getElementById('rider-active-delivery-row');
-    if (pickupRow) pickupRow.style.display = atFacility ? 'none' : '';
-    if (deliveryRow) deliveryRow.style.display = atFacility ? 'none' : '';
+    if (pickupRow) pickupRow.style.display = atFacility || isPending ? 'none' : '';
+    if (deliveryRow) deliveryRow.style.display = atFacility || isPending ? 'none' : '';
 
-    renderOrderProgress(order.status);
+    const progressEl = document.getElementById('rider-active-progress');
+    if (progressEl) progressEl.style.display = isPending ? 'none' : '';
+
+    if (isPending) {
+      startPendingTimer(order);
+    }
   }
 
   function clearActiveOrder() {
+    stopPendingTimer();
     document.getElementById('rider-active-card').style.display = 'none';
     document.getElementById('rider-no-active-card').style.display = 'flex';
+  }
+
+  let pendingTimerInterval = null;
+
+  function startPendingTimer(order) {
+    stopPendingTimer();
+    const pendingEl = document.getElementById('rider-active-pending');
+    const timerEl = document.getElementById('rider-pending-timer');
+    if (!pendingEl || !timerEl) return;
+    pendingEl.style.display = '';
+
+    const expiresAt = new Date(order.pendingExpiresAt).getTime();
+    const now = Date.now();
+    let remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
+
+    timerEl.textContent = remaining + 's';
+    if (remaining <= 0) {
+      handleDeclineOrder();
+      return;
+    }
+
+    pendingTimerInterval = setInterval(() => {
+      remaining--;
+      timerEl.textContent = remaining + 's';
+      if (remaining <= 0) {
+        stopPendingTimer();
+        handleDeclineOrder();
+      }
+    }, 1000);
+  }
+
+  function stopPendingTimer() {
+    if (pendingTimerInterval) {
+      clearInterval(pendingTimerInterval);
+      pendingTimerInterval = null;
+    }
+    const pendingEl = document.getElementById('rider-active-pending');
+    if (pendingEl) pendingEl.style.display = 'none';
+  }
+
+  async function handleAcceptOrder() {
+    if (!activeOrder) return;
+    stopPendingTimer();
+    try {
+      await SpaccleDB.acceptAssignment(activeOrder._id, user.userId);
+      showToast('Order accepted!');
+      await renderOrders();
+    } catch (err) {
+      if (err?.message === 'ASSIGNMENT_EXPIRED') {
+        showToast('Offer expired — order has been reassigned');
+      } else {
+        showToast('Could not accept order');
+      }
+      await renderOrders();
+    }
+  }
+
+  async function handleDeclineOrder() {
+    if (!activeOrder) return;
+    stopPendingTimer();
+    try {
+      await SpaccleDB.declineAssignment(activeOrder._id, user.userId);
+      showToast('Order declined');
+      await renderOrders();
+    } catch {
+      showToast('Could not decline order');
+      await renderOrders();
+    }
   }
 
   function renderOrderProgress(status, containerId, noteId) {
@@ -538,9 +615,10 @@ function setupSheets() {
 
   /* ── Order actions ────────────────────────────────────────── */
   function openOrderSheet(order) {
+    const isPending = order.pendingRiderId === user.userId && !order.riderId;
     activeOrder = order;
     document.getElementById('rider-sheet-order-id').textContent = order.orderId || order._id.slice(-6);
-    document.getElementById('rider-sheet-order-status').textContent = formatStatus(order.status);
+    document.getElementById('rider-sheet-order-status').textContent = isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
     document.getElementById('rider-sheet-pickup').textContent = order.pickupAddress || 'N/A';
     document.getElementById('rider-sheet-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
     document.getElementById('rider-sheet-items').textContent = (order.itemsCount || 0) + ' items';
@@ -560,10 +638,10 @@ function setupSheets() {
     document.getElementById('rider-sheet-pickup').style.fontWeight = '';
     document.getElementById('rider-sheet-delivery').style.fontWeight = '';
 
-    pickupAddr.style.display = pickupStage || doneStage ? '' : 'none';
-    deliveryAddr.style.display = deliveryStage || doneStage ? '' : 'none';
-    document.getElementById('rider-sheet-row-time').style.display = pickupStage ? '' : 'none';
-    document.getElementById('rider-sheet-row-notes').style.display = pickupStage ? '' : 'none';
+    pickupAddr.style.display = (pickupStage || doneStage) && !isPending ? '' : 'none';
+    deliveryAddr.style.display = (deliveryStage || doneStage) && !isPending ? '' : 'none';
+    document.getElementById('rider-sheet-row-time').style.display = pickupStage && !isPending ? '' : 'none';
+    document.getElementById('rider-sheet-row-notes').style.display = pickupStage && !isPending ? '' : 'none';
 
     if (pickupStage) pickupAddr.style.opacity = '1';
     if (deliveryStage) deliveryAddr.style.opacity = '1';
@@ -579,8 +657,25 @@ function setupSheets() {
   }
 
   function renderOrderActions(order) {
+    const isPending = order.pendingRiderId === user.userId && !order.riderId;
     const actionsEl = document.getElementById('rider-sheet-actions');
     if (!actionsEl) return;
+
+    if (isPending) {
+      actionsEl.innerHTML = `
+        <div style="text-align:center;padding:8px 0;font-size:13px;color:var(--text-2,#666)">Accept or decline within <strong id="rider-sheet-timer"></strong></div>
+        <button class="btn btn--primary btn--lg btn--full" id="btn-rider-sheet-accept" style="margin-bottom:8px">Accept Order</button>
+        <button class="btn btn--warn btn--lg btn--full" id="btn-rider-sheet-decline">Decline</button>
+      `;
+      document.getElementById('btn-rider-sheet-accept').addEventListener('click', handleAcceptOrder);
+      document.getElementById('btn-rider-sheet-decline').addEventListener('click', handleDeclineOrder);
+      const timerEl = document.getElementById('rider-sheet-timer');
+      if (timerEl && order.pendingExpiresAt) {
+        const remaining = Math.max(0, Math.floor((new Date(order.pendingExpiresAt).getTime() - Date.now()) / 1000));
+        timerEl.textContent = remaining + 's';
+      }
+      return;
+    }
 
     const actions = [];
     const s = order.status;

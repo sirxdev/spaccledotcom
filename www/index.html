@@ -2014,6 +2014,16 @@
               <span id="rider-active-items">0 items</span>
             </div>
             <div class="rider-active-card__progress" id="rider-active-progress"></div>
+            <div class="rider-active-card__pending" id="rider-active-pending" style="display:none;padding:12px 16px;border-top:1px solid var(--border,#eee);margin-top:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <span style="font-size:13px;font-weight:600">Accept this order?</span>
+                <span id="rider-pending-timer" style="font-size:13px;font-weight:700;color:var(--primary,#5B4FBE)">60s</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <button class="btn btn--primary btn--sm" id="btn-rider-accept-order">Accept</button>
+                <button class="btn btn--warn btn--sm" id="btn-rider-decline-order">Decline</button>
+              </div>
+            </div>
           </div>
 
           <!-- No active order -->

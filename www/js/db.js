@@ -916,7 +916,122 @@ async function listAllUsers() {
     candidates.sort((a, b) => (pendingCounts[a._id] || 0) - (pendingCounts[b._id] || 0));
 
     const rider = candidates[0];
-    await assignRiderToOrder(orderId, rider._id, rider.name);
+    const nowIso = new Date().toISOString();
+    const expiresAt = new Date(Date.now() + 60000).toISOString();
+    const attempts = (order.assignmentAttempts || 0) + 1;
+
+    await db.put({
+      ...order,
+      pendingRiderId: rider._id,
+      pendingExpiresAt: expiresAt,
+      assignmentAttempts: attempts,
+      updatedAt: nowIso,
+    });
+
+    await createNotification({
+      title: 'New Order Available',
+      message: `Order ${order.publicId || order._id.slice(-6)} is available. Tap to accept.`,
+      riderId: rider._id,
+      orderId,
+    });
+
+    return rider;
+  }
+
+  async function acceptAssignment(orderId, riderId) {
+    const order = await db.get(orderId);
+    if (order.pendingRiderId !== riderId) throw new Error('NOT_PENDING_FOR_RIDER');
+    if (order.pendingExpiresAt && new Date(order.pendingExpiresAt) < new Date()) throw new Error('ASSIGNMENT_EXPIRED');
+    const nowIso = new Date().toISOString();
+    const events = Array.isArray(order.events) ? order.events.slice() : [];
+    events.push({ status: 'assigned', at: nowIso, riderId, assignedAt: nowIso });
+    const updated = {
+      ...order,
+      status: 'assigned',
+      riderId,
+      assignedAt: nowIso,
+      pendingRiderId: null,
+      pendingExpiresAt: null,
+      events,
+      updatedAt: nowIso,
+    };
+    const result = await db.put(updated);
+    await createNotification({
+      title: 'New Order Assigned',
+      message: `You have been assigned to order ${order.publicId || orderId.slice(-6)}. Tap to view details.`,
+      riderId,
+      orderId,
+    });
+    return { ...updated, _rev: result.rev };
+  }
+
+  async function declineAssignment(orderId, riderId) {
+    const order = await db.get(orderId);
+    if (order.pendingRiderId !== riderId) return order;
+    const attempts = (order.assignmentAttempts || 0);
+    const nowIso = new Date().toISOString();
+
+    await db.put({
+      ...order,
+      pendingRiderId: null,
+      pendingExpiresAt: null,
+      updatedAt: nowIso,
+    });
+
+    if (attempts >= 3) {
+      await createNotification({
+        title: 'Assignment Failed',
+        message: `Order ${order.publicId || orderId.slice(-6)} could not be assigned after ${attempts} attempts.`,
+        orderId,
+      });
+      return order;
+    }
+
+    return tryNextCandidate(orderId, riderId);
+  }
+
+  async function tryNextCandidate(orderId, excludeRiderId) {
+    const [riders, order] = await Promise.all([
+      listAllRiders(),
+      db.get(orderId),
+    ]);
+    const online = riders.filter(r => r.isAvailable !== false && r._id !== excludeRiderId);
+    if (!online.length) {
+      await createNotification({
+        title: 'No Riders Available',
+        message: `Order ${order.publicId || orderId.slice(-6)} has no available riders.`,
+        orderId,
+      });
+      return null;
+    }
+
+    const orderZoneId = order.zoneId;
+    let candidates = online;
+    if (orderZoneId) {
+      const zoned = online.filter(r => r.zoneIds && r.zoneIds.includes(orderZoneId));
+      if (zoned.length) candidates = zoned;
+    }
+
+    const rider = candidates[0];
+    const nowIso = new Date().toISOString();
+    const expiresAt = new Date(Date.now() + 60000).toISOString();
+    const attempts = (order.assignmentAttempts || 0) + 1;
+
+    await db.put({
+      ...order,
+      pendingRiderId: rider._id,
+      pendingExpiresAt: expiresAt,
+      assignmentAttempts: attempts,
+      updatedAt: nowIso,
+    });
+
+    await createNotification({
+      title: 'New Order Available',
+      message: `Order ${order.publicId || order._id.slice(-6)} is available. Tap to accept.`,
+      riderId: rider._id,
+      orderId,
+    });
+
     return rider;
   }
 
@@ -1343,6 +1458,8 @@ async function listAllUsers() {
     assignRiderToOrder,
     unassignRider,
     autoAssignRider,
+    acceptAssignment,
+    declineAssignment,
     listZones,
     saveZones,
     matchZone,

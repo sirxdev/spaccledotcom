@@ -120,16 +120,17 @@ async function run() {
     notes: 'E2E test order',
   });
 
-  // Order is auto-assigned during creation; status may be 'assigned' if rider available
-  assert('1', order.status === 'assigned', `Order created and auto-assigned (got ${order.status})`);
-  assert('1b', hasEvent(order, 'scheduled'), 'events contains scheduled entry');
-
-  // 2 — Order auto-assigned during creation (no admin confirm needed)
-  let updated = await SpaccleDB.getOrder(order._id);
+  // Order is created as scheduled with a pending rider assignment
   const riders = await SpaccleDB.listAllRiders();
   const rider = riders.find(r => r.email === 'rider@spaccle.com');
 
-  assert('2', updated.status === 'assigned', `Order auto-assigned → assigned (got ${updated.status})`);
+  assert('1', order.status === 'scheduled', `Order created (got ${order.status})`);
+  assert('1b', hasEvent(order, 'scheduled'), 'events contains scheduled entry');
+
+  // Accept the pending assignment (simulates rider tapping Accept)
+  let updated = await SpaccleDB.acceptAssignment(order._id, rider._id);
+
+  assert('2', updated.status === 'assigned', `Order assigned on accept (got ${updated.status})`);
   assert('2b', !!updated.riderId, 'order doc has riderId');
   assert('2c', !!updated.assignedAt, 'order doc has assignedAt');
   assert('2d', hasEvent(updated, 'assigned'), 'events contains assigned entry');
