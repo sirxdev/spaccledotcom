@@ -897,7 +897,14 @@ async function listAllUsers() {
     ]);
     if (!order) return null;
     const online = riders.filter(r => r.isAvailable !== false);
-    if (!online.length) return null;
+    if (!online.length) {
+      await createNotification({
+        title: 'No Riders Available',
+        message: `Order ${order.publicId || orderId.slice(-6)} has no available riders.`,
+        orderId,
+      });
+      return null;
+    }
 
     const pendingCounts = {};
     allOrders.forEach(o => {

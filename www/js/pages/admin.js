@@ -2026,6 +2026,13 @@ function init(data = {}) {
           tab:   'orders',
           docId: doc._id,
         };
+      } else if (doc.type === 'order' && doc.assignmentAttempts >= 3 && !doc.riderId && !doc.pendingRiderId) {
+        notif = {
+          title: 'Assignment Failed',
+          body:  (doc.publicId || '') + ' — no rider accepted after multiple attempts',
+          tab:   'orders',
+          docId: doc._id,
+        };
       } else if (doc.type === 'payout_request' && doc.status === 'pending') {
         notif = {
           title: 'Payout Request',
