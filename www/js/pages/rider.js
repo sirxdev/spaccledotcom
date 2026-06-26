@@ -9,7 +9,7 @@ const RiderPage = (() => {
 
   const ORDER_STATUS = {
     SCHEDULED:  'scheduled',
-    CONFIRMED:  'confirmed',
+
     ASSIGNED:   'assigned',
     PICKED_UP:  'picked_up',
     PROCESSING: 'processing',
@@ -607,7 +607,7 @@ function setupSheets() {
     if (!actions.length) {
       const statusLabel = s === ORDER_STATUS.CANCELLED ? 'Order Cancelled'
         : s === ORDER_STATUS.SCHEDULED ? 'Awaiting Confirmation'
-        : s === ORDER_STATUS.CONFIRMED ? 'Waiting for Assignment'
+        : s === ORDER_STATUS.SCHEDULED ? 'Waiting for Rider'
         : 'No Actions Available';
       actionsEl.innerHTML = `<p class="rider-sheet-waiting">${statusLabel}</p>`;
       return;
@@ -947,7 +947,7 @@ function setupSheets() {
   function formatStatus(status) {
     const labels = {
       [ORDER_STATUS.SCHEDULED]:  'Scheduled',
-      [ORDER_STATUS.CONFIRMED]:  'Confirmed',
+      [ORDER_STATUS.CONFIRMED]:  'Confirmed (legacy)',
       [ORDER_STATUS.ASSIGNED]:   'Assigned to You',
       [ORDER_STATUS.PICKED_UP]:  'Picked Up',
       [ORDER_STATUS.PROCESSING]: 'At Facility — Processing',

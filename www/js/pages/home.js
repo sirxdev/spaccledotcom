@@ -898,7 +898,7 @@ const HomePage = (() => {
   function statusLabel(status) {
     const labels = {
       scheduled:  "Scheduled",
-      confirmed:  "Confirmed",
+      confirmed:  "Confirmed (legacy)",
       assigned:   "Rider Assigned",
       picked_up:  "Picked Up",
       processing: "Processing",
@@ -915,7 +915,7 @@ const HomePage = (() => {
   function statusSub(status) {
     const subs = {
       scheduled:  "We'll arrive within your pickup window.",
-      confirmed:  "Your order is confirmed — we'll pick it up soon.",
+      confirmed:  "Your order is scheduled — we'll pick it up soon.",
       assigned:   "A rider has been assigned and will collect your laundry.",
       picked_up:  "Your laundry is on the way to our facility.",
       processing: "Your items are being sorted and prepared.",
@@ -932,7 +932,7 @@ const HomePage = (() => {
   function statusTitle(status) {
     const titles = {
       scheduled:  "Pickup Scheduled",
-      confirmed:  "Order Confirmed",
+      confirmed:  "Order Confirmed (legacy)",
       assigned:   "Rider Assigned",
       picked_up:  "Picked Up",
       processing: "At Facility",
@@ -998,7 +998,6 @@ const HomePage = (() => {
     const steps = Array.from(card.querySelectorAll('.order-track-step'));
     const map = {
       scheduled:  0,
-      confirmed:  0,
       assigned:   0,
       picked_up:  1,
       processing: 1,
@@ -1070,7 +1069,7 @@ const HomePage = (() => {
 
       const cancelBtn = document.getElementById('btn-order-cancel');
       const reorderBtn = document.getElementById('btn-order-reorder');
-      const cancellable = ['scheduled', 'confirmed'].includes(order.status);
+      const cancellable = ['scheduled'].includes(order.status);
       if (cancelBtn) {
         cancelBtn.style.display = cancellable ? '' : 'none';
         cancelBtn.onclick = () => handleCancelOrder(order._id);
@@ -1171,7 +1170,7 @@ const HomePage = (() => {
     const timelineEl = document.getElementById('track-timeline');
     timelineEl.innerHTML = '';
     const flow = [
-      { statuses: ['scheduled', 'confirmed'],              label: 'Scheduled',   sub: 'Pickup window confirmed.' },
+      { statuses: ['scheduled'],                           label: 'Scheduled',   sub: 'Pickup window confirmed.' },
       { statuses: ['assigned', 'picked_up'],               label: 'Picked up',   sub: 'Driver collected your laundry.' },
       { statuses: ['processing'],              label: 'Cleaning',    sub: 'Cleaning + quality check.' },
       { statuses: ['ready', 'in_transit'],                 label: 'Out for Delivery', sub: 'On the way to you.' },

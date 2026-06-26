@@ -450,12 +450,11 @@ function init(data = {}) {
     const actionsEl = document.getElementById('admin-order-status-actions');
     actionsEl.innerHTML = '';
     const btnDefs = [
-      { label: 'Confirm Order',        status: 'confirmed',  trigger: ['scheduled'],                                       ghost: false },
       { label: 'Mark Processing',      status: 'processing', trigger: ['picked_up'],                                      ghost: false },
       { label: 'Mark Ready',           status: 'ready',      trigger: ['processing'],                                     ghost: false },
       { label: 'Mark In Transit',      status: 'in_transit', trigger: ['ready'],                                          ghost: false },
       { label: 'Mark Completed',       status: 'completed',  trigger: ['delivered', 'in_transit'],                        ghost: false },
-      { label: 'Cancel Order',         status: 'cancelled',  trigger: ['scheduled', 'confirmed', 'assigned', 'picked_up'], ghost: true },
+      { label: 'Cancel Order',         status: 'cancelled',  trigger: ['scheduled', 'assigned', 'picked_up'],              ghost: true },
     ];
     btnDefs.forEach(def => {
       if (!def.trigger.includes(order.status)) return;
@@ -500,22 +499,6 @@ function init(data = {}) {
     btn.classList.add('loading');
     try {
       await SpaccleDB.setOrderStatus(order._id, newStatus);
-
-      if (newStatus === 'confirmed') {
-        try {
-          const rider = await SpaccleDB.autoAssignRider(order._id);
-          if (rider) {
-            closeOrderDetail();
-            await loadOrders(currentOrderFilter);
-            if (activeTab === 'dashboard') loadDashboard();
-            showToast('Order confirmed — ' + (rider.name || 'Rider') + ' assigned automatically');
-            return;
-          }
-        } catch {
-          // Auto-assign failed — order stays confirmed for manual assignment
-        }
-      }
-
       closeOrderDetail();
       await loadOrders(currentOrderFilter);
       if (activeTab === 'dashboard') loadDashboard();
@@ -1995,7 +1978,7 @@ function init(data = {}) {
   function statusLabel(s) {
     return ({
       scheduled:  'Scheduled',
-      confirmed:  'Confirmed',
+      confirmed:  'Confirmed (legacy)',
       assigned:   'Assigned to Rider',
       picked_up:  'Picked Up',
       processing: 'Processing',
@@ -2011,7 +1994,7 @@ function init(data = {}) {
   function statusPillClass(s) {
     if (['delivered', 'completed'].includes(s))              return 'admin-card__pill--resolved';
     if (['cancelled'].includes(s))                           return 'admin-card__pill--cancelled';
-    if (['scheduled', 'confirmed'].includes(s))              return 'admin-card__pill--open';
+    if (['scheduled'].includes(s))              return 'admin-card__pill--open';
     if (['processing', 'ready'].includes(s))     return 'admin-card__pill--processing';
     if (['assigned', 'picked_up', 'in_transit'].includes(s)) return 'admin-card__pill--transit';
     return '';

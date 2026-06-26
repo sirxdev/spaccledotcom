@@ -418,7 +418,7 @@ async function listAllUsers() {
   }
 
   function nextStatus(current) {
-    const flow = ['scheduled', 'confirmed', 'assigned', 'picked_up', 'processing', 'ready', 'in_transit', 'delivered', 'completed'];
+    const flow = ['scheduled', 'assigned', 'picked_up', 'processing', 'ready', 'in_transit', 'delivered', 'completed'];
     const idx = flow.indexOf(current);
     if (idx === -1) return current;
     return flow[Math.min(idx + 1, flow.length - 1)];
@@ -851,10 +851,10 @@ async function listAllUsers() {
     const doc = await db.get(orderId);
     const nowIso = new Date().toISOString();
     const events = Array.isArray(doc.events) ? doc.events.slice() : [];
-    events.push({ status: 'confirmed', at: nowIso, note: 'Rider declined assignment' });
+    events.push({ status: 'scheduled', at: nowIso, note: 'Rider declined assignment' });
     const updated = {
       ...doc,
-      status: 'confirmed',
+      status: 'scheduled',
       events,
       updatedAt: nowIso,
       riderId: null,
