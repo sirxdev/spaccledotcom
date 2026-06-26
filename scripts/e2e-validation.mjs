@@ -159,13 +159,9 @@ async function run() {
   assert('6a', updated.status === 'out_for_delivery', `Rider start delivery → out_for_delivery (got ${updated.status})`);
 
   updated = await SpaccleDB.updateOrderStatus(order._id, 'delivered', { deliveryNote: 'Left with security' });
-  assert('6b', updated.status === 'delivered', `Rider delivered → delivered (got ${updated.status})`);
+  assert('6b', updated.status === 'completed', `Delivery auto-completes → completed (got ${updated.status})`);
   assert('6c', hasEvent(updated, 'delivered', e => e.deliveryNote === 'Left with security'), 'delivered event has deliveryNote');
-
-  // 7 — Admin completes
-  updated = await SpaccleDB.setOrderStatus(order._id, 'completed');
-  assert('7', updated.status === 'completed', `Admin complete → completed (got ${updated.status})`);
-  assert('7b', hasEvent(updated, 'completed'), 'events contains completed entry');
+  assert('6d', hasEvent(updated, 'completed'), 'auto-completed event added');
 
   // 8 — Customer view (list orders + active check)
   const customerOrders = await SpaccleDB.listOrders(customer._id);

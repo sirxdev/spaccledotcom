@@ -369,12 +369,22 @@ async function listAllUsers() {
 
   async function updateOrderStatus(orderId, status, meta = {}) {
     const doc = await db.get(orderId);
+    if (['completed', 'cancelled'].includes(doc.status)) return doc;
     const nowIso = new Date().toISOString();
     const events = Array.isArray(doc.events) ? doc.events.slice() : [];
     events.push({ status, at: nowIso, ...meta });
-    const updated = { ...doc, status, events, updatedAt: nowIso, ...meta };
-    await db.put(updated);
-    return updated;
+    const base = { events, updatedAt: nowIso, ...meta };
+    const updated = { ...doc, status, ...base };
+    const result = await db.put(updated);
+
+    if (status === 'delivered') {
+      events.push({ status: 'completed', at: nowIso });
+      const completed = { ...updated, _rev: result.rev, status: 'completed', events, updatedAt: nowIso };
+      const final = await db.put(completed);
+      return { ...completed, _rev: final.rev };
+    }
+
+    return { ...updated, _rev: result.rev };
   }
 
   async function addTip(orderId, amount) {
@@ -426,12 +436,22 @@ async function listAllUsers() {
 
   async function setOrderStatus(orderId, status, meta = {}) {
     const doc = await db.get(orderId);
+    if (['completed', 'cancelled'].includes(doc.status)) return doc;
     const nowIso = new Date().toISOString();
     const events = Array.isArray(doc.events) ? doc.events.slice() : [];
     events.push({ status, at: nowIso, ...meta });
-    const updated = { ...doc, status, events, updatedAt: nowIso };
-    await db.put(updated);
-    return updated;
+    const base = { events, updatedAt: nowIso, ...meta };
+    const updated = { ...doc, status, ...base };
+    const result = await db.put(updated);
+
+    if (status === 'delivered') {
+      events.push({ status: 'completed', at: nowIso });
+      const completed = { ...updated, _rev: result.rev, status: 'completed', events, updatedAt: nowIso };
+      const final = await db.put(completed);
+      return { ...completed, _rev: final.rev };
+    }
+
+    return { ...updated, _rev: result.rev };
   }
 
   async function advanceOrder(orderId) {
