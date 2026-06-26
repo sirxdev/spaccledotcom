@@ -213,7 +213,7 @@ const HomePage = (() => {
       if (selectedOrderId) openOrderSheet(selectedOrderId);
     });
     document.getElementById('btn-track-map').addEventListener('click', toggleTrackMap);
-    document.getElementById('btn-track-advance').addEventListener('click', handleAdvanceStatus);
+
 
     document.querySelectorAll('.service-card').forEach(card => {
       card.addEventListener('click', () => handleServiceTap(card.dataset.service));
@@ -1213,22 +1213,6 @@ const HomePage = (() => {
     if (!created) return '—';
     const readyAt = new Date(created + 24 * 60 * 60 * 1000);
     return readyAt.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-  }
-
-  async function handleAdvanceStatus() {
-    if (!selectedOrderId) return;
-    const btn = document.getElementById('btn-track-advance');
-    setButtonLoading(btn, true);
-    try {
-      const updated = await SpaccleDB.advanceOrder(selectedOrderId);
-      await refresh();
-      if (updated.status === 'ready') showToast('Your laundry is ready');
-      if (updated.status === 'delivered') showToast('Delivered');
-    } catch {
-      showToast('Could not update status');
-    } finally {
-      setButtonLoading(btn, false);
-    }
   }
 
   async function setBillingMode(mode) {
