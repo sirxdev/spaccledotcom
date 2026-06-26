@@ -1981,7 +1981,7 @@ function init(data = {}) {
       assigned:   'Assigned to Rider',
       picked_up:  'Picked Up',
       processing: 'Processing',
-      cleaning:   'Cleaning',
+      cleaning:   'Cleaning (legacy)',
       ready:      'Ready for Delivery',
       out_for_delivery: 'Out for Delivery',
       delivered:  'Delivered',

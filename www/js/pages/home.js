@@ -902,7 +902,7 @@ const HomePage = (() => {
       assigned:   "Rider Assigned",
       picked_up:  "Picked Up",
       processing: "Processing",
-      cleaning:   "Cleaning",
+      cleaning:   "Cleaning (legacy)",
       ready:      "Ready for Delivery",
       out_for_delivery: "Out for Delivery",
       delivered:  "Delivered",
@@ -919,7 +919,7 @@ const HomePage = (() => {
       assigned:   "A rider has been assigned and will collect your laundry.",
       picked_up:  "Your laundry is on the way to our facility.",
       processing: "Your items are being sorted and prepared.",
-      cleaning:   "We're cleaning, pressing, and quality-checking.",
+      cleaning:   "Your items are being cleaned and prepared.",
       ready:      "Your laundry is ready — delivery is next.",
       out_for_delivery: "Your clean laundry is on the way to you!",
       delivered:  "Delivered to your address. Enjoy fresh laundry!",
@@ -936,7 +936,7 @@ const HomePage = (() => {
       assigned:   "Rider Assigned",
       picked_up:  "Picked Up",
       processing: "At Facility",
-      cleaning:   "Cleaning",
+      cleaning:   "Cleaning (legacy)",
       ready:      "Ready for Delivery",
       out_for_delivery: "Out for Delivery",
       delivered:  "Delivered",
@@ -1779,7 +1779,7 @@ const HomePage = (() => {
 
     const messages = {
       picked_up: { title: 'Order Picked Up', body: `Your laundry (#${order.publicId || 'SP-000000'}) has been collected.` },
-      cleaning:  { title: 'Cleaning in Progress', body: `Your laundry (#${order.publicId || 'SP-000000'}) is being cleaned.` },
+
       ready:     { title: 'Ready for Delivery 🎉', body: `Your laundry (#${order.publicId || 'SP-000000'}) is ready!` },
       delivered: { title: 'Delivered', body: `Your laundry (#${order.publicId || 'SP-000000'}) has been delivered.` },
     };
