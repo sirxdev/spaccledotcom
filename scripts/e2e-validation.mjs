@@ -155,8 +155,8 @@ async function run() {
   }
 
   // 6 — Rider delivery
-  updated = await SpaccleDB.updateOrderStatus(order._id, 'in_transit');
-  assert('6a', updated.status === 'in_transit', `Rider start delivery → in_transit (got ${updated.status})`);
+  updated = await SpaccleDB.updateOrderStatus(order._id, 'out_for_delivery');
+  assert('6a', updated.status === 'out_for_delivery', `Rider start delivery → out_for_delivery (got ${updated.status})`);
 
   updated = await SpaccleDB.updateOrderStatus(order._id, 'delivered', { deliveryNote: 'Left with security' });
   assert('6b', updated.status === 'delivered', `Rider delivered → delivered (got ${updated.status})`);
@@ -178,7 +178,7 @@ async function run() {
   assert('post-events', events.length >= 8, `events array has ${events.length} entries (expected ≥8)`);
   assert('post-chrono', chronological, 'events are chronologically ordered');
 
-  const expectedFlow = ['scheduled', 'assigned', 'picked_up', 'processing', 'ready', 'in_transit', 'delivered', 'completed'];
+  const expectedFlow = ['scheduled', 'assigned', 'picked_up', 'processing', 'ready', 'out_for_delivery', 'delivered', 'completed'];
   const eventStatuses = events.map(e => e.status);
   const flowOk = expectedFlow.every(s => eventStatuses.includes(s));
   assert('post-flow', flowOk, `events cover full lifecycle (${eventStatuses.join(' → ')})`);

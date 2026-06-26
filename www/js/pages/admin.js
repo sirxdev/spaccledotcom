@@ -452,8 +452,8 @@ function init(data = {}) {
     const btnDefs = [
       { label: 'Mark Processing',      status: 'processing', trigger: ['picked_up'],                                      ghost: false },
       { label: 'Mark Ready',           status: 'ready',      trigger: ['processing'],                                     ghost: false },
-      { label: 'Mark In Transit',      status: 'in_transit', trigger: ['ready'],                                          ghost: false },
-      { label: 'Mark Completed',       status: 'completed',  trigger: ['delivered', 'in_transit'],                        ghost: false },
+      { label: 'Mark In Transit',      status: 'out_for_delivery', trigger: ['ready'],                                          ghost: false },
+      { label: 'Mark Completed',       status: 'completed',  trigger: ['delivered', 'out_for_delivery'],                        ghost: false },
       { label: 'Cancel Order',         status: 'cancelled',  trigger: ['scheduled', 'assigned', 'picked_up'],              ghost: true },
     ];
     btnDefs.forEach(def => {
@@ -1984,7 +1984,7 @@ function init(data = {}) {
       processing: 'Processing',
       cleaning:   'Cleaning',
       ready:      'Ready for Delivery',
-      in_transit: 'Out for Delivery',
+      out_for_delivery: 'Out for Delivery',
       delivered:  'Delivered',
       completed:  'Completed',
       cancelled:  'Cancelled',
@@ -1996,7 +1996,7 @@ function init(data = {}) {
     if (['cancelled'].includes(s))                           return 'admin-card__pill--cancelled';
     if (['scheduled'].includes(s))              return 'admin-card__pill--open';
     if (['processing', 'ready'].includes(s))     return 'admin-card__pill--processing';
-    if (['assigned', 'picked_up', 'in_transit'].includes(s)) return 'admin-card__pill--transit';
+    if (['assigned', 'picked_up', 'out_for_delivery'].includes(s)) return 'admin-card__pill--transit';
     return '';
   }
 

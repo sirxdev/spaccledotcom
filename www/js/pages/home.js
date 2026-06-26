@@ -588,7 +588,7 @@ const HomePage = (() => {
         markers.push(deliveryMarker);
       }
       
-      if (order.riderLat && order.riderLng && (order.status === 'picked_up' || order.status === 'in_transit')) {
+      if (order.riderLat && order.riderLng && (order.status === 'picked_up' || order.status === 'out_for_delivery')) {
         const riderMarker = new window.google.maps.Marker({
           position: { lat: order.riderLat, lng: order.riderLng },
           map,
@@ -904,7 +904,7 @@ const HomePage = (() => {
       processing: "Processing",
       cleaning:   "Cleaning",
       ready:      "Ready for Delivery",
-      in_transit: "Out for Delivery",
+      out_for_delivery: "Out for Delivery",
       delivered:  "Delivered",
       completed:  "Completed",
       cancelled:  "Cancelled",
@@ -921,7 +921,7 @@ const HomePage = (() => {
       processing: "Your items are being sorted and prepared.",
       cleaning:   "We're cleaning, pressing, and quality-checking.",
       ready:      "Your laundry is ready — delivery is next.",
-      in_transit: "Your clean laundry is on the way to you!",
+      out_for_delivery: "Your clean laundry is on the way to you!",
       delivered:  "Delivered to your address. Enjoy fresh laundry!",
       completed:  "Order complete. Thank you for using Spaccle.",
       cancelled:  "This order has been cancelled.",
@@ -938,7 +938,7 @@ const HomePage = (() => {
       processing: "At Facility",
       cleaning:   "Cleaning",
       ready:      "Ready for Delivery",
-      in_transit: "Out for Delivery",
+      out_for_delivery: "Out for Delivery",
       delivered:  "Delivered",
       completed:  "Completed",
       cancelled:  "Cancelled",
@@ -1002,7 +1002,7 @@ const HomePage = (() => {
       picked_up:  1,
       processing: 1,
       ready:      2,
-      in_transit: 2,
+      out_for_delivery: 2,
       delivered:  3,
       completed:  3,
       cancelled:  0,
@@ -1173,7 +1173,7 @@ const HomePage = (() => {
       { statuses: ['scheduled'],                           label: 'Scheduled',   sub: 'Pickup window confirmed.' },
       { statuses: ['assigned', 'picked_up'],               label: 'Picked up',   sub: 'Driver collected your laundry.' },
       { statuses: ['processing'],              label: 'Cleaning',    sub: 'Cleaning + quality check.' },
-      { statuses: ['ready', 'in_transit'],                 label: 'Out for Delivery', sub: 'On the way to you.' },
+      { statuses: ['ready', 'out_for_delivery'],                 label: 'Out for Delivery', sub: 'On the way to you.' },
       { statuses: ['delivered', 'completed'],              label: 'Delivered',   sub: 'Delivered to your address.' },
     ];
     const idx = flow.findIndex(s => s.statuses.includes(order.status));

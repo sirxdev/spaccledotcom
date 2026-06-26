@@ -14,7 +14,7 @@ const RiderPage = (() => {
     PICKED_UP:  'picked_up',
     PROCESSING: 'processing',
     READY:      'ready',
-    IN_TRANSIT: 'in_transit',
+    OUT_FOR_DELIVERY: 'out_for_delivery',
     DELIVERED:  'delivered',
     COMPLETED:  'completed',
     CANCELLED:  'cancelled',
@@ -388,7 +388,7 @@ function setupSheets() {
       console.log('DEBUG: All retrieved orders:', orders);
       const riderOrders = orders.filter(o => o.riderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId);
       console.log('DEBUG: Filtered riderOrders:', riderOrders);
-      const pending = riderOrders.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.IN_TRANSIT || o.status === ORDER_STATUS.PROCESSING);
+      const pending = riderOrders.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.OUT_FOR_DELIVERY || o.status === ORDER_STATUS.PROCESSING);
       const completed = riderOrders.filter(o => o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED);
       const today = riderOrders.filter(o => isToday(o.updatedAt));
 
@@ -479,7 +479,7 @@ function setupSheets() {
       { id: ORDER_STATUS.PICKED_UP,  label: 'Picked Up' },
       { id: 'facility',              label: 'At Facility' },
       { id: ORDER_STATUS.READY,      label: 'Ready' },
-      { id: ORDER_STATUS.IN_TRANSIT, label: 'Delivering' },
+      { id: ORDER_STATUS.OUT_FOR_DELIVERY, label: 'Delivering' },
       { id: ORDER_STATUS.DELIVERED,  label: 'Delivered' },
     ];
 
@@ -488,7 +488,7 @@ function setupSheets() {
       ORDER_STATUS.PICKED_UP,
       ORDER_STATUS.PROCESSING,
       ORDER_STATUS.READY,
-      ORDER_STATUS.IN_TRANSIT,
+      ORDER_STATUS.OUT_FOR_DELIVERY,
       ORDER_STATUS.DELIVERED,
       ORDER_STATUS.COMPLETED,
     ];
@@ -499,7 +499,7 @@ function setupSheets() {
         [ORDER_STATUS.PICKED_UP]:  1,
         [ORDER_STATUS.PROCESSING]: 2,
         [ORDER_STATUS.READY]:      3,
-        [ORDER_STATUS.IN_TRANSIT]: 4,
+        [ORDER_STATUS.OUT_FOR_DELIVERY]: 4,
         [ORDER_STATUS.DELIVERED]:  5,
         [ORDER_STATUS.COMPLETED]:  5,
       };
@@ -546,7 +546,7 @@ function setupSheets() {
     document.getElementById('rider-sheet-notes').textContent = order.notes || '—';
 
     const pickupStage = ['assigned', 'picked_up'].includes(order.status);
-    const deliveryStage = ['ready', 'in_transit'].includes(order.status);
+    const deliveryStage = ['ready', 'out_for_delivery'].includes(order.status);
     const doneStage = ['delivered', 'completed'].includes(order.status);
 
     const pickupAddr = document.getElementById('rider-sheet-addr-pickup');
@@ -598,7 +598,7 @@ function setupSheets() {
       return;
     } else if (s === ORDER_STATUS.READY) {
       actions.push({ id: 'transit', label: 'Start Delivery to Customer', style: 'primary' });
-    } else if (s === ORDER_STATUS.IN_TRANSIT) {
+    } else if (s === ORDER_STATUS.OUT_FOR_DELIVERY) {
       actions.push({ id: 'delivered', label: 'Mark Delivered', style: 'primary' });
     } else if (s === ORDER_STATUS.DELIVERED || s === ORDER_STATUS.COMPLETED) {
       actions.push({ id: 'tip', label: 'View / Add Tip', style: 'accent' });
@@ -629,7 +629,7 @@ function setupSheets() {
     const statusMap = {
       pickup:    ORDER_STATUS.PICKED_UP,
       facility:  ORDER_STATUS.PROCESSING,
-      transit:   ORDER_STATUS.IN_TRANSIT,
+      transit:   ORDER_STATUS.OUT_FOR_DELIVERY,
       delivered: ORDER_STATUS.DELIVERED,
     };
 
@@ -952,7 +952,7 @@ function setupSheets() {
       [ORDER_STATUS.PICKED_UP]:  'Picked Up',
       [ORDER_STATUS.PROCESSING]: 'At Facility — Processing',
       [ORDER_STATUS.READY]:      'Ready for Delivery',
-      [ORDER_STATUS.IN_TRANSIT]: 'Out for Delivery',
+      [ORDER_STATUS.OUT_FOR_DELIVERY]: 'Out for Delivery',
       [ORDER_STATUS.DELIVERED]:  'Delivered',
       [ORDER_STATUS.COMPLETED]:  'Completed',
       [ORDER_STATUS.CANCELLED]:  'Cancelled',

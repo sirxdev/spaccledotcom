@@ -498,7 +498,7 @@
   background: #4A90E2;
 }
 
-.rider-order-item__status-dot.in_transit {
+.rider-order-item__status-dot.out_for_delivery {
   background: var(--primary);
 }
 

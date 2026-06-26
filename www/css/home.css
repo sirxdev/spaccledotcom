@@ -965,7 +965,7 @@
 .status-pill--processing { background: rgba(255,209,102,0.18); color: #7A4E00;            border-color: rgba(255,209,102,0.30); }
 .status-pill--cleaning   { background: rgba(255,209,102,0.20); color: #7A4E00;            border-color: rgba(255,209,102,0.35); }
 .status-pill--ready      { background: rgba(6,214,160,0.16);  color: var(--accent-dark);  border-color: rgba(6,214,160,0.26); }
-.status-pill--in_transit { background: rgba(33,150,243,0.12); color: #0D47A1;             border-color: rgba(33,150,243,0.22); }
+.status-pill--out_for_delivery { background: rgba(33,150,243,0.12); color: #0D47A1;             border-color: rgba(33,150,243,0.22); }
 .status-pill--delivered  { background: rgba(28,27,58,0.08);   color: var(--text-2);       border-color: rgba(28,27,58,0.10); }
 .status-pill--completed  { background: rgba(46,125,50,0.10);  color: #2E7D32;             border-color: rgba(46,125,50,0.18); }
 .status-pill--cancelled  { background: rgba(211,47,47,0.08);  color: #C62828;             border-color: rgba(211,47,47,0.15); }
