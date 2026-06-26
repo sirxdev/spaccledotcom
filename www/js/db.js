@@ -1159,6 +1159,38 @@ async function listAllUsers() {
     return db.put(doc);
   }
 
+  /* ── Service zones ──────────────────────────────────────────────── */
+  async function listZones() {
+    try {
+      const doc = await db.get('zone_config');
+      return Array.isArray(doc.zones) ? doc.zones : [];
+    } catch {
+      return [];
+    }
+  }
+
+  async function saveZones(zones) {
+    if (!Array.isArray(zones)) throw new Error('INVALID_ZONES');
+    try {
+      const existing = await db.get('zone_config');
+      await db.put({ ...existing, zones, updatedAt: new Date().toISOString() });
+    } catch {
+      await db.put({ _id: 'zone_config', type: 'zone_config', zones, updatedAt: new Date().toISOString() });
+    }
+  }
+
+  function matchZone(address, zones) {
+    if (!address || !zones || !zones.length) return null;
+    const lower = address.toLowerCase();
+    for (const z of zones) {
+      if (!z.keywords || !z.keywords.length) continue;
+      for (const kw of z.keywords) {
+        if (lower.includes(kw.toLowerCase().trim())) return z._id || z.name;
+      }
+    }
+    return null;
+  }
+
   /* ── Rider payout requests ──────────────────────────────────────── */
   function payoutId(riderId) {
     return `payout_${riderId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -1285,6 +1317,9 @@ async function listAllUsers() {
     assignRiderToOrder,
     unassignRider,
     autoAssignRider,
+    listZones,
+    saveZones,
+    matchZone,
     createBroadcast,
     createNotification,
     listAllNotifications,

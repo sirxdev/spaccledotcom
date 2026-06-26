@@ -153,6 +153,7 @@ function init(data = {}) {
     document.getElementById('btn-admin-item-pricing-save').addEventListener('click', handleItemPricingSave);
     document.getElementById('btn-admin-legal-save').addEventListener('click', handleLegalSave);
     document.getElementById('btn-admin-promo-add').addEventListener('click', handlePromoAdd);
+    document.getElementById('btn-admin-zone-save').addEventListener('click', handleZoneSave);
 
     // Dashboard extras
     document.getElementById('btn-admin-broadcast-send').addEventListener('click', handleBroadcastSend);
@@ -1281,6 +1282,7 @@ function init(data = {}) {
     await loadItemPricingForm();
     await loadLegalEditor();
     await loadPromos();
+    await loadZones();
   }
 
   function renderServicePriceForm(svcCfg) {
@@ -1720,14 +1722,87 @@ function init(data = {}) {
           try {
             const doc = await SpaccleDB.getDocument(id);
             await SpaccleDB.saveDocument({ ...doc, active: !nowOn });
-            showToast((nowOn ? 'Disabled' : 'Enabled') + ': ' + p.code);
-            await loadPromos();
+      showToast((nowOn ? 'Disabled' : 'Enabled') + ': ' + p.code);
+    await loadPromos();
           } catch { showToast('Could not update promo'); }
         });
         list.appendChild(card);
       });
     } catch {
       list.innerHTML = '<div class="admin-empty" style="font-size:12px">Failed to load.</div>';
+    }
+  }
+
+  /* ── Service zones ──────────────────────────────────────────── */
+  async function loadZones() {
+    const list = document.getElementById('admin-zones-list');
+    if (!list) return;
+    list.innerHTML = '<div class="admin-empty" style="font-size:12px">Loading…</div>';
+    try {
+      const zones = await SpaccleDB.listZones();
+      list.innerHTML = '';
+      if (!zones.length) {
+        list.innerHTML = '<div class="admin-empty" style="font-size:12px;margin:0">No zones configured.</div>';
+        return;
+      }
+      zones.forEach(z => {
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.innerHTML =
+          `<div class="admin-card__left">` +
+          `<div class="admin-card__title">${escapeAdminHtml(z.name)}</div>` +
+          `<div class="admin-card__meta">${(z.keywords || []).join(', ')}</div>` +
+          `</div>` +
+          `<div class="admin-card__right">` +
+          `<button class="btn btn--ghost btn--sm" data-zone-id="${escapeAdminHtml(z._id || z.name)}">Delete</button>` +
+          `</div>`;
+        card.querySelector('button').addEventListener('click', () => handleZoneDelete(z));
+        list.appendChild(card);
+      });
+    } catch {
+      list.innerHTML = '<div class="admin-empty" style="font-size:12px">Failed to load.</div>';
+    }
+  }
+
+  async function handleZoneSave() {
+    const name = (document.getElementById('admin-zone-name')?.value || '').trim();
+    const kw   = (document.getElementById('admin-zone-keywords')?.value || '').trim();
+    if (!name) { showToast('Zone name is required'); return; }
+    if (!kw)   { showToast('At least one keyword is required'); return; }
+    const keywords = kw.split(',').map(s => s.trim()).filter(Boolean);
+    if (!keywords.length) { showToast('At least one keyword is required'); return; }
+    const btn = document.getElementById('btn-admin-zone-save');
+    btn.classList.add('loading');
+    try {
+      const zones = await SpaccleDB.listZones();
+      if (zones.find(z => z.name.toLowerCase() === name.toLowerCase())) {
+        showToast('Zone "' + name + '" already exists');
+        btn.classList.remove('loading');
+        return;
+      }
+      zones.push({ _id: 'zone_' + name.replace(/\s+/g, '_').toLowerCase(), name, keywords });
+      await SpaccleDB.saveZones(zones);
+      document.getElementById('admin-zone-name').value = '';
+      document.getElementById('admin-zone-keywords').value = '';
+      showToast('Zone added: ' + name);
+      await loadZones();
+    } catch {
+      showToast('Could not save zone');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  async function handleZoneDelete(zone) {
+    if (!confirm(`Delete zone "${zone.name}"?`)) return;
+    try {
+      const zones = await SpaccleDB.listZones();
+      const filtered = zones.filter(z => z.name !== zone.name);
+      await SpaccleDB.saveZones(filtered);
+      showToast('Zone deleted');
+      await loadZones();
+    } catch {
+      showToast('Could not delete zone');
     }
   }
 
