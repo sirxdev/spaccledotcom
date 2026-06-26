@@ -291,6 +291,9 @@ async function ensureAdminUser({ email, password, name }) {
     const _id = generateOrderId(userId);
     const publicId = formatOrderPublicId(_id);
 
+    const [zones] = await Promise.all([listZones()]);
+    const zoneId = matchZone(address, zones);
+
     const doc = {
       _id,
       type: 'order',
@@ -304,6 +307,7 @@ async function ensureAdminUser({ email, password, name }) {
       paystackRef,
       currency: 'NGN',
       city: 'Lagos',
+      zoneId,
       pickupDay,
       pickupTime,
       address,
@@ -886,10 +890,32 @@ async function listAllUsers() {
   }
 
   async function autoAssignRider(orderId) {
-    const riders = await listAllRiders();
+    const [riders, order, allOrders] = await Promise.all([
+      listAllRiders(),
+      db.get(orderId).catch(() => null),
+      listAllOrders(),
+    ]);
+    if (!order) return null;
     const online = riders.filter(r => r.isAvailable !== false);
     if (!online.length) return null;
-    const rider = online[0];
+
+    const pendingCounts = {};
+    allOrders.forEach(o => {
+      if (o.riderId && !['delivered', 'completed', 'cancelled'].includes(o.status)) {
+        pendingCounts[o.riderId] = (pendingCounts[o.riderId] || 0) + 1;
+      }
+    });
+
+    const orderZoneId = order.zoneId;
+    let candidates = online;
+    if (orderZoneId) {
+      const zoned = online.filter(r => r.zoneIds && r.zoneIds.includes(orderZoneId));
+      if (zoned.length) candidates = zoned;
+    }
+
+    candidates.sort((a, b) => (pendingCounts[a._id] || 0) - (pendingCounts[b._id] || 0));
+
+    const rider = candidates[0];
     await assignRiderToOrder(orderId, rider._id, rider.name);
     return rider;
   }
