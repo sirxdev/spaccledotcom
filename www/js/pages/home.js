@@ -439,6 +439,13 @@ const HomePage = (() => {
 
     document.getElementById('btn-support-send').addEventListener('click', handleSupportSend);
     document.getElementById('btn-copy-support-email').addEventListener('click', copySupportEmail);
+    document.getElementById('support-issue-pills')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-issue]');
+      if (btn) {
+        document.getElementById('support-subject').value = btn.dataset.issue;
+        document.getElementById('support-message').focus();
+      }
+    });
 
     document.getElementById('btn-profile-info-save').addEventListener('click', handleProfileInfoSave);
     document.getElementById('btn-addr-add').addEventListener('click', showAddressForm);
@@ -630,6 +637,10 @@ const HomePage = (() => {
 
   function openSupport(orderId = null) {
     supportOrderId = orderId;
+    const pills = document.getElementById('support-issue-pills');
+    if (pills) pills.style.display = orderId ? '' : 'none';
+    document.getElementById('support-subject').value = '';
+    document.getElementById('support-message').value = '';
     openSheet('sheet-support');
   }
 
@@ -1093,6 +1104,11 @@ const HomePage = (() => {
         const canRate = ['delivered', 'completed'].includes(order.status) && !order.rating;
         rateBtn.style.display = canRate ? '' : 'none';
         rateBtn.onclick = () => openRatingSheet(order);
+      }
+      const supportBtn = document.getElementById('btn-order-support');
+      if (supportBtn) {
+        const isDelivered = ['delivered', 'completed'].includes(order.status);
+        supportBtn.textContent = isDelivered ? 'Report Issue' : 'Support';
       }
       openSheet('sheet-order');
     } catch {

@@ -1353,6 +1353,14 @@
 
 .support-quick__btn { align-self: flex-start; padding: 8px 14px; }
 
+.support-issue-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.support-issue-types .btn { font-size: 12px; }
+
 .faq-item {
   background: var(--surface);
   border: 1.5px solid var(--border);
