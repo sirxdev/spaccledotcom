@@ -192,6 +192,23 @@ async function ensureAdminUser({ email, password, name }) {
     }
   }
 
+  async function ensureStaffUser({ email, password, name }) {
+    const emailLower = email.toLowerCase().trim();
+    const existingId = 'user_email_' + emailLower.replace(/[^a-z0-9]/g, '_');
+    try {
+      const idx = await db.get(existingId);
+      const userDoc = await db.get(idx.userId);
+      if (userDoc.role !== 'staff') {
+        await db.put({ ...userDoc, role: 'staff', updatedAt: new Date().toISOString() });
+      }
+    } catch (e) {
+      if (e.status !== 404) return;
+      try {
+        await createUser({ name: name || 'Staff', email: emailLower, phone: '', password, recoveryQuestion: '', recoveryAnswer: '', role: 'staff' });
+      } catch {}
+    }
+  }
+
   /* ── Recovery flow ──────────────────────────────────────────── */
   async function getRecoveryQuestion(email) {
     const emailLower = email.toLowerCase().trim();
@@ -344,6 +361,11 @@ async function ensureAdminUser({ email, password, name }) {
     return res.rows.map(r => r.doc).filter(d => d && d.type === 'order');
   }
 
+  async function listFacilityOrders() {
+    const all = await listAllOrders();
+    return all.filter(o => o.status === 'picked_up' || o.status === 'processing');
+  }
+
 async function listAllUsers() {
     const res = await db.allDocs({ include_docs: true });
     return res.rows.map(r => r.doc).filter(d => d && d.type === 'user');
@@ -352,6 +374,11 @@ async function listAllUsers() {
   async function listAllRiders() {
     const users = await listAllUsers();
     return users.filter(u => u.role === 'rider');
+  }
+
+  async function listAllStaff() {
+    const users = await listAllUsers();
+    return users.filter(u => u.role === 'staff');
   }
 
   async function listAllSubscriptions() {
@@ -1613,6 +1640,7 @@ async function listAllUsers() {
     getOrder,
     listOrders,
     listAllOrders,
+    listFacilityOrders,
     getActiveOrder,
     setOrderStatus,
     advanceOrder,
@@ -1621,6 +1649,8 @@ async function listAllUsers() {
     setTicketStatus,
     listAllUsers,
     listAllRiders,
+    listAllStaff,
+    ensureStaffUser,
     listAllSubscriptions,
     getOrdersByUser,
     getRiderOrders,

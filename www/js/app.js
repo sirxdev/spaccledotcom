@@ -12,6 +12,7 @@ const App = (() => {
     auth:       { id: 'page-auth',       module: null },
     home:       { id: 'page-home',       module: null },
     rider:      { id: 'page-rider',      module: null },
+    staff:      { id: 'page-staff',      module: null },
     admin:      { id: 'page-admin',      module: null },
   };
 
@@ -46,6 +47,7 @@ const App = (() => {
     pages.auth.module       = AuthPage;
     pages.home.module       = HomePage;
     pages.rider.module      = RiderPage;
+    pages.staff.module      = StaffPage;
     pages.admin.module      = AdminPage;
 
     if (window.SpaccleConfig?.env === 'test') {

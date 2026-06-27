@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/auth.css" />
   <link rel="stylesheet" href="css/home.css" />
   <link rel="stylesheet" href="css/rider.css" />
+  <link rel="stylesheet" href="css/staff.css" />
   <link rel="stylesheet" href="css/admin.css" />
 </head>
 <body>
@@ -2532,8 +2533,52 @@
 
   </div><!-- #page-rider -->
 
+  <!-- ── Staff Dashboard ────────────────────────────────────────── -->
+  <div id="page-staff" class="page page--staff">
+
+    <div class="staff-toast" id="staff-toast">Order updated</div>
+
+    <header class="staff-topbar">
+      <div class="staff-greeting">
+        <p class="staff-greeting__sub">Facility</p>
+        <h1 class="staff-greeting__name" id="staff-greeting-name">Staff</h1>
+      </div>
+      <div class="staff-topbar__right">
+        <div class="staff-sync-status" id="staff-sync-status">Synced</div>
+        <button class="staff-avatar" id="btn-staff-avatar">
+          <span id="staff-avatar-letter">?</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="staff-dropdown" id="staff-dropdown">
+      <button class="staff-dropdown__item staff-dropdown__item--danger" id="btn-staff-logout">Logout</button>
+    </div>
+
+    <nav class="staff-tabs">
+      <button class="staff-tab active" data-staff-tab="ready">Ready for Processing</button>
+      <button class="staff-tab" data-staff-tab="processing">In Progress</button>
+    </nav>
+
+    <div class="staff-tab-content active" id="staff-tab-ready">
+      <div class="staff-queue" id="staff-ready-list"></div>
+      <div class="orders-empty" id="staff-ready-empty">
+        <h3>All caught up</h3>
+        <p>No orders ready for processing.</p>
+      </div>
+    </div>
+
+    <div class="staff-tab-content" id="staff-tab-processing">
+      <div class="staff-queue" id="staff-processing-list"></div>
+      <div class="orders-empty" id="staff-processing-empty">
+        <h3>Nothing in progress</h3>
+        <p>Start processing an order from the Ready tab.</p>
+      </div>
+    </div>
+
+  </div><!-- #page-staff -->
+
   <!-- ── Admin Dashboard ───────────────────────────────────────── -->
-  <div id="page-admin" class="page page--admin">
 
     <!-- Top bar -->
     <div class="admin-topbar">
@@ -2572,6 +2617,7 @@
       <button class="admin-tab" data-tab="support">Support</button>
       <button class="admin-tab" data-tab="messages">Messages</button>
       <button class="admin-tab" data-tab="riders">Riders</button>
+      <button class="admin-tab" data-tab="staff">Staff</button>
       <button class="admin-tab" data-tab="plans">Plans</button>
       <button class="admin-tab" data-tab="config">Config</button>
     </div>
@@ -2705,6 +2751,60 @@
           </div>
         </div>
         <div id="admin-riders-list"></div>
+      </div>
+
+      <!-- Staff tab -->
+      <div class="admin-panel" id="admin-panel-staff">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">Staff</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn--primary btn--sm" id="btn-admin-staff-add">+ Add Staff</button>
+            <button class="btn btn--ghost btn--sm" id="btn-admin-staff-refresh">Refresh</button>
+          </div>
+        </div>
+        <div id="admin-staff-list"></div>
+      </div>
+
+      <!-- Staff detail overlay -->
+      <div class="admin-overlay" id="admin-staff-overlay">
+        <div class="admin-overlay__backdrop" id="admin-staff-backdrop"></div>
+        <div class="admin-sheet">
+          <div class="admin-sheet__handle"></div>
+          <div class="admin-sheet__header">
+            <h3 class="admin-sheet__title" id="admin-staff-title">Staff</h3>
+            <button class="admin-sheet__close" id="btn-admin-staff-close" aria-label="Close">✕</button>
+          </div>
+          <div class="admin-sheet__body">
+            <div id="admin-staff-details" class="admin-detail-rows"></div>
+            <div class="admin-card__meta" style="font-weight:600;margin:16px 0 8px">Orders Processed</div>
+            <div id="admin-staff-processed-orders"></div>
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn--ghost btn--full" id="btn-admin-staff-edit">Edit Staff</button>
+              <button class="btn btn--warn btn--full" id="btn-admin-staff-delete">Delete Staff</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff editor overlay -->
+      <div class="admin-overlay" id="admin-staff-editor-overlay">
+        <div class="admin-overlay__backdrop" id="admin-staff-editor-backdrop"></div>
+        <div class="admin-sheet">
+          <div class="admin-sheet__handle"></div>
+          <div class="admin-sheet__header">
+            <h3 class="admin-sheet__title" id="admin-staff-editor-title">Add Staff</h3>
+            <button class="admin-sheet__close" id="btn-admin-staff-editor-close" aria-label="Close">✕</button>
+          </div>
+          <div class="admin-sheet__body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+              <input class="form-input" id="staff-form-name" placeholder="Full name">
+              <input class="form-input" id="staff-form-email" type="email" placeholder="Email address">
+              <input class="form-input" id="staff-form-phone" type="tel" placeholder="Phone number">
+              <input class="form-input" id="staff-form-password" type="password" placeholder="Password">
+            </div>
+            <button class="btn btn--primary btn--full" id="btn-admin-staff-editor-save">Save Staff</button>
+          </div>
+        </div>
       </div>
 
       <!-- Rider detail overlay -->
@@ -3087,6 +3187,7 @@
   <script src="js/pages/auth.js"></script>
   <script src="js/pages/home.js"></script>
   <script src="js/pages/rider.js"></script>
+  <script src="js/pages/staff.js"></script>
   <script src="js/pages/admin.js"></script>
   <script src="js/app.js"></script>
 </body>

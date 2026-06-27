@@ -59,6 +59,7 @@ function init(data = {}) {
     if (tab === 'support')   loadSupport(currentSupportFilter);
     if (tab === 'messages')  loadMessages();
     if (tab === 'riders')    loadRiders();
+    if (tab === 'staff')    loadStaff();
     if (tab === 'plans')     loadPlans();
     if (tab === 'config')    loadConfig();
   }
@@ -101,6 +102,17 @@ function init(data = {}) {
     document.getElementById('btn-admin-rider-editor-save').addEventListener('click', handleRiderEditorSave);
     document.getElementById('btn-admin-rider-editor-close').addEventListener('click', closeRiderEditor);
     document.getElementById('admin-rider-editor-backdrop').addEventListener('click', closeRiderEditor);
+
+    // Staff
+    document.getElementById('btn-admin-staff-refresh').addEventListener('click', loadStaff);
+    document.getElementById('btn-admin-staff-close').addEventListener('click', closeStaffDetail);
+    document.getElementById('admin-staff-backdrop').addEventListener('click', closeStaffDetail);
+    document.getElementById('btn-admin-staff-add').addEventListener('click', handleStaffAdd);
+    document.getElementById('btn-admin-staff-edit').addEventListener('click', handleStaffEdit);
+    document.getElementById('btn-admin-staff-delete').addEventListener('click', handleStaffDelete);
+    document.getElementById('btn-admin-staff-editor-save').addEventListener('click', handleStaffEditorSave);
+    document.getElementById('btn-admin-staff-editor-close').addEventListener('click', closeStaffEditor);
+    document.getElementById('admin-staff-editor-backdrop').addEventListener('click', closeStaffEditor);
 
     // Users
     document.getElementById('btn-admin-users-refresh').addEventListener('click', loadUsers);
@@ -986,6 +998,165 @@ function init(data = {}) {
       showToast('Rider deleted');
     } catch {
       showToast('Could not delete rider');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* ── Staff management ──────────────────────────────────────────── */
+  let currentStaffId = null;
+  let staffEditorMode = 'add';
+
+  async function loadStaff() {
+    const list = document.getElementById('admin-staff-list');
+    list.innerHTML = '<div class="admin-empty">Loading…</div>';
+    try {
+      const staff = await SpaccleDB.listAllStaff();
+      let allOrders = [];
+      try { allOrders = await SpaccleDB.listAllOrders(); } catch (e) { console.warn('loadStaff: orders failed', e); }
+
+      list.innerHTML = '';
+      if (!staff.length) {
+        list.innerHTML = '<div class="admin-empty">No staff yet.</div>';
+        return;
+      }
+
+      staff.forEach(s => {
+        const processed = allOrders.filter(o => o.processedBy === s._id);
+        const activeCount = processed.filter(o => !['delivered', 'completed', 'cancelled'].includes(o.status)).length;
+
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.style.cursor = 'pointer';
+        card.innerHTML = `
+          <div class="admin-card__left">
+            <div class="admin-card__title">${escapeHtml(s.name || '(No name)')}</div>
+            <div class="admin-card__meta">${escapeHtml(s.email || '')} · ${processed.length} processed · ${activeCount} active</div>
+          </div>
+          <div class="admin-card__right">
+            <div class="admin-card__pill" style="background:var(--bg-2);color:var(--text-2)">Staff</div>
+          </div>`;
+        card.addEventListener('click', () => openStaffDetail(s));
+        list.appendChild(card);
+      });
+    } catch (e) {
+      console.warn('loadStaff error:', e);
+      list.innerHTML = '<div class="admin-empty">Failed to load staff.</div>';
+    }
+  }
+
+  async function openStaffDetail(s) {
+    currentStaffId = s._id;
+    document.getElementById('admin-staff-title').textContent = s.name || 'Staff';
+
+    let allOrders = [];
+    try { allOrders = await SpaccleDB.listAllOrders(); } catch {}
+    const processedOrders = allOrders.filter(o => o.processedBy === s._id);
+
+    document.getElementById('admin-staff-details').innerHTML = [
+      ['Name',      escapeHtml(s.name  || '—')],
+      ['Email',     escapeHtml(s.email || '—')],
+      ['Phone',     escapeHtml(s.phone || '—')],
+      ['Joined',    escapeHtml(formatDateTime(s.createdAt))],
+      ['Processed', processedOrders.length],
+      ['Active',    processedOrders.filter(o => !['delivered', 'completed', 'cancelled'].includes(o.status)).length],
+    ].map(([l, v]) =>
+      `<div class="admin-detail-row"><span class="admin-detail-row__label">${escapeHtml(l)}</span><span class="admin-detail-row__value">${v}</span></div>`
+    ).join('');
+
+    const ordersEl = document.getElementById('admin-staff-processed-orders');
+    ordersEl.innerHTML = '';
+    if (!processedOrders.length) {
+      ordersEl.innerHTML = '<div class="admin-empty" style="font-size:12px;padding:8px 0">No orders processed yet.</div>';
+    } else {
+      processedOrders.slice(0, 10).forEach(o => ordersEl.appendChild(buildOrderCard(o)));
+    }
+
+    document.getElementById('admin-staff-overlay').classList.add('open');
+  }
+
+  function closeStaffDetail() {
+    document.getElementById('admin-staff-overlay').classList.remove('open');
+    currentStaffId = null;
+  }
+
+  async function openStaffEditor(mode, staffId = '') {
+    staffEditorMode = mode;
+    document.getElementById('admin-staff-editor-title').textContent = mode === 'edit' ? 'Edit Staff' : 'Add Staff';
+    document.getElementById('admin-staff-editor-overlay').classList.add('open');
+    const passwordRow = document.getElementById('staff-form-password');
+    passwordRow.required = mode === 'add';
+    passwordRow.parentElement.style.display = mode === 'add' ? '' : 'none';
+    document.getElementById('btn-admin-staff-editor-save').dataset.editId = staffId;
+  }
+
+  function closeStaffEditor() {
+    document.getElementById('admin-staff-editor-overlay').classList.remove('open');
+    document.getElementById('btn-admin-staff-editor-save').dataset.editId = '';
+    ['staff-form-name','staff-form-email','staff-form-phone','staff-form-password'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  }
+
+  async function handleStaffAdd() {
+    openStaffEditor('add');
+  }
+
+  async function handleStaffEdit() {
+    const staffId = currentStaffId;
+    if (!staffId) return;
+    const doc = await SpaccleDB.getDocument(staffId);
+    document.getElementById('staff-form-name').value = doc.name || '';
+    document.getElementById('staff-form-email').value = doc.email || '';
+    document.getElementById('staff-form-phone').value = doc.phone || '';
+    document.getElementById('staff-form-password').value = '';
+    closeStaffDetail();
+    await openStaffEditor('edit', staffId);
+  }
+
+  async function handleStaffEditorSave() {
+    const editId = document.getElementById('btn-admin-staff-editor-save').dataset.editId || '';
+    const name = document.getElementById('staff-form-name').value.trim();
+    const email = document.getElementById('staff-form-email').value.trim();
+    const phone = document.getElementById('staff-form-phone').value.trim();
+    const password = document.getElementById('staff-form-password').value;
+    if (!name || !email) { showToast('Name and email are required'); return; }
+    if (!editId && !password) { showToast('Password is required for new staff'); return; }
+    const btn = document.getElementById('btn-admin-staff-editor-save');
+    btn.classList.add('loading');
+    try {
+      if (editId) {
+        const doc = await SpaccleDB.getDocument(editId);
+        await SpaccleDB.saveDocument({ ...doc, name, email, phone, updatedAt: new Date().toISOString() });
+        showToast('Staff updated');
+      } else {
+        await SpaccleDB.createUser({ name, email, phone, password, role: 'staff', recoveryQuestion: '', recoveryAnswer: '' });
+        showToast('Staff added');
+      }
+      closeStaffEditor();
+      await loadStaff();
+    } catch (e) {
+      showToast(e?.message === 'EMAIL_TAKEN' ? 'Email already in use' : 'Could not save staff');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  async function handleStaffDelete() {
+    const staffId = currentStaffId;
+    if (!staffId) return;
+    const doc = await SpaccleDB.getDocument(staffId);
+    if (!confirm(`Delete staff "${doc.name || 'Unnamed'}"? This cannot be undone.`)) return;
+    const btn = document.getElementById('btn-admin-staff-delete');
+    btn.classList.add('loading');
+    try {
+      await SpaccleDB.deleteUser(staffId);
+      closeStaffDetail();
+      await loadStaff();
+      showToast('Staff deleted');
+    } catch {
+      showToast('Could not delete staff');
     } finally {
       btn.classList.remove('loading');
     }

@@ -17,6 +17,8 @@ const SplashPage = (() => {
           App.navigate('admin', { user: session });
         } else if (session.role === 'rider') {
           App.navigate('rider', { user: session });
+        } else if (session.role === 'staff') {
+          App.navigate('staff', { user: session });
         } else if (session.role === 'customer') {
           App.navigate('home', { user: session });
         } else {

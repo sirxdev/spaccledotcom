@@ -229,6 +229,8 @@ const AuthPage = (() => {
         App.navigate('admin', { user: session });
       } else if (session.role === 'rider' || riderMode) {
         App.navigate('rider', { user: session });
+      } else if (session.role === 'staff') {
+        App.navigate('staff', { user: session });
       } else {
         App.navigate('home', { user: session });
       }
