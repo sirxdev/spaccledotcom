@@ -1110,6 +1110,23 @@ const HomePage = (() => {
         const isDelivered = ['delivered', 'completed'].includes(order.status);
         supportBtn.textContent = isDelivered ? 'Report Issue' : 'Support';
       }
+
+      // Resolve rider IDs to names
+      const pickupRiderEl = document.getElementById('order-detail-pickup-rider');
+      const deliveryRiderEl = document.getElementById('order-detail-delivery-rider');
+      async function resolveRider(id) {
+        if (!id || id.startsWith('user_')) {
+          const profile = id ? await SpaccleDB.getUserProfile(id).catch(() => null) : null;
+          return profile?.name || id || '—';
+        }
+        return id;
+      }
+      if (pickupRiderEl) {
+        resolveRider(order.assignedDriver || order.pickupRiderId).then(name => { pickupRiderEl.textContent = name; });
+      }
+      if (deliveryRiderEl && order.deliveryRiderId) {
+        resolveRider(order.deliveryRiderId).then(name => { deliveryRiderEl.textContent = name; });
+      }
       openSheet('sheet-order');
     } catch {
       showToast('Could not open order');
@@ -1142,7 +1159,8 @@ const HomePage = (() => {
       <div class="order-detail__row"><strong>Delivery:</strong> ${escapeHtml(order.deliveryAddress || order.address || '—')}</div>
       <div class="order-detail__row"><strong>Items:</strong> ${escapeHtml(String(order.itemsCount || '—'))}</div>
       <div class="order-detail__row"><strong>Amount:</strong> ${order.amountPaid ? '₦' + Number(order.amountPaid).toLocaleString() : '—'}</div>
-      <div class="order-detail__row"><strong>Rider:</strong> ${escapeHtml(order.assignedDriver || order.riderId || '—')}</div>
+      <div class="order-detail__row"><strong>Pickup Rider:</strong> <span id="order-detail-pickup-rider">${escapeHtml(order.assignedDriver || order.pickupRiderId || '—')}</span></div>
+      ${order.deliveryRiderId ? `<div class="order-detail__row"><strong>Delivery Rider:</strong> <span id="order-detail-delivery-rider">${escapeHtml(order.deliveryRiderId || '—')}</span></div>` : ''}
       <div class="order-detail__row"><strong>Status:</strong> ${escapeHtml(statusLabel(order.status))}</div>
       <div class="order-detail__row"><strong>Ordered:</strong> ${escapeHtml(formatTime(order.createdAt))}</div>
       <div style="height:12px"></div>

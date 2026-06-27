@@ -383,14 +383,24 @@ function setupSheets() {
     App.navigate('roleSelect');
   }
 
-  /* ── Orders rendering ────────────���────────────────────────── */
+  function riderRole(order) {
+    const isPickup = order.pickupRiderId === user.userId || order.riderId === user.userId;
+    const isDelivery = order.deliveryRiderId === user.userId;
+    if (isPickup && isDelivery) return 'Both';
+    if (isPickup) return 'Pickup';
+    if (isDelivery) return 'Delivery';
+    return '';
+  }
+
+  /* ── Orders rendering ────────────────────────────────────────── */
   async function renderOrders() {
     try {
       const orders = await SpaccleDB.getRiderOrders();
       const riderOrders = orders.filter(o => o.riderId === user.userId || o.pickupRiderId === user.userId || o.deliveryRiderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId);
       const pendingAssignments = orders.filter(o => o.pendingRiderId === user.userId && o.status === 'scheduled' && !o.riderId);
-      const allActive = [...pendingAssignments, ...riderOrders];
-      const pending = allActive.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.OUT_FOR_DELIVERY || o.status === ORDER_STATUS.PROCESSING || (o.pendingRiderId === user.userId && !o.riderId));
+      const deliveryPendingAssignments = orders.filter(o => o.pendingDeliveryRiderId === user.userId && o.status === 'ready' && !o.deliveryRiderId);
+      const allActive = [...pendingAssignments, ...deliveryPendingAssignments, ...riderOrders];
+      const pending = allActive.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.OUT_FOR_DELIVERY || o.status === ORDER_STATUS.PROCESSING || (o.pendingRiderId === user.userId && !o.riderId) || (o.pendingDeliveryRiderId === user.userId && !o.deliveryRiderId));
       const completed = riderOrders.filter(o => o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED);
       const today = riderOrders.filter(o => isToday(o.updatedAt));
 
@@ -426,10 +436,17 @@ function setupSheets() {
       if (!item) return;
       item.className = 'rider-order-item';
       item.dataset.orderId = order._id;
+      const role = riderRole(order);
+      const isDelivPending = order.pendingDeliveryRiderId === user.userId && !order.deliveryRiderId;
+      const isPickupPending = order.pendingRiderId === user.userId && !order.riderId;
+      let roleBadge = '';
+      if (isDelivPending) roleBadge = '<span class="role-badge role-badge--delivery">Delivery</span>';
+      else if (isPickupPending) roleBadge = '<span class="role-badge role-badge--pickup">Pickup</span>';
+      else if (role) roleBadge = `<span class="role-badge role-badge--${role.toLowerCase()}">${role}</span>`;
       item.innerHTML = `
         <div class="rider-order-item__status">
           <span class="rider-order-item__status-dot ${order.status}"></span>
-          <span class="rider-order-item__status-label">${formatStatus(order.status)}</span>
+          <span class="rider-order-item__status-label">${isDelivPending ? 'Delivery Available' : isPickupPending ? 'Awaiting Acceptance' : formatStatus(order.status)} ${roleBadge}</span>
         </div>
         <div class="rider-order-item__info">
           <div class="rider-order-item__row">
@@ -459,11 +476,12 @@ function setupSheets() {
 
   function renderActiveOrder(order) {
     const isPending = order.pendingRiderId === user.userId && !order.riderId;
+    const isDeliveryPending = order.pendingDeliveryRiderId === user.userId && !order.deliveryRiderId;
     document.getElementById('rider-active-card').style.display = 'flex';
     document.getElementById('rider-no-active-card').style.display = 'none';
 
     document.getElementById('rider-active-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
-    document.getElementById('rider-active-status').textContent = isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
+    document.getElementById('rider-active-status').textContent = isDeliveryPending ? 'Delivery Available' : isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
     document.getElementById('rider-active-pickup').textContent = order.pickupAddress || 'N/A';
     document.getElementById('rider-active-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
     document.getElementById('rider-active-items').textContent = (order.itemsCount || 0) + ' items';
@@ -471,11 +489,11 @@ function setupSheets() {
     const atFacility = order.status === ORDER_STATUS.PROCESSING;
     const pickupRow = document.getElementById('rider-active-pickup-row');
     const deliveryRow = document.getElementById('rider-active-delivery-row');
-    if (pickupRow) pickupRow.style.display = atFacility || isPending ? 'none' : '';
-    if (deliveryRow) deliveryRow.style.display = atFacility || isPending ? 'none' : '';
+    if (pickupRow) pickupRow.style.display = atFacility || isPending || isDeliveryPending ? 'none' : '';
+    if (deliveryRow) deliveryRow.style.display = atFacility || isPending || isDeliveryPending ? 'none' : '';
 
     const progressEl = document.getElementById('rider-active-progress');
-    if (progressEl) progressEl.style.display = isPending ? 'none' : '';
+    if (progressEl) progressEl.style.display = isPending || isDeliveryPending ? 'none' : '';
 
     if (isPending) {
       startPendingTimer(order);
@@ -497,7 +515,8 @@ function setupSheets() {
     if (!pendingEl || !timerEl) return;
     pendingEl.style.display = '';
 
-    const expiresAt = new Date(order.pendingExpiresAt).getTime();
+    const isDeliveryPending = order.pendingDeliveryRiderId === user.userId && !order.deliveryRiderId;
+    const expiresAt = new Date(isDeliveryPending ? order.pendingDeliveryExpiresAt : order.pendingExpiresAt).getTime();
     const now = Date.now();
     let remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
 
@@ -529,15 +548,20 @@ function setupSheets() {
   async function handleAcceptOrder() {
     if (!activeOrder) return;
     stopPendingTimer();
+    const isDeliveryPending = activeOrder.pendingDeliveryRiderId === user.userId && !activeOrder.deliveryRiderId;
     try {
-      await SpaccleDB.acceptAssignment(activeOrder._id, user.userId);
-      showToast('Order accepted!');
+      if (isDeliveryPending) {
+        await SpaccleDB.acceptDeliveryAssignment(activeOrder._id, user.userId);
+      } else {
+        await SpaccleDB.acceptAssignment(activeOrder._id, user.userId);
+      }
+      showToast(isDeliveryPending ? 'Delivery accepted!' : 'Order accepted!');
       await renderOrders();
     } catch (err) {
       if (err?.message === 'ASSIGNMENT_EXPIRED') {
         showToast('Offer expired — order has been reassigned');
       } else {
-        showToast('Could not accept order');
+        showToast('Could not accept');
       }
       await renderOrders();
     }
@@ -546,12 +570,17 @@ function setupSheets() {
   async function handleDeclineOrder() {
     if (!activeOrder) return;
     stopPendingTimer();
+    const isDeliveryPending = activeOrder.pendingDeliveryRiderId === user.userId && !activeOrder.deliveryRiderId;
     try {
-      await SpaccleDB.declineAssignment(activeOrder._id, user.userId);
-      showToast('Order declined');
+      if (isDeliveryPending) {
+        await SpaccleDB.declineDeliveryAssignment(activeOrder._id, user.userId);
+      } else {
+        await SpaccleDB.declineAssignment(activeOrder._id, user.userId);
+      }
+      showToast(isDeliveryPending ? 'Delivery declined' : 'Order declined');
       await renderOrders();
     } catch {
-      showToast('Could not decline order');
+      showToast('Could not decline');
       await renderOrders();
     }
   }
@@ -631,9 +660,10 @@ function setupSheets() {
   /* ── Order actions ────────────────────────────────────────── */
   function openOrderSheet(order) {
     const isPending = order.pendingRiderId === user.userId && !order.riderId;
+    const isDeliveryPending = order.pendingDeliveryRiderId === user.userId && !order.deliveryRiderId;
     activeOrder = order;
     document.getElementById('rider-sheet-order-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
-    document.getElementById('rider-sheet-order-status').textContent = isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
+    document.getElementById('rider-sheet-order-status').textContent = isDeliveryPending ? 'Delivery Available' : isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
     document.getElementById('rider-sheet-pickup').textContent = order.pickupAddress || 'N/A';
     document.getElementById('rider-sheet-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
     document.getElementById('rider-sheet-items').textContent = (order.itemsCount || 0) + ' items';
@@ -645,6 +675,7 @@ function setupSheets() {
     const pickupStage = ['assigned', 'picked_up'].includes(order.status);
     const deliveryStage = ['ready', 'out_for_delivery'].includes(order.status);
     const doneStage = ['delivered', 'completed'].includes(order.status);
+    const anyPending = isPending || isDeliveryPending;
 
     const pickupAddr = document.getElementById('rider-sheet-addr-pickup');
     const deliveryAddr = document.getElementById('rider-sheet-addr-delivery');
@@ -653,10 +684,10 @@ function setupSheets() {
     document.getElementById('rider-sheet-pickup').style.fontWeight = '';
     document.getElementById('rider-sheet-delivery').style.fontWeight = '';
 
-    pickupAddr.style.display = (pickupStage || doneStage) && !isPending ? '' : 'none';
-    deliveryAddr.style.display = (deliveryStage || doneStage) && !isPending ? '' : 'none';
-    document.getElementById('rider-sheet-row-time').style.display = pickupStage && !isPending ? '' : 'none';
-    document.getElementById('rider-sheet-row-notes').style.display = pickupStage && !isPending ? '' : 'none';
+    pickupAddr.style.display = (pickupStage || doneStage) && !anyPending ? '' : 'none';
+    deliveryAddr.style.display = (deliveryStage || doneStage) && !anyPending ? '' : 'none';
+    document.getElementById('rider-sheet-row-time').style.display = pickupStage && !anyPending ? '' : 'none';
+    document.getElementById('rider-sheet-row-notes').style.display = pickupStage && !anyPending ? '' : 'none';
 
     if (pickupStage) pickupAddr.style.opacity = '1';
     if (deliveryStage) deliveryAddr.style.opacity = '1';
@@ -673,20 +704,23 @@ function setupSheets() {
 
   function renderOrderActions(order) {
     const isPending = order.pendingRiderId === user.userId && !order.riderId;
+    const isDeliveryPending = order.pendingDeliveryRiderId === user.userId && !order.deliveryRiderId;
     const actionsEl = document.getElementById('rider-sheet-actions');
     if (!actionsEl) return;
 
-    if (isPending) {
+    if (isPending || isDeliveryPending) {
+      const label = isDeliveryPending ? 'Accept Delivery' : 'Accept Order';
+      const expiresKey = isDeliveryPending ? 'pendingDeliveryExpiresAt' : 'pendingExpiresAt';
       actionsEl.innerHTML = `
-        <div style="text-align:center;padding:8px 0;font-size:13px;color:var(--text-2,#666)">Accept or decline within <strong id="rider-sheet-timer"></strong></div>
-        <button class="btn btn--primary btn--lg btn--full" id="btn-rider-sheet-accept" style="margin-bottom:8px">Accept Order</button>
+        <div style="text-align:center;padding:8px 0;font-size:13px;color:var(--text-2,#666)">${isDeliveryPending ? 'Accept delivery within' : 'Accept or decline within'} <strong id="rider-sheet-timer"></strong></div>
+        <button class="btn btn--primary btn--lg btn--full" id="btn-rider-sheet-accept" style="margin-bottom:8px">${label}</button>
         <button class="btn btn--warn btn--lg btn--full" id="btn-rider-sheet-decline">Decline</button>
       `;
       document.getElementById('btn-rider-sheet-accept').addEventListener('click', handleAcceptOrder);
       document.getElementById('btn-rider-sheet-decline').addEventListener('click', handleDeclineOrder);
       const timerEl = document.getElementById('rider-sheet-timer');
-      if (timerEl && order.pendingExpiresAt) {
-        const remaining = Math.max(0, Math.floor((new Date(order.pendingExpiresAt).getTime() - Date.now()) / 1000));
+      if (timerEl && order[expiresKey]) {
+        const remaining = Math.max(0, Math.floor((new Date(order[expiresKey]).getTime() - Date.now()) / 1000));
         timerEl.textContent = remaining + 's';
       }
       return;

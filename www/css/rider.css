@@ -333,6 +333,20 @@
   border-top: 1px solid rgba(255,255,255,0.2);
 }
 
+.role-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 4px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+.role-badge--pickup { background: #E8F4FF; color: #4A90E2; }
+.role-badge--delivery { background: #E6FBF6; color: #06D6A0; }
+.role-badge--both { background: #FFF3E0; color: #FB8C00; }
+
 .rider-progress-step {
   display: flex;
   flex-direction: column;
