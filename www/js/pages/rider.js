@@ -434,7 +434,7 @@ function setupSheets() {
         <div class="rider-order-item__info">
           <div class="rider-order-item__row">
             <span class="rider-order-item__label">Order ID</span>
-            <span class="rider-order-item__val">${order.orderId || order._id.slice(-6)}</span>
+            <span class="rider-order-item__val">${order.publicId || order.orderId || order._id.slice(-6)}</span>
           </div>
           <div class="rider-order-item__row">
             <span class="rider-order-item__label">${order.status === ORDER_STATUS.COMPLETED ? 'Delivered' : 'Pickup'}</span>
@@ -462,7 +462,7 @@ function setupSheets() {
     document.getElementById('rider-active-card').style.display = 'flex';
     document.getElementById('rider-no-active-card').style.display = 'none';
 
-    document.getElementById('rider-active-id').textContent = order.orderId || order._id.slice(-6);
+    document.getElementById('rider-active-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
     document.getElementById('rider-active-status').textContent = isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
     document.getElementById('rider-active-pickup').textContent = order.pickupAddress || 'N/A';
     document.getElementById('rider-active-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
@@ -632,7 +632,7 @@ function setupSheets() {
   function openOrderSheet(order) {
     const isPending = order.pendingRiderId === user.userId && !order.riderId;
     activeOrder = order;
-    document.getElementById('rider-sheet-order-id').textContent = order.orderId || order._id.slice(-6);
+    document.getElementById('rider-sheet-order-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
     document.getElementById('rider-sheet-order-status').textContent = isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
     document.getElementById('rider-sheet-pickup').textContent = order.pickupAddress || 'N/A';
     document.getElementById('rider-sheet-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
@@ -795,7 +795,7 @@ function setupSheets() {
     overlay.innerHTML = `
       <div class="rider-delivery-confirm">
         <h3 class="rider-delivery-confirm__title">Confirm Delivery</h3>
-        <p class="rider-delivery-confirm__sub">Order #${order.orderId || order._id.slice(-6)}</p>
+        <p class="rider-delivery-confirm__sub">Order #${order.publicId || order.orderId || order._id.slice(-6)}</p>
         <label class="rider-delivery-confirm__label">Leave a delivery note for the customer</label>
         <textarea id="rider-delivery-note" class="rider-msg-textarea" rows="3"
           placeholder="E.g. Left with security, handed to resident, placed at door…"></textarea>
@@ -828,7 +828,7 @@ function setupSheets() {
   /* ── Tips ─────────────────────────────────────────────────────── */
   function openTipSheet(order) {
     activeOrder = order;
-    document.getElementById('rider-tip-order-id').textContent = order.orderId || order._id.slice(-6);
+    document.getElementById('rider-tip-order-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
     document.getElementById('rider-tip-customer').textContent = order.customerName || 'Customer';
     document.getElementById('rider-tip-input').value = '';
     document.getElementById('rider-tip-amount').value = '200';
@@ -1048,7 +1048,7 @@ function setupSheets() {
       </div>
       <div class="rider-new-order-alert__body">
         <strong>New Order Assigned!</strong>
-        <span>#${order.orderId || order._id.slice(-6)} — ${order.pickupAddress || 'Pickup ready'}</span>
+        <span>#${order.publicId || order.orderId || order._id.slice(-6)} — ${order.pickupAddress || 'Pickup ready'}</span>
       </div>
       <button class="rider-new-order-alert__close" aria-label="Dismiss">✕</button>`;
     document.getElementById('page-rider')?.appendChild(alert);
