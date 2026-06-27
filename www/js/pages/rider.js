@@ -1039,8 +1039,11 @@ function setupSheets() {
         if (!doc || doc._deleted || !user) return;
 
         // New order assigned to this rider
-        if (doc.type === 'order' && doc.status === ORDER_STATUS.ASSIGNED) {
+        if (doc.type === 'order' && (doc.status === ORDER_STATUS.ASSIGNED || doc.pendingDeliveryRiderId === user.userId)) {
           const isForMe = doc.riderId === user.userId ||
+            doc.pickupRiderId === user.userId ||
+            doc.deliveryRiderId === user.userId ||
+            doc.pendingDeliveryRiderId === user.userId ||
             doc.assignedDriver === user.name ||
             doc.assignedDriver === user.userId;
           if (!isForMe) return;
@@ -1052,6 +1055,8 @@ function setupSheets() {
         // Order status updated for an order belonging to this rider
         if (doc.type === 'order') {
           const isForMe = doc.riderId === user.userId ||
+            doc.pickupRiderId === user.userId ||
+            doc.deliveryRiderId === user.userId ||
             doc.assignedDriver === user.name ||
             doc.assignedDriver === user.userId;
           if (!isForMe) return;
@@ -1070,6 +1075,7 @@ function setupSheets() {
   function showNewOrderAlert(order) {
     const existing = document.getElementById('rider-new-order-alert');
     if (existing) existing.remove();
+    const isDeliveryPending = order.pendingDeliveryRiderId === user.userId && !order.deliveryRiderId;
 
     const alert = document.createElement('div');
     alert.id = 'rider-new-order-alert';
@@ -1081,8 +1087,8 @@ function setupSheets() {
         </svg>
       </div>
       <div class="rider-new-order-alert__body">
-        <strong>New Order Assigned!</strong>
-        <span>#${order.publicId || order.orderId || order._id.slice(-6)} — ${order.pickupAddress || 'Pickup ready'}</span>
+        <strong>${isDeliveryPending ? 'Delivery Available!' : 'New Order Assigned!'}</strong>
+        <span>${isDeliveryPending ? '' : '#'}${order.publicId || order.orderId || order._id.slice(-6)} — ${isDeliveryPending ? 'Ready for delivery' : (order.pickupAddress || 'Pickup ready')}</span>
       </div>
       <button class="rider-new-order-alert__close" aria-label="Dismiss">✕</button>`;
     document.getElementById('page-rider')?.appendChild(alert);
