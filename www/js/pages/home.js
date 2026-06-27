@@ -254,6 +254,9 @@ const HomePage = (() => {
     updateBillingUI();
     openSheet('sheet-schedule');
     loadSavedAddresses();
+    // Eagerly load Google Places for address autocomplete
+    const mapsKey = getConfig().googleMaps?.apiKey;
+    if (mapsKey) loadGoogleMaps(mapsKey).catch(() => {});
   }
 
   async function hasActiveSub() {
@@ -303,6 +306,7 @@ const HomePage = (() => {
     const freshInput = addrInput.cloneNode(true);
     addrInput.replaceWith(freshInput);
     addrInput = freshInput;
+    initPlaceAutocomplete(addrInput);
     freshInput.addEventListener('input', () => {
       if (saveBtn) saveBtn.style.display = freshInput.value.trim() ? '' : 'none';
     });
@@ -413,7 +417,12 @@ const HomePage = (() => {
     document.getElementById('btn-schedule-confirm').addEventListener('click', handleScheduleConfirm);
     document.getElementById('deliver-back-checkbox').addEventListener('change', e => {
       const group = document.getElementById('delivery-address-group');
-      if (group) group.style.display = e.target.checked ? 'none' : '';
+      if (group) {
+        group.style.display = e.target.checked ? 'none' : '';
+        if (!e.target.checked) {
+          initPlaceAutocomplete(document.getElementById('delivery-address'));
+        }
+      }
     });
     document.getElementById('btn-billing-payg').addEventListener('click', () => setBillingMode('payg'));
     document.getElementById('btn-billing-sub').addEventListener('click', () => setBillingMode('subscription'));
@@ -1624,9 +1633,26 @@ const HomePage = (() => {
     mapEl.dataset.ready = 'true';
   }
 
-  function loadGoogleMaps(apiKey) {
-    if (window.google?.maps) return Promise.resolve(true);
-    if (window._spaccleMapsPromise) return window._spaccleMapsPromise;
+  function initPlaceAutocomplete(inputEl) {
+    if (!inputEl || !window.google?.maps?.places) return;
+    const autocomplete = new google.maps.places.Autocomplete(inputEl, {
+      types: ['geocode', 'establishment'],
+      componentRestrictions: { country: 'NG' },
+      fields: ['formatted_address', 'address_components'],
+    });
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (place?.formatted_address) {
+        inputEl.value = place.formatted_address;
+        inputEl.dispatchEvent(new Event('input'));
+      }
+    });
+  }
+
+  function loadGoogleMaps(apiKey, libraries = 'places') {
+    if (window.google?.maps?.places && libraries?.includes('places')) return Promise.resolve(true);
+    if (window.google?.maps && !libraries) return Promise.resolve(true);
+    if (window._spaccleMapsPromise && !libraries) return window._spaccleMapsPromise;
 
     window._spaccleMapsPromise = new Promise((resolve, reject) => {
       const callbackName = '_spaccleMapsInit_' + Math.random().toString(36).slice(2, 9);
@@ -1637,7 +1663,8 @@ const HomePage = (() => {
 
       const script = document.createElement('script');
       const encodedKey = encodeURIComponent(apiKey);
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodedKey}&callback=${callbackName}`;
+      const libs = libraries ? `&libraries=${encodeURIComponent(libraries)}` : '';
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodedKey}&callback=${callbackName}${libs}`;
       script.async = true;
       script.onerror = () => reject(new Error('MAPS_LOAD_FAILED'));
       document.head.appendChild(script);
