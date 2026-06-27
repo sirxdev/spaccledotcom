@@ -246,9 +246,19 @@ const HomePage = (() => {
     const promoStatus = document.getElementById('promo-status');
     if (promoStatus) promoStatus.textContent = '';
     buildDatePicker();
+    const hasActiveSubscription = user && await hasActiveSub();
+    if (hasActiveSubscription) {
+      billingMode = 'subscription';
+      subscription = await SpaccleDB.getSubscription(user.userId);
+    }
     updateBillingUI();
     openSheet('sheet-schedule');
     loadSavedAddresses();
+  }
+
+  async function hasActiveSub() {
+    const sub = await SpaccleDB.getSubscription(user?.userId);
+    return !!(sub && sub.status === 'active');
   }
 
   async function loadSavedAddresses() {
@@ -1223,12 +1233,22 @@ const HomePage = (() => {
     const paygBtn = document.getElementById('btn-billing-payg');
     const subBtn = document.getElementById('btn-billing-sub');
     const subBlock = document.getElementById('subscription-block');
+    const tabsContainer = document.getElementById('billing-tabs');
     const itemsGroup = document.getElementById('items-count-group');
     const required = document.getElementById('subscription-required');
+
+    const activeSub = user && await hasActiveSub();
+
+    if (tabsContainer) tabsContainer.style.display = activeSub ? 'none' : '';
 
     if (paygBtn && subBtn) {
       paygBtn.classList.toggle('active', billingMode === 'payg');
       subBtn.classList.toggle('active', billingMode === 'subscription');
+    }
+
+    if (activeSub) {
+      billingMode = 'subscription';
+      subscription = await SpaccleDB.getSubscription(user.userId);
     }
 
     if (subBlock) subBlock.style.display = billingMode === 'subscription' ? '' : 'none';
