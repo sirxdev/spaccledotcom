@@ -2075,7 +2075,7 @@ function init(data = {}) {
     if (!iso) return '—';
     try {
       return new Date(iso).toLocaleDateString('en-NG',
-        { day: 'numeric', month: 'short', year: 'numeric' });
+        { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch { return iso; }
   }
 
