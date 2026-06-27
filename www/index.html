@@ -1245,131 +1245,160 @@
         </button>
       </div>
 
+      <!-- Step indicator -->
+      <div class="wizard-steps" id="wizard-steps">
+        <div class="wizard-step active" data-step="1"><span class="wizard-step__num">1</span> Service &amp; Items</div>
+        <div class="wizard-step" data-step="2"><span class="wizard-step__num">2</span> Address &amp; Time</div>
+        <div class="wizard-step" data-step="3"><span class="wizard-step__num">3</span> Review &amp; Confirm</div>
+      </div>
+
       <div class="sheet__content">
-        <div class="sheet-block">
-          <p class="sheet-block__label" data-i18n="Service">Service</p>
-          <div class="service-pills" id="service-pills">
-            <button class="service-pill active" data-service="wash-fold" data-i18n="Wash, Iron &amp; Fold">Wash, Iron &amp; Fold</button>
-            <button class="service-pill" data-service="dry-clean" data-i18n="Dry Cleaning">Dry Cleaning</button>
-            <button class="service-pill" data-service="iron-press" data-i18n="Iron &amp; Press">Iron &amp; Press</button>
-            <button class="service-pill" data-service="duvet" data-i18n="Bedding">Bedding</button>
-            <button class="service-pill" data-service="alteration" data-i18n="Alterations">Alterations</button>
-            <button class="service-pill" data-service="shoe-clean" data-i18n="Shoes">Shoes</button>
+        <!-- Step 1: Service & Items -->
+        <div class="wizard-panel" id="wizard-panel-1">
+          <div class="sheet-block">
+            <p class="sheet-block__label" data-i18n="Service">Service</p>
+            <div class="service-pills" id="service-pills">
+              <button class="service-pill active" data-service="wash-fold" data-i18n="Wash, Iron &amp; Fold">Wash, Iron &amp; Fold</button>
+              <button class="service-pill" data-service="dry-clean" data-i18n="Dry Cleaning">Dry Cleaning</button>
+              <button class="service-pill" data-service="iron-press" data-i18n="Iron &amp; Press">Iron &amp; Press</button>
+              <button class="service-pill" data-service="duvet" data-i18n="Bedding">Bedding</button>
+              <button class="service-pill" data-service="alteration" data-i18n="Alterations">Alterations</button>
+              <button class="service-pill" data-service="shoe-clean" data-i18n="Shoes">Shoes</button>
+            </div>
+          </div>
+
+          <div class="sheet-block">
+            <p class="sheet-block__label" data-i18n="Billing">Billing</p>
+            <div class="admin-tabs" id="billing-tabs">
+              <button class="admin-tab active" id="btn-billing-payg" data-billing="payg" data-i18n="Pay As You Go">Pay As You Go</button>
+              <button class="admin-tab" id="btn-billing-sub" data-billing="subscription" data-i18n="Monthly Plan">Monthly Plan</button>
+            </div>
+          </div>
+
+          <div class="sheet-block" id="subscription-block" style="display:none">
+            <p class="sheet-block__label">Monthly Plans (₦/month)</p>
+            <div class="plan-cards" id="plan-cards"></div>
+            <div class="orders-empty" id="subscription-required" style="display:none;margin-top:14px">
+              <h3>No active subscription</h3>
+              <p>Subscribe to a plan to use monthly benefits.</p>
+              <button class="btn btn--primary btn--pill" id="btn-open-subscribe">Subscribe</button>
+            </div>
+          </div>
+
+          <div class="form-group" id="items-count-group">
+            <label class="form-label" for="pickup-items">
+              <span id="items-count-label">Number of items</span>
+              <span class="form-label-hint" id="items-payg-rate" style="display:none">₦900/item</span>
+            </label>
+            <input class="form-input" id="pickup-items" inputmode="numeric" placeholder="e.g. 8" />
+          </div>
+
+          <div class="form-group" id="exceed-plan-group" style="display:none">
+            <label class="toggle-row">
+              <span class="form-label" style="margin:0">Exceeding my plan this month</span>
+              <input type="checkbox" id="chk-exceeds-plan" class="toggle-input">
+              <span class="toggle-thumb"></span>
+            </label>
+            <div id="extra-items-group" style="display:none;margin-top:10px">
+              <label class="form-label" for="extra-items-count">Extra items (above plan limit)</label>
+              <input class="form-input" id="extra-items-count" inputmode="numeric" placeholder="e.g. 3">
+              <span style="font-size:11px;color:#888;margin-top:4px;display:block">We'll bill you separately for these.</span>
+            </div>
+          </div>
+
+          <div class="form-group" id="recurring-pickup-group" style="display:none">
+            <label class="toggle-row">
+              <span class="form-label" style="margin:0">Set as my recurring monthly pickup</span>
+              <input type="checkbox" id="chk-recurring-pickup" class="toggle-input">
+              <span class="toggle-thumb"></span>
+            </label>
+            <span style="font-size:11px;color:#888;margin-top:4px;display:block" id="recurring-pickup-hint">We'll remind you each month on this day &amp; time.</span>
+          </div>
+
+          <button class="btn btn--primary btn--lg btn--full wizard-next" data-next="2">Next: Address &amp; Time</button>
+        </div>
+
+        <!-- Step 2: Address & Time -->
+        <div class="wizard-panel" id="wizard-panel-2" style="display:none">
+          <div class="sheet-block">
+            <p class="sheet-block__label">Pickup date</p>
+            <div class="date-picker" id="date-picker" role="group" aria-label="Select pickup date"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup-time">Time window</label>
+            <div class="select-wrap">
+              <select class="form-input" id="pickup-time">
+                <option value="8:00 AM – 10:00 AM">8:00 AM – 10:00 AM</option>
+                <option value="10:00 AM – 12:00 PM">10:00 AM – 12:00 PM</option>
+                <option value="2:00 PM – 4:00 PM" selected>2:00 PM – 4:00 PM</option>
+                <option value="4:00 PM – 6:00 PM">4:00 PM – 6:00 PM</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup-address">Pickup address</label>
+            <div id="saved-address-pills" class="saved-address-pills" style="display:none"></div>
+            <input class="form-input" id="pickup-address" placeholder="Apartment, street, city" autocomplete="street-address" />
+            <button type="button" class="save-address-btn" id="btn-save-address" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Save this address
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="deliver-back-checkbox" class="checkbox-input" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Deliver back to this address</span>
+            </label>
+          </div>
+
+          <div class="form-group" id="delivery-address-group" style="display:none">
+            <label class="form-label" for="delivery-address">Delivery address</label>
+            <input class="form-input" id="delivery-address" placeholder="Apartment, street, city" autocomplete="street-address" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup-notes">Notes (optional)</label>
+            <textarea class="form-input form-textarea" id="pickup-notes" rows="3" placeholder="Gate code, instructions, preferred drop-off…"></textarea>
+          </div>
+
+          <div class="form-group promo-group" id="promo-group">
+            <label class="form-label">Promo / Discount Code</label>
+            <div class="promo-input-row">
+              <input class="form-input" id="promo-input" placeholder="Enter code" style="text-transform:uppercase">
+              <button class="btn btn--ghost btn--sm" id="btn-apply-promo" type="button">Apply</button>
+            </div>
+            <span id="promo-status" style="font-size:12px;margin-top:4px;display:block"></span>
+          </div>
+
+          <div style="display:flex;gap:8px">
+            <button class="btn btn--ghost btn--lg btn--full wizard-back" data-prev="1">Back</button>
+            <button class="btn btn--primary btn--lg btn--full wizard-next" data-next="3">Next: Review</button>
           </div>
         </div>
 
-        <div class="sheet-block">
-          <p class="sheet-block__label" data-i18n="Billing">Billing</p>
-          <div class="admin-tabs" id="billing-tabs">
-            <button class="admin-tab active" id="btn-billing-payg" data-billing="payg" data-i18n="Pay As You Go">Pay As You Go</button>
-            <button class="admin-tab" id="btn-billing-sub" data-billing="subscription" data-i18n="Monthly Plan">Monthly Plan</button>
+        <!-- Step 3: Review & Confirm -->
+        <div class="wizard-panel" id="wizard-panel-3" style="display:none">
+          <div class="order-summary" id="order-summary"></div>
+          <div class="form-group promo-group" id="promo-group-step3">
+            <label class="form-label">Promo / Discount Code</label>
+            <div class="promo-input-row">
+              <input class="form-input" id="promo-input-3" placeholder="Enter code" style="text-transform:uppercase">
+              <button class="btn btn--ghost btn--sm" id="btn-apply-promo-3" type="button">Apply</button>
+            </div>
+            <span id="promo-status-3" style="font-size:12px;margin-top:4px;display:block"></span>
           </div>
-        </div>
 
-        <div class="sheet-block" id="subscription-block" style="display:none">
-          <p class="sheet-block__label">Monthly Plans (₦/month)</p>
-          <div class="plan-cards" id="plan-cards"></div>
-          <div class="orders-empty" id="subscription-required" style="display:none;margin-top:14px">
-            <h3>No active subscription</h3>
-            <p>Subscribe to a plan to use monthly benefits.</p>
-            <button class="btn btn--primary btn--pill" id="btn-open-subscribe">Subscribe</button>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button class="btn btn--ghost btn--lg btn--full wizard-back" data-prev="2">Back</button>
+            <button class="btn btn--primary btn--lg btn--full" id="btn-schedule-confirm">
+              <span class="btn__label" data-i18n="Confirm Pickup">Confirm Pickup</span>
+              <div class="btn__spinner"></div>
+            </button>
           </div>
-        </div>
-
-        <div class="form-group" id="items-count-group">
-          <label class="form-label" for="pickup-items">
-            <span id="items-count-label">Number of items</span>
-            <span class="form-label-hint" id="items-payg-rate" style="display:none">₦900/item</span>
-          </label>
-          <input class="form-input" id="pickup-items" inputmode="numeric" placeholder="e.g. 8" />
-        </div>
-
-        <!-- Exceed plan toggle — only shown for subscription billing -->
-        <div class="form-group" id="exceed-plan-group" style="display:none">
-          <label class="toggle-row">
-            <span class="form-label" style="margin:0">Exceeding my plan this month</span>
-            <input type="checkbox" id="chk-exceeds-plan" class="toggle-input">
-            <span class="toggle-thumb"></span>
-          </label>
-          <div id="extra-items-group" style="display:none;margin-top:10px">
-            <label class="form-label" for="extra-items-count">Extra items (above plan limit)</label>
-            <input class="form-input" id="extra-items-count" inputmode="numeric" placeholder="e.g. 3">
-            <span style="font-size:11px;color:#888;margin-top:4px;display:block">We'll bill you separately for these.</span>
-          </div>
-        </div>
-
-        <!-- Recurring pickup toggle — only shown for subscription billing -->
-        <div class="form-group" id="recurring-pickup-group" style="display:none">
-          <label class="toggle-row">
-            <span class="form-label" style="margin:0">Set as my recurring monthly pickup</span>
-            <input type="checkbox" id="chk-recurring-pickup" class="toggle-input">
-            <span class="toggle-thumb"></span>
-          </label>
-          <span style="font-size:11px;color:#888;margin-top:4px;display:block" id="recurring-pickup-hint">We'll remind you each month on this day &amp; time.</span>
-        </div>
-
-        <div class="sheet-block">
-          <p class="sheet-block__label">Pickup date</p>
-          <div class="date-picker" id="date-picker" role="group" aria-label="Select pickup date"></div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="pickup-time">Time window</label>
-          <div class="select-wrap">
-            <select class="form-input" id="pickup-time">
-          <option value="8:00 AM – 10:00 AM">8:00 AM – 10:00 AM</option>
-          <option value="10:00 AM – 12:00 PM">10:00 AM – 12:00 PM</option>
-          <option value="2:00 PM – 4:00 PM" selected>2:00 PM – 4:00 PM</option>
-          <option value="4:00 PM – 6:00 PM">4:00 PM – 6:00 PM</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="pickup-address">Pickup address</label>
-          <div id="saved-address-pills" class="saved-address-pills" style="display:none"></div>
-          <input class="form-input" id="pickup-address" placeholder="Apartment, street, city" autocomplete="street-address" />
-          <button type="button" class="save-address-btn" id="btn-save-address" style="display:none">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
-            Save this address
-          </button>
-        </div>
-
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="deliver-back-checkbox" class="checkbox-input" checked>
-            <span class="checkbox-custom"></span>
-            <span class="checkbox-text">Deliver back to this address</span>
-          </label>
-        </div>
-
-        <div class="form-group" id="delivery-address-group" style="display:none">
-          <label class="form-label" for="delivery-address">Delivery address</label>
-          <input class="form-input" id="delivery-address" placeholder="Apartment, street, city" autocomplete="street-address" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="pickup-notes">Notes (optional)</label>
-          <textarea class="form-input form-textarea" id="pickup-notes" rows="3" placeholder="Gate code, instructions, preferred drop-off…"></textarea>
-        </div>
-
-        <!-- Promo code (PAYG only, hidden for subscription) -->
-        <div class="form-group promo-group" id="promo-group">
-          <label class="form-label">Promo / Discount Code</label>
-          <div class="promo-input-row">
-            <input class="form-input" id="promo-input" placeholder="Enter code" style="text-transform:uppercase">
-            <button class="btn btn--ghost btn--sm" id="btn-apply-promo" type="button">Apply</button>
-          </div>
-          <span id="promo-status" style="font-size:12px;margin-top:4px;display:block"></span>
-        </div>
-
-        <div class="sheet__footer">
-          <button class="btn btn--primary btn--full btn--lg" id="btn-schedule-confirm">
-            <span class="btn__label" data-i18n="Confirm Pickup">Confirm Pickup</span>
-            <div class="btn__spinner"></div>
-          </button>
         </div>
       </div>
     </div>

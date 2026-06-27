@@ -2099,3 +2099,131 @@ body.dark .offline-banner { background: #2A1A00; border-color: #5A3800; color: #
   color: var(--text-1);
   font-weight: 500;
 }
+
+/* ─── Multi-step wizard ─── */
+.wizard-steps {
+  display: flex;
+  gap: 0;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+}
+
+.wizard-step {
+  flex: 1;
+  text-align: center;
+  padding: 10px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.wizard-step.active {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.wizard-step.completed {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.wizard-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-3);
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+
+.wizard-step.active .wizard-step__num {
+  background: var(--primary);
+  color: #fff;
+}
+
+.wizard-step.completed .wizard-step__num {
+  background: var(--green);
+  color: #fff;
+}
+
+.wizard-panel {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Order summary card ─── */
+.order-summary {
+  background: var(--bg-2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.order-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.order-summary__row + .order-summary__row {
+  border-top: 1px solid var(--border);
+}
+
+.order-summary__row--total {
+  font-weight: 700;
+  font-size: 15px;
+  border-top: 2px solid var(--text-1);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.order-summary__label {
+  color: var(--text-2);
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.order-summary__value {
+  color: var(--text-1);
+  text-align: right;
+  font-weight: 500;
+}
+
+.order-summary__items-breakdown {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.order-summary__item-cat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+  color: var(--text-2);
+}
+
+.order-summary__item-cat span:last-child {
+  font-weight: 500;
+  color: var(--text-1);
+}

@@ -245,7 +245,16 @@ const HomePage = (() => {
     if (promoInput) promoInput.value = '';
     const promoStatus = document.getElementById('promo-status');
     if (promoStatus) promoStatus.textContent = '';
+    ['promo-input', 'promo-input-3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['promo-status', 'promo-status-3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '';
+    });
     buildDatePicker();
+    goToWizardStep(1);
     const hasActiveSubscription = user && await hasActiveSub();
     if (hasActiveSubscription) {
       billingMode = 'subscription';
@@ -503,6 +512,18 @@ const HomePage = (() => {
     document.getElementById('promo-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); }
     });
+    document.getElementById('btn-apply-promo-3')?.addEventListener('click', handleApplyPromoStep3);
+    document.getElementById('promo-input-3')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); handleApplyPromoStep3(); }
+    });
+
+    // Wizard navigation
+    document.querySelectorAll('.wizard-next').forEach(btn => {
+      btn.addEventListener('click', () => goToWizardStep(parseInt(btn.dataset.next)));
+    });
+    document.querySelectorAll('.wizard-back').forEach(btn => {
+      btn.addEventListener('click', () => goToWizardStep(parseInt(btn.dataset.prev)));
+    });
 
     // Change password
     document.getElementById('btn-open-change-password').addEventListener('click', () => openSheet('sheet-change-password'));
@@ -665,6 +686,98 @@ const HomePage = (() => {
 
   function setButtonLoading(btn, isLoading) {
     btn.classList.toggle('loading', isLoading);
+  }
+
+  /* ── Wizard navigation ──────────────────────────────────────────── */
+  function goToWizardStep(step) {
+    document.querySelectorAll('.wizard-panel').forEach(p => p.style.display = 'none');
+    const panel = document.getElementById(`wizard-panel-${step}`);
+    if (panel) panel.style.display = '';
+
+    document.querySelectorAll('.wizard-step').forEach(s => {
+      const sNum = parseInt(s.dataset.step);
+      s.classList.toggle('active', sNum === step);
+      s.classList.toggle('completed', sNum < step);
+    });
+
+    // Render order summary when reaching step 3
+    if (step === 3) renderOrderSummary();
+  }
+
+  /* ── Order summary ──────────────────────────────────────────────── */
+  function renderOrderSummary() {
+    const wrap = document.getElementById('order-summary');
+    if (!wrap) return;
+
+    const day = selectedPickupDate || new Date().toISOString().split('T')[0];
+    const time = document.getElementById('pickup-time')?.value || '';
+    const address = document.getElementById('pickup-address')?.value.trim() || '';
+    const deliveryMode = document.getElementById('deliver-back-checkbox')?.checked;
+    const deliveryAddr = deliveryMode
+      ? address
+      : (document.getElementById('delivery-address')?.value.trim() || address);
+    const itemsRaw = document.getElementById('pickup-items')?.value || '';
+    const itemsCount = Math.floor(Number(String(itemsRaw).replace(/[^0-9.]/g, '')) || 0);
+    const notes = document.getElementById('pickup-notes')?.value.trim() || '';
+    const svcLabel = document.querySelector('.service-pill.active')?.textContent?.trim() || '—';
+    const dateLabel = new Date(day + 'T12:00:00').toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+    const isSub = billingMode === 'subscription';
+    const svcCfg = servicesConfig?.[selectedService] || {};
+    const perItemPrice = svcCfg.pricePerItem || 900;
+    const subtotal = perItemPrice * itemsCount;
+    const total = isSub ? 0 : applyPromoDiscount(subtotal);
+
+    let breakdownHtml = '';
+    if (itemsCount > 0) {
+      breakdownHtml = `
+        <div class="order-summary__items-breakdown">
+          <div class="order-summary__item-cat"><span>Shirts</span><span>—</span></div>
+          <div class="order-summary__item-cat"><span>Trousers</span><span>—</span></div>
+          <div class="order-summary__item-cat"><span>Other</span><span>${itemsCount} items</span></div>
+        </div>`;
+    }
+
+    wrap.innerHTML = `
+      <div class="order-summary__row">
+        <span class="order-summary__label">Service</span>
+        <span class="order-summary__value">${svcLabel}</span>
+      </div>
+      <div class="order-summary__row">
+        <span class="order-summary__label">Date &amp; Time</span>
+        <span class="order-summary__value">${dateLabel}<br>${time}</span>
+      </div>
+      <div class="order-summary__row">
+        <span class="order-summary__label">Pickup</span>
+        <span class="order-summary__value">${address || '—'}</span>
+      </div>
+      <div class="order-summary__row">
+        <span class="order-summary__label">Delivery</span>
+        <span class="order-summary__value">${deliveryAddr || '—'}</span>
+      </div>
+      ${notes ? `<div class="order-summary__row"><span class="order-summary__label">Notes</span><span class="order-summary__value">${notes}</span></div>` : ''}
+      <div class="order-summary__row">
+        <span class="order-summary__label">Billing</span>
+        <span class="order-summary__value">${isSub ? 'Monthly Plan' : 'Pay As You Go'}${isSub && itemsCount ? ` · ${itemsCount} items` : ''}</span>
+      </div>
+      ${!isSub ? `
+      <div class="order-summary__row">
+        <span class="order-summary__label">Items</span>
+        <span class="order-summary__value">${itemsCount} × ₦${perItemPrice.toLocaleString('en-NG')}</span>
+      </div>
+      ${appliedPromo ? `
+      <div class="order-summary__row">
+        <span class="order-summary__label">Discount</span>
+        <span class="order-summary__value" style="color:#2E7D32">
+          ${appliedPromo.discountType === 'percent' ? `${appliedPromo.value}% off` : `-₦${Number(appliedPromo.value).toLocaleString('en-NG')}`}
+        </span>
+      </div>` : ''}
+      <div class="order-summary__row order-summary__row--total">
+        <span class="order-summary__label">Total</span>
+        <span class="order-summary__value">₦${total.toLocaleString('en-NG')}</span>
+      </div>` : ''}
+      ${breakdownHtml}
+    `;
   }
 
   async function handleScheduleConfirm() {
@@ -1335,6 +1448,12 @@ const HomePage = (() => {
     }
     const itemsLabel = document.getElementById('items-count-label');
     if (itemsLabel) itemsLabel.textContent = 'Number of items';
+
+    // Promo visible only for PAYG
+    ['promo-group', 'promo-group-step3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isSub ? 'none' : '';
+    });
 
     if (billingMode === 'subscription' && user) {
       subscription = await SpaccleDB.getSubscription(user.userId);
@@ -2328,6 +2447,7 @@ const HomePage = (() => {
     buildDatePicker();
     updateBillingUI();
     openSheet('sheet-schedule');
+    goToWizardStep(1);
     loadSavedAddresses();
     setTimeout(() => {
       const addrEl = document.getElementById('pickup-address');
@@ -2383,6 +2503,40 @@ const HomePage = (() => {
         ? `${promo.value}% off`
         : `₦${Number(promo.value).toLocaleString('en-NG')} off`;
       if (statusEl) { statusEl.textContent = `✓ ${discountText} applied`; statusEl.style.color = '#2E7D32'; }
+      // Sync to step 3
+      const input3 = document.getElementById('promo-input-3');
+      const status3 = document.getElementById('promo-status-3');
+      if (input3) input3.value = code;
+      if (status3) { status3.textContent = statusEl.textContent; status3.style.color = statusEl.style.color; }
+      showToast(`Promo applied — ${discountText}`);
+    } catch {
+      if (statusEl) { statusEl.textContent = 'Could not validate code'; statusEl.style.color = '#E53935'; }
+    }
+  }
+
+  async function handleApplyPromoStep3() {
+    const input = document.getElementById('promo-input-3');
+    const code = input?.value.trim().toUpperCase();
+    const statusEl = document.getElementById('promo-status-3');
+    if (!code) return;
+    try {
+      const promo = await SpaccleDB.validatePromoCode(code);
+      if (!promo) {
+        if (statusEl) { statusEl.textContent = 'Invalid or expired code'; statusEl.style.color = '#E53935'; }
+        appliedPromo = null;
+        return;
+      }
+      appliedPromo = promo;
+      const discountText = promo.discountType === 'percent'
+        ? `${promo.value}% off`
+        : `₦${Number(promo.value).toLocaleString('en-NG')} off`;
+      if (statusEl) { statusEl.textContent = `✓ ${discountText} applied`; statusEl.style.color = '#2E7D32'; }
+      // Sync back to step 2
+      const input2 = document.getElementById('promo-input');
+      const status2 = document.getElementById('promo-status');
+      if (input2) input2.value = code;
+      if (status2) { status2.textContent = statusEl.textContent; status2.style.color = statusEl.style.color; }
+      renderOrderSummary();
       showToast(`Promo applied — ${discountText}`);
     } catch {
       if (statusEl) { statusEl.textContent = 'Could not validate code'; statusEl.style.color = '#E53935'; }
