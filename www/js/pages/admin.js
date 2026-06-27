@@ -160,11 +160,18 @@ function init(data = {}) {
     document.getElementById('btn-admin-export-csv').addEventListener('click', exportOrdersCSV);
     document.getElementById('btn-admin-export-pdf').addEventListener('click', exportOrdersPDF);
 
-    // Order overlay: driver assign
-    document.getElementById('btn-admin-driver-assign').addEventListener('click', handleDriverAssign);
-    document.getElementById('btn-admin-rider-change')?.addEventListener('click', () => {
-      const info = document.getElementById('admin-order-rider-info');
-      const form = document.getElementById('admin-order-assign-form');
+    // Rider assignment
+    document.getElementById('btn-admin-pickup-rider-assign').addEventListener('click', () => handleRiderAssign('pickup'));
+    document.getElementById('btn-admin-pickup-rider-change')?.addEventListener('click', () => {
+      const info = document.getElementById('admin-pickup-rider-info');
+      const form = document.getElementById('admin-pickup-rider-form');
+      if (info) info.style.display = 'none';
+      if (form) form.style.display = '';
+    });
+    document.getElementById('btn-admin-delivery-rider-assign').addEventListener('click', () => handleRiderAssign('delivery'));
+    document.getElementById('btn-admin-delivery-rider-change')?.addEventListener('click', () => {
+      const info = document.getElementById('admin-delivery-rider-info');
+      const form = document.getElementById('admin-delivery-rider-form');
       if (info) info.style.display = 'none';
       if (form) form.style.display = '';
     });
@@ -472,18 +479,35 @@ function init(data = {}) {
 
     loadRidersForSelect();
 
-    const hasRider = !!(order.riderId || order.assignedDriver);
-    const riderInfo = document.getElementById('admin-order-rider-info');
-    const assignForm = document.getElementById('admin-order-assign-form');
-    if (riderInfo) {
-      if (hasRider) {
-        document.getElementById('admin-order-current-rider').textContent =
-          'Currently: ' + (order.assignedDriver || order.riderId);
-        riderInfo.style.display = '';
-        if (assignForm) assignForm.style.display = 'none';
+    // Pickup rider
+    const hasPickupRider = !!(order.pickupRiderId || order.assignedDriver);
+    const pickupInfo = document.getElementById('admin-pickup-rider-info');
+    const pickupForm = document.getElementById('admin-pickup-rider-form');
+    if (pickupInfo) {
+      if (hasPickupRider) {
+        document.getElementById('admin-pickup-current-rider').textContent =
+          order.assignedDriver || order.pickupRiderId || '—';
+        pickupInfo.style.display = '';
+        if (pickupForm) pickupForm.style.display = 'none';
       } else {
-        riderInfo.style.display = 'none';
-        if (assignForm) assignForm.style.display = '';
+        pickupInfo.style.display = 'none';
+        if (pickupForm) pickupForm.style.display = '';
+      }
+    }
+
+    // Delivery rider
+    const hasDeliveryRider = !!order.deliveryRiderId;
+    const deliveryInfo = document.getElementById('admin-delivery-rider-info');
+    const deliveryForm = document.getElementById('admin-delivery-rider-form');
+    if (deliveryInfo) {
+      if (hasDeliveryRider) {
+        document.getElementById('admin-delivery-current-rider').textContent =
+          order.deliveryRiderId || '—';
+        deliveryInfo.style.display = '';
+        if (deliveryForm) deliveryForm.style.display = 'none';
+      } else {
+        deliveryInfo.style.display = 'none';
+        if (deliveryForm) deliveryForm.style.display = '';
       }
     }
 
@@ -510,20 +534,21 @@ function init(data = {}) {
     }
   }
 
-  async function handleDriverAssign() {
+  async function handleRiderAssign(role) {
     if (!currentOrderId) return;
-    const select = document.getElementById('admin-rider-select');
-    const input = document.getElementById('admin-driver-input');
+    const selectId = role === 'pickup' ? 'admin-pickup-rider-select' : 'admin-delivery-rider-select';
+    const btnId = role === 'pickup' ? 'btn-admin-pickup-rider-assign' : 'btn-admin-delivery-rider-assign';
+    const select = document.getElementById(selectId);
     const riderId = select?.value;
-    const riderName = input?.value?.trim();
-    if (!riderId && !riderName) { showToast('Select or enter a rider'); return; }
-    const btn = document.getElementById('btn-admin-driver-assign');
+    if (!riderId) { showToast('Select a rider'); return; }
+    const btn = document.getElementById(btnId);
     btn.classList.add('loading');
     try {
-      await SpaccleDB.assignRiderToOrder(currentOrderId, riderId || null, riderName || null);
-      if (input) input.value = '';
+      const pickupRiderId = role === 'pickup' ? riderId : null;
+      const deliveryRiderId = role === 'delivery' ? riderId : null;
+      await SpaccleDB.assignRiderToOrder(currentOrderId, pickupRiderId, deliveryRiderId);
       if (select) select.value = '';
-      showToast('Rider assigned');
+      showToast(role === 'pickup' ? 'Pickup rider assigned' : 'Delivery rider assigned');
       closeOrderDetail();
       await loadOrders(currentOrderFilter);
     } catch {
@@ -534,15 +559,19 @@ function init(data = {}) {
   }
 
   async function loadRidersForSelect() {
-    const select = document.getElementById('admin-rider-select');
-    if (!select) return;
-    try {
-      const riders = await SpaccleDB.listAllRiders();
-      select.innerHTML = '<option value="">Select a rider…</option>' +
-        riders.map(r => `<option value="${r._id}">${r.name}</option>`).join('');
-    } catch {
-      select.innerHTML = '<option value="">Select a rider…</option>';
-    }
+    const selects = ['admin-pickup-rider-select', 'admin-delivery-rider-select'];
+    selects.forEach(async (id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      try {
+        const riders = await SpaccleDB.listAllRiders();
+        const placeholder = id === 'admin-pickup-rider-select' ? 'Select pickup rider…' : 'Select delivery rider…';
+        el.innerHTML = `<option value="">${placeholder}</option>` +
+          riders.map(r => `<option value="${r._id}">${r.name}</option>`).join('');
+      } catch {
+        el.innerHTML = `<option value="">Error loading riders</option>`;
+      }
+    });
   }
 
   /* ── Users ──────────────────────────────────────────────────────── */
