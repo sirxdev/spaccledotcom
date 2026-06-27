@@ -918,7 +918,7 @@ const HomePage = (() => {
       confirmed:  "Your order is scheduled — we'll pick it up soon.",
       assigned:   "A rider has been assigned and will collect your laundry.",
       picked_up:  "Your laundry is on the way to our facility.",
-      processing: "Your items are being sorted and prepared.",
+      processing: "Your items are being sorted, cleaned, and prepared.",
       cleaning:   "Your items are being cleaned and prepared.",
       ready:      "Your laundry is ready — delivery is next.",
       out_for_delivery: "Your clean laundry is on the way to you!",
@@ -998,13 +998,13 @@ const HomePage = (() => {
     const steps = Array.from(card.querySelectorAll('.order-track-step'));
     const map = {
       scheduled:  0,
-      assigned:   0,
+      assigned:   1,
       picked_up:  1,
-      processing: 1,
-      ready:      2,
-      out_for_delivery: 2,
-      delivered:  3,
-      completed:  3,
+      processing: 2,
+      ready:      3,
+      out_for_delivery: 3,
+      delivered:  4,
+      completed:  4,
       cancelled:  0,
     };
     const activeIdx = map[order.status] ?? 0;
@@ -1171,8 +1171,8 @@ const HomePage = (() => {
     timelineEl.innerHTML = '';
     const flow = [
       { statuses: ['scheduled'],                           label: 'Scheduled',   sub: 'Pickup window confirmed.' },
-      { statuses: ['assigned', 'picked_up'],               label: 'Picked up',   sub: 'Driver collected your laundry.' },
-      { statuses: ['processing'],              label: 'Cleaning',    sub: 'Cleaning + quality check.' },
+      { statuses: ['assigned', 'picked_up'],               label: 'Picked Up',   sub: 'Driver collected your laundry.' },
+      { statuses: ['processing'],              label: 'At Facility', sub: 'Your items are being processed.' },
       { statuses: ['ready', 'out_for_delivery'],                 label: 'Out for Delivery', sub: 'On the way to you.' },
       { statuses: ['delivered', 'completed'],              label: 'Delivered',   sub: 'Delivered to your address.' },
     ];
