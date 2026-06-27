@@ -253,6 +253,9 @@ const HomePage = (() => {
       const el = document.getElementById(id);
       if (el) el.textContent = '';
     });
+    // Reset category inputs
+    document.querySelectorAll('.item-category-input').forEach(inp => inp.value = '0');
+    computeItemsBreakdown();
     buildDatePicker();
     goToWizardStep(1);
     const hasActiveSubscription = user && await hasActiveSub();
@@ -420,6 +423,15 @@ const HomePage = (() => {
       pill.addEventListener('click', () => {
         selectedService = pill.dataset.service;
         document.querySelectorAll('.service-pill').forEach(p => p.classList.toggle('active', p === pill));
+        updateItemTotalPrice(computeItemsBreakdown().total);
+      });
+    });
+
+    document.querySelectorAll('.item-category-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const { total } = computeItemsBreakdown();
+        // Re-render summary if on step 3
+        if (document.getElementById('wizard-panel-3')?.style.display !== 'none') renderOrderSummary();
       });
     });
 
@@ -688,7 +700,37 @@ const HomePage = (() => {
     btn.classList.toggle('loading', isLoading);
   }
 
-  /* ── Wizard navigation ──────────────────────────────────────────── */
+  /* ── Item breakdown ─────────────────────────────────────────────── */
+  function computeItemsBreakdown() {
+    const inputs = document.querySelectorAll('.item-category-input');
+    let total = 0;
+    const breakdown = {};
+    inputs.forEach(inp => {
+      const count = Math.floor(Number(inp.value.replace(/[^0-9]/g, '')) || 0);
+      if (count < 0) inp.value = '0';
+      const cat = inp.dataset.category;
+      breakdown[cat] = count;
+      total += count;
+    });
+    const hidden = document.getElementById('pickup-items');
+    if (hidden) hidden.value = total;
+    const totalEl = document.getElementById('item-total-count');
+    if (totalEl) totalEl.textContent = total;
+    updateItemTotalPrice(total);
+    return { breakdown, total };
+  }
+
+  function updateItemTotalPrice(total) {
+    const svcCfg = servicesConfig?.[selectedService] || {};
+    const price = svcCfg.pricePerItem || 900;
+    const isSub = billingMode === 'subscription';
+    const rateEl = document.getElementById('item-total-rate');
+    if (rateEl) rateEl.textContent = `₦${price.toLocaleString('en-NG')}`;
+    const priceRow = document.getElementById('item-total-price');
+    if (priceRow) priceRow.style.display = isSub ? 'none' : '';
+    const amountEl = document.getElementById('item-total-amount');
+    if (amountEl) amountEl.textContent = `₦${(total * price).toLocaleString('en-NG')}`;
+  }
   function goToWizardStep(step) {
     document.querySelectorAll('.wizard-panel').forEach(p => p.style.display = 'none');
     const panel = document.getElementById(`wizard-panel-${step}`);
@@ -716,11 +758,11 @@ const HomePage = (() => {
     const deliveryAddr = deliveryMode
       ? address
       : (document.getElementById('delivery-address')?.value.trim() || address);
-    const itemsRaw = document.getElementById('pickup-items')?.value || '';
-    const itemsCount = Math.floor(Number(String(itemsRaw).replace(/[^0-9.]/g, '')) || 0);
     const notes = document.getElementById('pickup-notes')?.value.trim() || '';
     const svcLabel = document.querySelector('.service-pill.active')?.textContent?.trim() || '—';
     const dateLabel = new Date(day + 'T12:00:00').toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+    const { breakdown, total: itemsCount } = computeItemsBreakdown();
 
     const isSub = billingMode === 'subscription';
     const svcCfg = servicesConfig?.[selectedService] || {};
@@ -728,14 +770,27 @@ const HomePage = (() => {
     const subtotal = perItemPrice * itemsCount;
     const total = isSub ? 0 : applyPromoDiscount(subtotal);
 
+    const catLabels = {
+      shirts: 'Shirts / Blouses',
+      trousers: 'Trousers / Jeans',
+      dresses: 'Dresses / Skirts',
+      suits: 'Suits / Jackets',
+      bedsheets: 'Bedsheets',
+      towels: 'Towels',
+      other: 'Other',
+    };
+
     let breakdownHtml = '';
     if (itemsCount > 0) {
-      breakdownHtml = `
-        <div class="order-summary__items-breakdown">
-          <div class="order-summary__item-cat"><span>Shirts</span><span>—</span></div>
-          <div class="order-summary__item-cat"><span>Trousers</span><span>—</span></div>
-          <div class="order-summary__item-cat"><span>Other</span><span>${itemsCount} items</span></div>
-        </div>`;
+      const rows = Object.entries(breakdown)
+        .filter(([, count]) => count > 0)
+        .map(([key, count]) => {
+          const label = catLabels[key] || key;
+          const linePrice = count * perItemPrice;
+          return `<div class="order-summary__item-cat"><span>${label}</span><span>${count} × ₦${perItemPrice.toLocaleString('en-NG')} = ₦${linePrice.toLocaleString('en-NG')}</span></div>`;
+        })
+        .join('');
+      breakdownHtml = `<div class="order-summary__items-breakdown">${rows}</div>`;
     }
 
     wrap.innerHTML = `
@@ -792,8 +847,7 @@ const HomePage = (() => {
     const deliveryAddress = deliverBackCheckbox && deliverBackCheckbox.checked
       ? address
       : (document.getElementById('delivery-address')?.value.trim() || address);
-    const itemsRaw = document.getElementById('pickup-items') ? document.getElementById('pickup-items').value : '';
-    const itemsCount = Math.floor(Number(String(itemsRaw).replace(/[^0-9.]/g, '')) || 0);
+    const { breakdown: itemsBreakdown, total: itemsCount } = computeItemsBreakdown();
 
     if (!address) {
       addressEl.focus();
@@ -809,9 +863,9 @@ const HomePage = (() => {
     }
 
     if (billingMode === 'payg' && (!itemsCount || itemsCount <= 0)) {
-      const el = document.getElementById('pickup-items');
-      if (el) el.focus();
-      showToast('Enter number of items');
+      const firstInput = document.querySelector('.item-category-input');
+      if (firstInput) firstInput.focus();
+      showToast('Enter item quantities');
       return;
     }
 
@@ -839,6 +893,7 @@ const HomePage = (() => {
           billingMode,
           planId: subscription?.planId,
           itemsCount: Number(itemsCount) || null,
+          itemsBreakdown,
           extraItemsCount,
           pickupDay: day,
           pickupTime: time,
@@ -940,6 +995,7 @@ const HomePage = (() => {
   }
 
   async function placeOrder({ userId, day, time, address, deliveryAddress, notes, itemsCount, paystackRef = null }) {
+    const { breakdown: itemsBreakdown } = computeItemsBreakdown();
     const svcCfg = servicesConfig?.[selectedService] || {};
     const pricePerItem = svcCfg.pricePerItem || 900;
     const amountPaid = billingMode === 'payg' ? (Number(itemsCount) || 0) * pricePerItem : null;
@@ -957,6 +1013,7 @@ const HomePage = (() => {
       billingMode,
       planId: billingMode === 'subscription' ? subscription?.planId : null,
       itemsCount: Number(itemsCount) || null,
+      itemsBreakdown,
       pickupDay: day,
       pickupTime: time,
       address,
@@ -1454,6 +1511,8 @@ const HomePage = (() => {
       const el = document.getElementById(id);
       if (el) el.style.display = isSub ? 'none' : '';
     });
+
+    updateItemTotalPrice(computeItemsBreakdown().total);
 
     if (billingMode === 'subscription' && user) {
       subscription = await SpaccleDB.getSubscription(user.userId);
@@ -2444,6 +2503,15 @@ const HomePage = (() => {
     document.querySelectorAll('.service-pill').forEach(p =>
       p.classList.toggle('active', p.dataset.service === selectedService));
     billingMode = order.billingMode || 'payg';
+    // Restore breakdown if present
+    document.querySelectorAll('.item-category-input').forEach(inp => inp.value = '0');
+    if (order.itemsBreakdown) {
+      Object.entries(order.itemsBreakdown).forEach(([cat, count]) => {
+        const inp = document.querySelector(`.item-category-input[data-category="${cat}"]`);
+        if (inp && count > 0) inp.value = String(count);
+      });
+    }
+    computeItemsBreakdown();
     buildDatePicker();
     updateBillingUI();
     openSheet('sheet-schedule');

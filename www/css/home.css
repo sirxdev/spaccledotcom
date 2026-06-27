@@ -2227,3 +2227,57 @@ body.dark .offline-banner { background: #2A1A00; border-color: #5A3800; color: #
   font-weight: 500;
   color: var(--text-1);
 }
+
+/* ─── Item category grid ─── */
+.item-category-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 8px;
+}
+
+.item-category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.item-category-name {
+  font-size: 13px;
+  color: var(--text-1);
+  flex: 1;
+}
+
+.item-category-input {
+  width: 56px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  color: var(--text-1);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.item-category-input:focus {
+  border-color: var(--primary);
+}
+
+.item-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 2px 0;
+  font-size: 13px;
+  color: var(--text-2);
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+}
+
+.item-total-row strong {
+  color: var(--text-1);
+}

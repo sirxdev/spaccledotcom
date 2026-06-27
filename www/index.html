@@ -1286,11 +1286,45 @@
           </div>
 
           <div class="form-group" id="items-count-group">
-            <label class="form-label" for="pickup-items">
-              <span id="items-count-label">Number of items</span>
+            <label class="form-label">
+              <span id="items-count-label">Item breakdown</span>
               <span class="form-label-hint" id="items-payg-rate" style="display:none">₦900/item</span>
             </label>
-            <input class="form-input" id="pickup-items" inputmode="numeric" placeholder="e.g. 8" />
+            <div class="item-category-grid" id="item-category-grid">
+              <div class="item-category-row">
+                <span class="item-category-name">Shirts / Blouses</span>
+                <input class="item-category-input" data-category="shirts" inputmode="numeric" value="0" min="0" />
+              </div>
+              <div class="item-category-row">
+                <span class="item-category-name">Trousers / Jeans</span>
+                <input class="item-category-input" data-category="trousers" inputmode="numeric" value="0" min="0" />
+              </div>
+              <div class="item-category-row">
+                <span class="item-category-name">Dresses / Skirts</span>
+                <input class="item-category-input" data-category="dresses" inputmode="numeric" value="0" min="0" />
+              </div>
+              <div class="item-category-row">
+                <span class="item-category-name">Suits / Jackets</span>
+                <input class="item-category-input" data-category="suits" inputmode="numeric" value="0" min="0" />
+              </div>
+              <div class="item-category-row">
+                <span class="item-category-name">Bedsheets</span>
+                <input class="item-category-input" data-category="bedsheets" inputmode="numeric" value="0" min="0" />
+              </div>
+              <div class="item-category-row">
+                <span class="item-category-name">Towels</span>
+                <input class="item-category-input" data-category="towels" inputmode="numeric" value="0" min="0" />
+              </div>
+              <div class="item-category-row">
+                <span class="item-category-name">Other</span>
+                <input class="item-category-input" data-category="other" inputmode="numeric" value="0" min="0" />
+              </div>
+            </div>
+            <div class="item-total-row" id="item-total-row">
+              <span>Total: <strong id="item-total-count">0</strong> items</span>
+              <span id="item-total-price" style="display:none">× <span id="item-total-rate">₦900</span> = <strong id="item-total-amount">₦0</strong></span>
+            </div>
+            <input type="hidden" id="pickup-items" value="0" />
           </div>
 
           <div class="form-group" id="exceed-plan-group" style="display:none">
