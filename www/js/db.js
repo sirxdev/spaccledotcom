@@ -388,6 +388,10 @@ async function listAllUsers() {
       return { ...completed, _rev: final.rev };
     }
 
+    if (status === 'ready') {
+      try { await autoAssignDeliveryRider(orderId); } catch (e) { console.warn('auto-assign delivery rider', e); }
+    }
+
     return { ...updated, _rev: result.rev };
   }
 
@@ -399,11 +403,18 @@ async function listAllUsers() {
     return updated;
   }
 
-  async function assignRider(orderId, riderId) {
+  async function assignRider(orderId, riderId, role = 'both') {
     const nowIso = new Date().toISOString();
     const updated = await updateOrderStatus(orderId, 'assigned', { riderId, assignedAt: nowIso });
     if (updated.riderId !== riderId) {
-      const patched = { ...updated, riderId, pickupRiderId: riderId, deliveryRiderId: riderId, updatedAt: nowIso };
+      const patched = {
+        ...updated,
+        riderId: role !== 'delivery' ? riderId : updated.riderId,
+        pickupRiderId: role !== 'delivery' ? riderId : updated.pickupRiderId,
+        deliveryRiderId: role !== 'pickup' ? riderId : updated.deliveryRiderId,
+        assignedAt: nowIso,
+        updatedAt: nowIso,
+      };
       await db.put(patched).catch(() => {});
       return patched;
     }
@@ -451,6 +462,10 @@ async function listAllUsers() {
       const completed = { ...updated, _rev: result.rev, status: 'completed', events, updatedAt: nowIso };
       const final = await db.put(completed);
       return { ...completed, _rev: final.rev };
+    }
+
+    if (status === 'ready') {
+      try { await autoAssignDeliveryRider(orderId); } catch (e) { console.warn('auto-assign delivery rider', e); }
     }
 
     return { ...updated, _rev: result.rev };
@@ -844,54 +859,77 @@ async function listAllUsers() {
     return updated;
   }
 
-  async function assignRiderToOrder(orderId, riderId = null, riderName = null) {
+  async function assignRiderToOrder(orderId, pickupRiderId = null, deliveryRiderId = null, riderName = null) {
     const doc = await db.get(orderId);
     const nowIso = new Date().toISOString();
-    const updated = await updateOrderStatus(orderId, riderId || riderName ? 'assigned' : doc.status, {
-      riderId: riderId || null,
+    const hasPickup = !!pickupRiderId;
+    const hasDelivery = !!deliveryRiderId;
+    const newStatus = (hasPickup || hasDelivery || riderName) ? 'assigned' : doc.status;
+    const updated = await updateOrderStatus(orderId, newStatus, {
+      riderId: hasPickup ? pickupRiderId : doc.riderId,
       assignedDriver: riderName || null,
       assignedAt: nowIso,
     });
 
-    if (updated.riderId !== (riderId || null) || updated.assignedDriver !== (riderName || null)) {
+    const needsPatch = (
+      (pickupRiderId && updated.pickupRiderId !== pickupRiderId) ||
+      (deliveryRiderId && updated.deliveryRiderId !== deliveryRiderId) ||
+      (riderName && updated.assignedDriver !== riderName)
+    );
+    if (needsPatch) {
       const patched = {
         ...updated,
-        riderId: riderId || null,
-        pickupRiderId: riderId || null,
-        deliveryRiderId: riderId || null,
+        riderId: pickupRiderId || updated.riderId,
+        pickupRiderId: pickupRiderId || updated.pickupRiderId,
+        deliveryRiderId: deliveryRiderId || updated.deliveryRiderId,
         assignedDriver: riderName || null,
         updatedAt: nowIso,
       };
       await db.put(patched).catch(() => {});
     }
 
-    if (riderId || riderName) {
+    if (pickupRiderId) {
       await createNotification({
         title: 'New Order Assigned',
-        message: `You have been assigned to order ${doc.orderId || orderId.slice(-6)}. Tap to view details.`,
-        riderId: riderId
+        message: `You have been assigned pickup for order ${doc.publicId || orderId.slice(-6)}. Tap to view details.`,
+        riderId: pickupRiderId
+      });
+    }
+    if (deliveryRiderId) {
+      await createNotification({
+        title: 'Delivery Assigned',
+        message: `You have been assigned delivery for order ${doc.publicId || orderId.slice(-6)}. Tap to view details.`,
+        riderId: deliveryRiderId
       });
     }
   }
 
-  async function unassignRider(orderId) {
+  async function unassignRider(orderId, role = 'both') {
     const doc = await db.get(orderId);
     const nowIso = new Date().toISOString();
     const events = Array.isArray(doc.events) ? doc.events.slice() : [];
-    events.push({ status: 'scheduled', at: nowIso, note: 'Rider declined assignment' });
-    const updated = {
+    events.push({ status: 'scheduled', at: nowIso, note: 'Rider unassigned (' + role + ')' });
+    const patch = {
       ...doc,
-      status: 'scheduled',
       events,
       updatedAt: nowIso,
-      riderId: null,
-      pickupRiderId: null,
-      deliveryRiderId: null,
-      assignedDriver: null,
-      assignedAt: null,
     };
-    await db.put(updated);
-    return updated;
+    if (role === 'pickup') {
+      patch.pickupRiderId = null;
+      if (doc.riderId === doc.pickupRiderId) patch.riderId = doc.deliveryRiderId || null;
+    } else if (role === 'delivery') {
+      patch.deliveryRiderId = null;
+      if (doc.riderId === doc.deliveryRiderId) patch.riderId = doc.pickupRiderId || null;
+    } else {
+      patch.riderId = null;
+      patch.pickupRiderId = null;
+      patch.deliveryRiderId = null;
+      patch.assignedDriver = null;
+      patch.assignedAt = null;
+      patch.status = 'scheduled';
+    }
+    await db.put(patch);
+    return patch;
   }
 
   async function autoAssignRider(orderId) {
@@ -962,7 +1000,6 @@ async function listAllUsers() {
       status: 'assigned',
       riderId,
       pickupRiderId: riderId,
-      deliveryRiderId: riderId,
       assignedAt: nowIso,
       pendingRiderId: null,
       pendingExpiresAt: null,
@@ -1042,6 +1079,160 @@ async function listAllUsers() {
     await createNotification({
       title: 'New Order Available',
       message: `Order ${order.publicId || order._id.slice(-6)} is available. Tap to accept.`,
+      riderId: rider._id,
+      orderId,
+    });
+
+    return rider;
+  }
+
+  /* ── Delivery rider assignment ──────────────────────────────── */
+
+  async function autoAssignDeliveryRider(orderId) {
+    const [riders, order, allOrders] = await Promise.all([
+      listAllRiders(),
+      db.get(orderId).catch(() => null),
+      listAllOrders(),
+    ]);
+    if (!order) return null;
+    if (order.deliveryRiderId) return null;
+    const online = riders.filter(r => r.isAvailable !== false);
+    if (!online.length) {
+      await createNotification({
+        title: 'No Riders Available',
+        message: `Delivery for order ${order.publicId || orderId.slice(-6)} has no available riders.`,
+        orderId,
+      });
+      return null;
+    }
+
+    const pendingCounts = {};
+    allOrders.forEach(o => {
+      if (o.deliveryRiderId && !['delivered', 'completed', 'cancelled'].includes(o.status)) {
+        pendingCounts[o.deliveryRiderId] = (pendingCounts[o.deliveryRiderId] || 0) + 1;
+      }
+    });
+
+    const orderZoneId = order.zoneId;
+    let candidates = online;
+    if (orderZoneId) {
+      const zoned = online.filter(r => r.zoneIds && r.zoneIds.includes(orderZoneId));
+      if (zoned.length) candidates = zoned;
+    }
+
+    candidates.sort((a, b) => (pendingCounts[a._id] || 0) - (pendingCounts[b._id] || 0));
+
+    const rider = candidates[0];
+    const nowIso = new Date().toISOString();
+    const expiresAt = new Date(Date.now() + 60000).toISOString();
+    const attempts = (order.deliveryAssignmentAttempts || 0) + 1;
+
+    await db.put({
+      ...order,
+      pendingDeliveryRiderId: rider._id,
+      pendingDeliveryExpiresAt: expiresAt,
+      deliveryAssignmentAttempts: attempts,
+      updatedAt: nowIso,
+    });
+
+    await createNotification({
+      title: 'Delivery Available',
+      message: `Order ${order.publicId || order._id.slice(-6)} is ready for delivery. Tap to accept.`,
+      riderId: rider._id,
+      orderId,
+    });
+
+    return rider;
+  }
+
+  async function acceptDeliveryAssignment(orderId, riderId) {
+    const order = await db.get(orderId);
+    if (order.pendingDeliveryRiderId !== riderId) throw new Error('NOT_PENDING_FOR_RIDER');
+    if (order.pendingDeliveryExpiresAt && new Date(order.pendingDeliveryExpiresAt) < new Date()) throw new Error('ASSIGNMENT_EXPIRED');
+    const nowIso = new Date().toISOString();
+    const events = Array.isArray(order.events) ? order.events.slice() : [];
+    const updated = {
+      ...order,
+      deliveryRiderId: riderId,
+      riderId: riderId,
+      pendingDeliveryRiderId: null,
+      pendingDeliveryExpiresAt: null,
+      events,
+      updatedAt: nowIso,
+    };
+    const result = await db.put(updated);
+    await createNotification({
+      title: 'Delivery Assigned',
+      message: `You have been assigned delivery for order ${order.publicId || orderId.slice(-6)}. Tap to view details.`,
+      riderId,
+      orderId,
+    });
+    return { ...updated, _rev: result.rev };
+  }
+
+  async function declineDeliveryAssignment(orderId, riderId) {
+    const order = await db.get(orderId);
+    if (order.pendingDeliveryRiderId !== riderId) return order;
+    const attempts = (order.deliveryAssignmentAttempts || 0);
+    const nowIso = new Date().toISOString();
+
+    await db.put({
+      ...order,
+      pendingDeliveryRiderId: null,
+      pendingDeliveryExpiresAt: null,
+      updatedAt: nowIso,
+    });
+
+    if (attempts >= 3) {
+      await createNotification({
+        title: 'Delivery Assignment Failed',
+        message: `Delivery for order ${order.publicId || orderId.slice(-6)} could not be assigned after ${attempts} attempts.`,
+        orderId,
+      });
+      return order;
+    }
+
+    return tryNextDeliveryCandidate(orderId, riderId);
+  }
+
+  async function tryNextDeliveryCandidate(orderId, excludeRiderId) {
+    const [riders, order] = await Promise.all([
+      listAllRiders(),
+      db.get(orderId),
+    ]);
+    const online = riders.filter(r => r.isAvailable !== false && r._id !== excludeRiderId);
+    if (!online.length) {
+      await createNotification({
+        title: 'No Riders Available',
+        message: `Delivery for order ${order.publicId || orderId.slice(-6)} has no available riders.`,
+        orderId,
+      });
+      return null;
+    }
+
+    const orderZoneId = order.zoneId;
+    let candidates = online;
+    if (orderZoneId) {
+      const zoned = online.filter(r => r.zoneIds && r.zoneIds.includes(orderZoneId));
+      if (zoned.length) candidates = zoned;
+    }
+
+    const rider = candidates[0];
+    const nowIso = new Date().toISOString();
+    const expiresAt = new Date(Date.now() + 60000).toISOString();
+    const attempts = (order.deliveryAssignmentAttempts || 0) + 1;
+
+    await db.put({
+      ...order,
+      pendingDeliveryRiderId: rider._id,
+      pendingDeliveryExpiresAt: expiresAt,
+      deliveryAssignmentAttempts: attempts,
+      updatedAt: nowIso,
+    });
+
+    await createNotification({
+      title: 'Delivery Available',
+      message: `Order ${order.publicId || order._id.slice(-6)} is ready for delivery. Tap to accept.`,
       riderId: rider._id,
       orderId,
     });
@@ -1474,6 +1665,9 @@ async function listAllUsers() {
     autoAssignRider,
     acceptAssignment,
     declineAssignment,
+    autoAssignDeliveryRider,
+    acceptDeliveryAssignment,
+    declineDeliveryAssignment,
     listZones,
     saveZones,
     matchZone,

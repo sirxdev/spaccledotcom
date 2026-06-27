@@ -453,7 +453,7 @@ function init(data = {}) {
     const btnDefs = [
       { label: 'Mark Processing',      status: 'processing', trigger: ['picked_up'],                                      ghost: false },
       { label: 'Mark Ready',           status: 'ready',      trigger: ['processing'],                                     ghost: false },
-      { label: 'Mark In Transit',      status: 'out_for_delivery', trigger: ['ready'],                                          ghost: false },
+      { label: 'Mark Out for Delivery', status: 'out_for_delivery', trigger: ['ready'],                                          ghost: false },
       { label: 'Cancel Order',         status: 'cancelled',  trigger: ['scheduled', 'assigned', 'picked_up'],              ghost: true },
     ];
     btnDefs.forEach(def => {
