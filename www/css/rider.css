@@ -382,6 +382,12 @@
   background: var(--text-1);
 }
 
+.rider-progress-step__time {
+  font-size: 9px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
 /* No active card */
 .rider-no-active-card {
   background: var(--surface);

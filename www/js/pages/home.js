@@ -1188,6 +1188,17 @@ const HomePage = (() => {
     ];
     const idx = flow.findIndex(s => s.statuses.includes(order.status));
 
+    function stepTime(statuses) {
+      if (!order.events) return null;
+      let latest = null;
+      for (const ev of order.events) {
+        if (statuses.includes(ev.status)) {
+          if (!latest || ev.timestamp > latest.timestamp) latest = ev;
+        }
+      }
+      return latest ? latest.timestamp : null;
+    }
+
     flow.forEach((step, i) => {
       const item = document.createElement('div');
       item.className = 'timeline-item';
@@ -1210,6 +1221,17 @@ const HomePage = (() => {
 
       body.appendChild(title);
       body.appendChild(sub);
+
+      // Show timestamp for completed/active steps
+      if (i <= idx) {
+        const ts = stepTime(step.statuses);
+        if (ts) {
+          const timeEl = document.createElement('div');
+          timeEl.className = 'timeline-time';
+          timeEl.textContent = new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+          body.appendChild(timeEl);
+        }
+      }
       item.appendChild(dot);
       item.appendChild(body);
       timelineEl.appendChild(item);

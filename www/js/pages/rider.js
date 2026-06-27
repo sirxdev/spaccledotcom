@@ -556,7 +556,8 @@ function setupSheets() {
     }
   }
 
-  function renderOrderProgress(status, containerId, noteId) {
+  function renderOrderProgress(order, containerId, noteId) {
+    const status = order.status;
     const steps = [
       { id: ORDER_STATUS.ASSIGNED,   label: 'Accepted' },
       { id: ORDER_STATUS.PICKED_UP,  label: 'Picked Up' },
@@ -593,13 +594,27 @@ function setupSheets() {
     const progressEl = document.getElementById(containerId || 'rider-active-progress');
     if (!progressEl) return;
 
+    function stepEventTime(stepId) {
+      if (!order.events) return null;
+      let latest = null;
+      for (const ev of order.events) {
+        if (ev.status === stepId || (stepId === 'facility' && ev.status === ORDER_STATUS.PROCESSING)) {
+          if (!latest || ev.timestamp > latest.timestamp) latest = ev;
+        }
+      }
+      return latest ? latest.timestamp : null;
+    }
+
     progressEl.innerHTML = steps.map((step, i) => {
       const isActive = Math.floor(activeStepIndex) === i;
       const isDone = activeStepIndex > i;
+      const ts = isDone || isActive ? stepEventTime(step.id) : null;
+      const timeStr = ts ? new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
       return `
         <div class="rider-progress-step ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}">
           <div class="rider-progress-step__dot"></div>
           <span>${step.label}</span>
+          ${timeStr ? `<div class="rider-progress-step__time">${timeStr}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -646,7 +661,7 @@ function setupSheets() {
     if (pickupStage) pickupAddr.style.opacity = '1';
     if (deliveryStage) deliveryAddr.style.opacity = '1';
 
-    renderOrderProgress(order.status, 'rider-sheet-progress', 'rider-facility-note');
+    renderOrderProgress(order, 'rider-sheet-progress', 'rider-facility-note');
     renderOrderActions(order);
 
     document.getElementById('rider-order-sheet').classList.add('open');
