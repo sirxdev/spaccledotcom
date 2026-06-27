@@ -684,7 +684,7 @@ function init(data = {}) {
 
       unique.forEach(r => {
         const riderOrders = orders.filter(o =>
-          o.riderId === r._id || o.assignedDriver === r.name || o.assignedDriver === r._id);
+          o.riderId === r._id || o.pickupRiderId === r._id || o.deliveryRiderId === r._id || o.assignedDriver === r.name || o.assignedDriver === r._id);
         const completed = riderOrders.filter(o => ['delivered', 'completed'].includes(o.status));
         const active = r.isAvailable !== false;
 
@@ -843,7 +843,7 @@ function init(data = {}) {
       if (riderId) {
         const riderDoc = await SpaccleDB.getDocument(riderId);
         const allRiderOrders = await SpaccleDB.getRiderOrders();
-        const riderOrders = allRiderOrders.filter(o => o.riderId === riderId || o.assignedDriver === riderId);
+        const riderOrders = allRiderOrders.filter(o => o.riderId === riderId || o.pickupRiderId === riderId || o.deliveryRiderId === riderId || o.assignedDriver === riderId);
         await openRiderDetail(riderDoc, riderOrders);
       }
       showToast(action === 'paid' ? 'Marked as paid' : action === 'approved' ? 'Payout approved' : 'Payout rejected');

@@ -401,11 +401,9 @@ async function listAllUsers() {
 
   async function assignRider(orderId, riderId) {
     const nowIso = new Date().toISOString();
-    // Use updateOrderStatus so the event history is appended and meta is stored on the doc
     const updated = await updateOrderStatus(orderId, 'assigned', { riderId, assignedAt: nowIso });
-    // ensure riderId is present on the document
     if (updated.riderId !== riderId) {
-      const patched = { ...updated, riderId, updatedAt: nowIso };
+      const patched = { ...updated, riderId, pickupRiderId: riderId, deliveryRiderId: riderId, updatedAt: nowIso };
       await db.put(patched).catch(() => {});
       return patched;
     }
@@ -849,16 +847,21 @@ async function listAllUsers() {
   async function assignRiderToOrder(orderId, riderId = null, riderName = null) {
     const doc = await db.get(orderId);
     const nowIso = new Date().toISOString();
-    // Use updateOrderStatus to append event metadata and update status
     const updated = await updateOrderStatus(orderId, riderId || riderName ? 'assigned' : doc.status, {
       riderId: riderId || null,
       assignedDriver: riderName || null,
       assignedAt: nowIso,
     });
 
-    // Ensure rider fields are present on the document
     if (updated.riderId !== (riderId || null) || updated.assignedDriver !== (riderName || null)) {
-      const patched = { ...updated, riderId: riderId || null, assignedDriver: riderName || null, updatedAt: nowIso };
+      const patched = {
+        ...updated,
+        riderId: riderId || null,
+        pickupRiderId: riderId || null,
+        deliveryRiderId: riderId || null,
+        assignedDriver: riderName || null,
+        updatedAt: nowIso,
+      };
       await db.put(patched).catch(() => {});
     }
 
@@ -882,6 +885,8 @@ async function listAllUsers() {
       events,
       updatedAt: nowIso,
       riderId: null,
+      pickupRiderId: null,
+      deliveryRiderId: null,
       assignedDriver: null,
       assignedAt: null,
     };
@@ -956,6 +961,8 @@ async function listAllUsers() {
       ...order,
       status: 'assigned',
       riderId,
+      pickupRiderId: riderId,
+      deliveryRiderId: riderId,
       assignedAt: nowIso,
       pendingRiderId: null,
       pendingExpiresAt: null,

@@ -387,7 +387,7 @@ function setupSheets() {
   async function renderOrders() {
     try {
       const orders = await SpaccleDB.getRiderOrders();
-      const riderOrders = orders.filter(o => o.riderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId);
+      const riderOrders = orders.filter(o => o.riderId === user.userId || o.pickupRiderId === user.userId || o.deliveryRiderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId);
       const pendingAssignments = orders.filter(o => o.pendingRiderId === user.userId && o.status === 'scheduled' && !o.riderId);
       const allActive = [...pendingAssignments, ...riderOrders];
       const pending = allActive.filter(o => o.status === ORDER_STATUS.ASSIGNED || o.status === ORDER_STATUS.PICKED_UP || o.status === ORDER_STATUS.READY || o.status === ORDER_STATUS.OUT_FOR_DELIVERY || o.status === ORDER_STATUS.PROCESSING || (o.pendingRiderId === user.userId && !o.riderId));
@@ -855,7 +855,7 @@ function setupSheets() {
       const orders = await SpaccleDB.getRiderOrders();
       const completed = orders.filter(o =>
         (o.status === ORDER_STATUS.COMPLETED || o.status === ORDER_STATUS.DELIVERED) &&
-        (o.riderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId)
+        (o.riderId === user.userId || o.pickupRiderId === user.userId || o.deliveryRiderId === user.userId || o.assignedDriver === user.name || o.assignedDriver === user.userId)
       );
 
       let totalEarnings = 0;
