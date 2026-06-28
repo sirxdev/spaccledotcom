@@ -111,6 +111,55 @@ const StaffPage = (() => {
       </div>`;
   }
 
+  async function showStaffOrderDetail(orderId) {
+    try {
+      const order = await SpaccleDB.getOrder(orderId);
+      if (!order) { showToast('Order not found'); return; }
+      const existing = document.getElementById('staff-order-detail-overlay');
+      if (existing) existing.remove();
+
+      const catLabels = { shirts:'Shirts', trousers:'Trousers', dresses:'Dresses', suits:'Suits', bedsheets:'Bedsheets', towels:'Towels', other:'Other', 'everyday-clothing':'Everyday Clothing', 'dresses-gowns':'Dresses & Gowns', 'bedding':'Bedding', 'underwear':'Underwear', 'shoes':'Shoes', 'bags':'Bags', 'curtains':'Curtains', 'rugs':'Rugs', 'other-specialty':'Other Specialty', 'iron-items':'Iron Only' };
+      let breakdownHtml = '';
+      if (order.itemsBreakdown) {
+        const parts = Object.entries(order.itemsBreakdown).filter(([,c]) => c > 0).map(([k,c]) => `${catLabels[k]||k}: ${c}`);
+        if (parts.length) breakdownHtml = `<div class="staff-detail__row"><strong>Breakdown:</strong> ${parts.join(', ')}</div>`;
+      }
+
+      const overlay = document.createElement('div');
+      overlay.id = 'staff-order-detail-overlay';
+      overlay.className = 'staff-order-detail-overlay';
+      overlay.innerHTML = `
+        <div class="staff-order-detail">
+          <div class="staff-order-detail__header">
+            <h3>Order #${escapeHtml(order.publicId || order._id || '—')}</h3>
+            <button class="staff-order-detail__close" id="btn-staff-detail-close">&times;</button>
+          </div>
+          <div class="staff-order-detail__body">
+            <div class="staff-detail__row"><strong>Status:</strong> ${escapeHtml(order.status)}</div>
+            <div class="staff-detail__row"><strong>Service:</strong> ${escapeHtml(order.service || order.serviceCategories || '—')}</div>
+            <div class="staff-detail__row"><strong>Billing:</strong> ${order.billingMode === 'subscription' ? 'Subscription' : 'Pay As You Go'}</div>
+            <div class="staff-detail__row"><strong>Items:</strong> ${order.itemsCount || 0}</div>
+            <div class="staff-detail__row"><strong>Date:</strong> ${escapeHtml(order.pickupDay || '—')}</div>
+            <div class="staff-detail__row"><strong>Time:</strong> ${escapeHtml(order.pickupTime || '—')}</div>
+            <div class="staff-detail__row"><strong>Address:</strong> ${escapeHtml(order.address || '—')}</div>
+            <div class="staff-detail__row"><strong>Delivery:</strong> ${escapeHtml(order.deliveryAddress || order.address || '—')}</div>
+            ${order.deliveryCode ? `<div class="staff-detail__row"><strong>Delivery Code:</strong> <span class="staff-detail__code">${escapeHtml(order.deliveryCode)}</span></div>` : ''}
+            ${order.notes ? `<div class="staff-detail__row"><strong>Notes:</strong> ${escapeHtml(order.notes)}</div>` : ''}
+            ${breakdownHtml}
+            <div class="staff-detail__row"><strong>Amount Paid:</strong> ${order.amountPaid ? '₦' + Number(order.amountPaid).toLocaleString() : '—'}</div>
+            ${order.processedByName ? `<div class="staff-detail__row"><strong>Processed by:</strong> ${escapeHtml(order.processedByName)}</div>` : ''}
+            <div class="staff-detail__row"><strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : '—'}</div>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      document.getElementById('btn-staff-detail-close').addEventListener('click', () => overlay.remove());
+      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    } catch (err) {
+      console.error('showStaffOrderDetail error:', err);
+      showToast('Could not load order details');
+    }
+  }
+
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
@@ -150,10 +199,18 @@ const StaffPage = (() => {
 
     // Delegated clicks on order cards
     document.getElementById('page-staff').addEventListener('click', e => {
+      const card = e.target.closest('.staff-card');
       const startBtn = e.target.closest('.btn-start-processing');
-      if (startBtn) { handleStartProcessing(startBtn.dataset.orderId); return; }
       const readyBtn = e.target.closest('.btn-mark-ready');
+      if (startBtn) { handleStartProcessing(startBtn.dataset.orderId); return; }
       if (readyBtn) { handleMarkReady(readyBtn.dataset.orderId); return; }
+      if (card && !e.target.closest('.staff-card__actions')) {
+        const orderId = card.dataset.orderId;
+        const allOrders = document.querySelectorAll('.staff-card');
+        const idx = Array.from(allOrders).indexOf(card);
+        // Fetch full order data to show detail
+        showStaffOrderDetail(orderId);
+      }
     });
 
     // Avatar dropdown
