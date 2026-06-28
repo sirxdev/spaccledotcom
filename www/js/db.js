@@ -421,6 +421,13 @@ async function listAllUsers() {
       try { await autoAssignDeliveryRider(orderId); } catch (e) { console.warn('auto-assign delivery rider', e); }
     }
 
+    if (status === 'out_for_delivery' && !updated.deliveryCode) {
+      const code = String(Math.floor(1000 + Math.random() * 9000));
+      const withCode = { ...updated, _rev: result.rev, deliveryCode: code };
+      const codeResult = await db.put(withCode);
+      return { ...withCode, _rev: codeResult.rev };
+    }
+
     return { ...updated, _rev: result.rev };
   }
 

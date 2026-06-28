@@ -831,12 +831,18 @@ function setupSheets() {
     const overlay = document.createElement('div');
     overlay.id = 'rider-delivery-confirm-overlay';
     overlay.className = 'rider-delivery-confirm-overlay';
+    const hasCode = !!order.deliveryCode;
     overlay.innerHTML = `
       <div class="rider-delivery-confirm">
         <h3 class="rider-delivery-confirm__title">Confirm Delivery</h3>
         <p class="rider-delivery-confirm__sub">Order #${order.publicId || order.orderId || order._id.slice(-6)}</p>
-        <label class="rider-delivery-confirm__label">Leave a delivery note for the customer</label>
-        <textarea id="rider-delivery-note" class="rider-msg-textarea" rows="3"
+        ${hasCode ? `
+        <label class="rider-delivery-confirm__label">Enter delivery code from customer</label>
+        <input id="rider-delivery-code-input" class="rider-delivery-code-input" type="text" inputmode="numeric"
+          maxlength="4" placeholder="0000" autocomplete="off">
+        ` : ''}
+        <label class="rider-delivery-confirm__label">Delivery note (optional)</label>
+        <textarea id="rider-delivery-note" class="rider-msg-textarea" rows="2"
           placeholder="E.g. Left with security, handed to resident, placed at door…"></textarea>
         <div class="rider-delivery-confirm__actions">
           <button class="btn btn--ghost btn--full" id="btn-delivery-cancel">Cancel</button>
@@ -847,13 +853,18 @@ function setupSheets() {
 
     document.getElementById('btn-delivery-cancel').addEventListener('click', () => overlay.remove());
     document.getElementById('btn-delivery-confirm').addEventListener('click', async () => {
-      const note = (document.getElementById('rider-delivery-note')?.value || '').trim();
-      if (!note) {
-        showToast('Please add a delivery note');
-        return;
+      if (hasCode) {
+        const entered = (document.getElementById('rider-delivery-code-input')?.value || '').trim();
+        if (entered !== order.deliveryCode) {
+          showToast('Incorrect delivery code');
+          return;
+        }
       }
+      const note = (document.getElementById('rider-delivery-note')?.value || '').trim();
+      const meta = {};
+      if (note) meta.deliveryNote = note;
       try {
-        await SpaccleDB.updateOrderStatus(order._id, ORDER_STATUS.DELIVERED, { deliveryNote: note });
+        await SpaccleDB.updateOrderStatus(order._id, ORDER_STATUS.DELIVERED, meta);
         overlay.remove();
         closeOrderSheet();
         await renderOrders();

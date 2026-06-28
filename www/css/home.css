@@ -1086,6 +1086,7 @@ body.dark .nav-badge--payg { background: #E65100; color: #FFF3E0; }
 
 .track-meta__label { font-size: 12px; color: var(--text-3); font-weight: 700; }
 .track-meta__val   { font-size: 13px; color: var(--text-1); font-weight: 800; text-align: right; }
+.track-meta__val--code { font-size: 24px; letter-spacing: 6px; font-family: monospace; }
 
 .track-timeline {
   margin-top: 16px;

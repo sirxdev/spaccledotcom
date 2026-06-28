@@ -1621,6 +1621,15 @@ const HomePage = (() => {
     document.getElementById('track-time').textContent = order.pickupTime || '—';
     document.getElementById('track-ready').textContent = estimateReady(order);
 
+    const codeRow = document.getElementById('track-delivery-code-row');
+    const codeEl = document.getElementById('track-delivery-code');
+    if (codeRow && codeEl && order.deliveryCode && (order.status === 'out_for_delivery' || order.status === 'delivered' || order.status === 'completed')) {
+      codeRow.style.display = '';
+      codeEl.textContent = order.deliveryCode;
+    } else if (codeRow) {
+      codeRow.style.display = 'none';
+    }
+
     selectedOrderId = order._id;
 
     const timelineEl = document.getElementById('track-timeline');
