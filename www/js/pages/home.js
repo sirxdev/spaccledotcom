@@ -1388,6 +1388,7 @@ const HomePage = (() => {
     renderOrders(orders);
     renderTracking(activeOrder);
     renderSubscriptionUsageBar();
+    updateBillingUI();
 
     if (!document.getElementById('sheet-order')?.classList.contains('active')) {
       selectedOrderId = activeOrder?._id || selectedOrderId;
@@ -1749,6 +1750,18 @@ const HomePage = (() => {
       } else {
         navBadge.textContent = 'PAYG';
         navBadge.className = 'nav-badge nav-badge--payg';
+      }
+    }
+
+    // Profile plan badge
+    const profileBadge = document.getElementById('profile-plan-badge');
+    if (profileBadge) {
+      if (isSub && subscription) {
+        profileBadge.textContent = subscription.planName || 'Plan';
+        profileBadge.className = 'profile-plan-badge profile-plan-badge--active';
+      } else {
+        profileBadge.textContent = '';
+        profileBadge.className = 'profile-plan-badge';
       }
     }
   }
