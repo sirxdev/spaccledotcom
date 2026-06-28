@@ -689,8 +689,8 @@ function setupSheets() {
     document.getElementById('rider-sheet-pickup').style.fontWeight = '';
     document.getElementById('rider-sheet-delivery').style.fontWeight = '';
 
-    pickupAddr.style.display = (pickupStage || doneStage) && !anyPending ? '' : 'none';
-    deliveryAddr.style.display = (deliveryStage || doneStage) && !anyPending ? '' : 'none';
+    pickupAddr.style.display = !anyPending ? '' : 'none';
+    deliveryAddr.style.display = !anyPending ? '' : 'none';
     document.getElementById('rider-sheet-row-time').style.display = pickupStage && !anyPending ? '' : 'none';
     document.getElementById('rider-sheet-row-notes').style.display = pickupStage && !anyPending ? '' : 'none';
 
