@@ -1037,6 +1037,13 @@ function setupSheets() {
     await renderEarnings();
   }
 
+  let watchRefreshTimer;
+
+  function debouncedRefresh() {
+    clearTimeout(watchRefreshTimer);
+    watchRefreshTimer = setTimeout(() => refresh(), 500);
+  }
+
   function startLiveWatch() {
     try {
       SpaccleDB.watchChanges(function(change) {
@@ -1053,7 +1060,7 @@ function setupSheets() {
             doc.assignedDriver === user.userId;
           if (!isForMe) return;
           showNewOrderAlert(doc);
-          refresh();
+          debouncedRefresh();
           return;
         }
 
@@ -1068,8 +1075,11 @@ function setupSheets() {
           // Refresh silently when admin moves an order to READY
           if (doc.status === ORDER_STATUS.READY) {
             showToast('An order is ready for delivery!');
-            refresh();
+            debouncedRefresh();
+            return;
           }
+          // Refresh on any other order change (completed, cancellation, etc.)
+          debouncedRefresh();
         }
       });
     } catch(e) {
