@@ -357,6 +357,7 @@ const HomePage = (() => {
         picker.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
         selectedPickupDate = iso;
+        buildTimeChips();
       });
       picker.appendChild(btn);
     }
@@ -364,27 +365,63 @@ const HomePage = (() => {
   }
 
   /* ── Time chip picker ───────────────────────────────────────── */
+  const MIN_LEAD_HOURS = 2;
   const TIME_SLOTS = [
-    '8:00 AM – 10:00 AM',
-    '10:00 AM – 12:00 PM',
-    '12:00 PM – 2:00 PM',
-    '2:00 PM – 4:00 PM',
-    '4:00 PM – 6:00 PM',
+    { label: '8:00 AM – 10:00 AM', startHour: 8,  endHour: 10 },
+    { label: '10:00 AM – 12:00 PM', startHour: 10, endHour: 12 },
+    { label: '12:00 PM – 2:00 PM',  startHour: 12, endHour: 14 },
+    { label: '2:00 PM – 4:00 PM',   startHour: 14, endHour: 16 },
+    { label: '4:00 PM – 6:00 PM',   startHour: 16, endHour: 18 },
   ];
 
   function buildTimeChips() {
     const container = document.getElementById('time-chips');
     if (!container) return;
+    const now = new Date();
+    const selectedDate = selectedPickupDate ? new Date(selectedPickupDate + 'T12:00:00') : new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+
+    let availableSlots;
+    if (isToday) {
+      const cutoff = new Date(now.getTime() + MIN_LEAD_HOURS * 60 * 60 * 1000);
+      availableSlots = TIME_SLOTS.filter(slot => {
+        const slotEnd = new Date(now);
+        slotEnd.setHours(slot.endHour, 0, 0, 0);
+        return slotEnd > cutoff;
+      });
+      // If no slots remain today, auto-advance to tomorrow
+      if (availableSlots.length === 0) {
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowIso = tomorrow.toISOString().split('T')[0];
+        selectedPickupDate = tomorrowIso;
+        // Update date picker selection
+        const picker = document.getElementById('date-picker');
+        if (picker) {
+          picker.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
+          const nextChip = picker.querySelector(`[data-date-value="${tomorrowIso}"]`);
+          if (nextChip) nextChip.classList.add('active');
+        }
+        availableSlots = TIME_SLOTS;
+      }
+    } else {
+      availableSlots = TIME_SLOTS;
+    }
+
     container.innerHTML = '';
-    TIME_SLOTS.forEach(slot => {
+    // Re-select the first available slot if current selection is no longer valid
+    if (!availableSlots.some(s => s.label === selectedPickupTime)) {
+      selectedPickupTime = availableSlots[0]?.label || selectedPickupTime;
+    }
+    availableSlots.forEach(slot => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'time-chip' + (slot === selectedPickupTime ? ' active' : '');
-      btn.textContent = slot;
+      btn.className = 'time-chip' + (slot.label === selectedPickupTime ? ' active' : '');
+      btn.textContent = slot.label;
       btn.addEventListener('click', () => {
         container.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
-        selectedPickupTime = slot;
+        selectedPickupTime = slot.label;
       });
       container.appendChild(btn);
     });
