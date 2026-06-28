@@ -877,19 +877,7 @@ const HomePage = (() => {
       breakdown['iron-items'] = ironCount;
       total += ironCount;
     }
-    updateEstimatedTotal(breakdown, getPricingMap());
     return { breakdown, total };
-  }
-
-  function updateEstimatedTotal(breakdown, priceMap) {
-    const totalEl = document.getElementById('pricing-total-amount');
-    if (!totalEl) return;
-    let amount = 0;
-    Object.entries(breakdown || {}).forEach(([key, qty]) => {
-      const unitPrice = key === 'iron-items' ? 600 : (priceMap?.[key] || 0);
-      amount += (Number(qty) || 0) * unitPrice;
-    });
-    totalEl.textContent = `₦${amount.toLocaleString('en-NG')}`;
   }
 
   function computePriceFromGroups(breakdown) {

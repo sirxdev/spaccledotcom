@@ -2351,21 +2351,6 @@ body.dark .offline-banner { background: #2A1A00; border-color: #5A3800; color: #
   min-width: 60px;
   text-align: right;
 }
-.pricing-total {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 8px 2px 0;
-  font-size: 14px;
-  color: var(--text-2);
-  border-top: 1px solid var(--border);
-  margin-top: 4px;
-}
-.pricing-total strong {
-  color: var(--text-1);
-  font-size: 16px;
-}
-
 /* ── Iron Only single stepper ───────────────────────────────── */
 .pricing-section__header {
   font-size: 11px;
