@@ -474,7 +474,7 @@ const HomePage = (() => {
         }
       }
     });
-    document.getElementById('btn-open-subscribe').addEventListener('click', openSubscriptionSheet);
+    document.getElementById('btn-open-subscribe')?.addEventListener('click', openSubscriptionSheet);
     document.getElementById('btn-sub-upsell')?.addEventListener('click', openSubscriptionSheet);
     document.getElementById('btn-subscribe-pay').addEventListener('click', handleSubscribePay);
 
