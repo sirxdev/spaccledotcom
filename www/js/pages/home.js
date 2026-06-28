@@ -242,14 +242,15 @@ const HomePage = (() => {
     if (promoInput) promoInput.value = '';
     const promoStatus = document.getElementById('promo-status');
     if (promoStatus) promoStatus.textContent = '';
-    buildDatePicker();
-    buildTimeChips();
-    goToWizardStep(1);
+    // Detect subscription before rendering wizard
     const hasActiveSubscription = user && await hasActiveSub();
     if (hasActiveSubscription) {
       billingMode = 'subscription';
       subscription = await SpaccleDB.getSubscription(user.userId);
     }
+    buildDatePicker();
+    buildTimeChips();
+    goToWizardStep(1);
     updateBillingUI();
     openSheet('sheet-schedule');
     loadSavedAddresses();
@@ -472,8 +473,6 @@ const HomePage = (() => {
         }
       }
     });
-    document.getElementById('btn-billing-payg').addEventListener('click', () => setBillingMode('payg'));
-    document.getElementById('btn-billing-sub').addEventListener('click', () => setBillingMode('subscription'));
     document.getElementById('btn-open-subscribe').addEventListener('click', openSubscriptionSheet);
     document.getElementById('btn-sub-upsell')?.addEventListener('click', openSubscriptionSheet);
     document.getElementById('btn-subscribe-pay').addEventListener('click', handleSubscribePay);
@@ -907,6 +906,23 @@ const HomePage = (() => {
   function onPricingChange() {
     computeItemsBreakdown();
     if (document.getElementById('wizard-panel-3')?.style.display !== 'none') renderOrderSummary();
+    updateUpgradePrompt();
+  }
+
+  function updateUpgradePrompt() {
+    const upgradeEl = document.getElementById('upgrade-prompt');
+    if (!upgradeEl || billingMode === 'subscription') return;
+    const { total } = computeItemsBreakdown();
+    if (total > 10) {
+      upgradeEl.innerHTML = `<div class="upgrade-prompt__card">
+        <span>You have <strong>${total}</strong> items — save with a plan.</span>
+        <button class="btn btn--ghost btn--sm" id="btn-upgrade-prompt">See plans</button>
+      </div>`;
+      upgradeEl.style.display = '';
+      document.getElementById('btn-upgrade-prompt')?.addEventListener('click', openSubscriptionSheet);
+    } else {
+      upgradeEl.style.display = 'none';
+    }
   }
 
   function clearStepErrors() {
@@ -1628,56 +1644,53 @@ const HomePage = (() => {
     return readyAt.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   }
 
-  async function setBillingMode(mode) {
-    billingMode = mode === 'subscription' ? 'subscription' : 'payg';
-    await updateBillingUI();
-  }
-
   async function updateBillingUI() {
-    const paygBtn = document.getElementById('btn-billing-payg');
-    const subBtn = document.getElementById('btn-billing-sub');
-    const subBlock = document.getElementById('subscription-block');
-    const tabsContainer = document.getElementById('billing-tabs');
     const itemsGroup = document.getElementById('items-count-group');
-    const required = document.getElementById('subscription-required');
+    const upsell = document.getElementById('sub-upsell');
+    const promoGroup = document.getElementById('promo-group');
+    const statusEl = document.getElementById('billing-status');
+    const upgradeEl = document.getElementById('upgrade-prompt');
 
-    const activeSub = user && await hasActiveSub();
+    const isSub = billingMode === 'subscription';
 
-    if (tabsContainer) tabsContainer.style.display = activeSub ? 'none' : '';
-
-    if (paygBtn && subBtn) {
-      paygBtn.classList.toggle('active', billingMode === 'payg');
-      subBtn.classList.toggle('active', billingMode === 'subscription');
-    }
-
-    if (activeSub) {
-      billingMode = 'subscription';
+    // Re-fetch subscription for fresh status
+    if (isSub && user) {
       subscription = await SpaccleDB.getSubscription(user.userId);
     }
 
-    if (subBlock) subBlock.style.display = billingMode === 'subscription' ? '' : 'none';
+    // Billing status indicator
+    if (statusEl) {
+      if (isSub && subscription && subscription.status === 'active') {
+        statusEl.innerHTML = `<div class="billing-status__badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#2E7D32"/></svg>
+          Covered by <strong>${escapeHtml(subscription.planName || 'your subscription')}</strong>
+        </div>`;
+        statusEl.style.display = '';
+      } else {
+        statusEl.style.display = 'none';
+      }
+    }
 
-    const isSub = billingMode === 'subscription';
-    // For subscription users items count is optional (no validation), for PAYG it's required
     if (itemsGroup) itemsGroup.style.display = '';
 
     // Subscription upsell — visible only for non-subscribed users
-    const upsell = document.getElementById('sub-upsell');
     if (upsell) upsell.style.display = isSub ? 'none' : '';
 
     // Promo visible only for PAYG
-    const promoGroup = document.getElementById('promo-group');
     if (promoGroup) promoGroup.style.display = isSub ? 'none' : '';
 
-    computeItemsBreakdown();
-
-    if (billingMode === 'subscription' && user) {
-      subscription = await SpaccleDB.getSubscription(user.userId);
-      const active = !!(subscription && subscription.status === 'active');
-      if (required) required.style.display = active ? 'none' : '';
-      await renderPlansUI();
-    } else {
-      if (required) required.style.display = 'none';
+    if (!isSub && upgradeEl) {
+      const { total } = computeItemsBreakdown();
+      if (total > 10) {
+        upgradeEl.innerHTML = `<div class="upgrade-prompt__card">
+          <span>You have <strong>${total}</strong> items — save with a plan.</span>
+          <button class="btn btn--ghost btn--sm" id="btn-upgrade-prompt">See plans</button>
+        </div>`;
+        upgradeEl.style.display = '';
+        document.getElementById('btn-upgrade-prompt')?.addEventListener('click', openSubscriptionSheet);
+      } else {
+        upgradeEl.style.display = 'none';
+      }
     }
   }
 
