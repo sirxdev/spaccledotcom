@@ -222,6 +222,7 @@ const HomePage = (() => {
     document.getElementById('btn-open-profile-info').addEventListener('click', openProfileInfo);
     document.getElementById('btn-open-profile-addresses').addEventListener('click', openProfileAddresses);
     document.getElementById('btn-open-profile-payment').addEventListener('click', () => openSheet('sheet-profile-payment'));
+    document.getElementById('btn-open-profile-subscription').addEventListener('click', openSubscriptionSheet);
     document.getElementById('btn-open-profile-notifications').addEventListener('click', openProfileNotifications);
     document.getElementById('btn-open-profile-settings').addEventListener('click', openProfileSettings);
 
@@ -1774,22 +1775,61 @@ const HomePage = (() => {
 
   async function renderSubscriptionSheet() {
     const current = document.getElementById('sub-current');
+    const manageCard = document.getElementById('sub-manage-card');
     const wrap = document.getElementById('sub-plan-cards');
+    const titleEl = document.getElementById('sheet-subscription-title');
+    const payBtn = document.getElementById('btn-subscribe-pay');
+    const cancelBtn = document.getElementById('btn-subscribe-cancel');
     if (!wrap) return;
     const allPlans = await SpaccleDB.listPlans({ includeInactive: false });
     const plans = allPlans.filter(p => p.kind === 'subscription').sort((a, b) => (a.sort ?? 999) - (b.sort ?? 999));
     wrap.innerHTML = '';
 
-    if (subscription && subscription.status === 'active') {
-      if (current) {
-        const ren = subscription.renewAt ? formatTime(subscription.renewAt) : '';
-        const picks = subscription.pickupsRemaining == null ? 'Unlimited' : String(subscription.pickupsRemaining);
-        const planName = subscription.planName || subscription.planId?.replace(/^plan_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Plan';
-        const itemsLeft = (Number(subscription.itemsRemaining) || 0) + (Number(subscription.rolloverRemaining) || 0);
-        current.textContent = `Active: ${planName} • Items left: ${itemsLeft} • Pickups left: ${picks} • Renew: ${ren}`;
+    const isActive = subscription && subscription.status === 'active';
+    if (titleEl) titleEl.textContent = isActive ? 'My Plan' : 'Choose a plan';
+
+    if (isActive) {
+      const planName = subscription.planName || subscription.planId?.replace(/^plan_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Plan';
+      const itemsLeft = (Number(subscription.itemsRemaining) || 0) + (Number(subscription.rolloverRemaining) || 0);
+      const included = Number(subscription.includedItems) || 0;
+      const used = included - itemsLeft;
+      const pct = included ? Math.min(100, Math.round((used / included) * 100)) : 0;
+      const colour = pct >= 90 ? '#E53935' : pct >= 70 ? '#FB8C00' : '#5B4FBE';
+      const ren = subscription.renewAt ? formatTime(subscription.renewAt) : '';
+      const picks = subscription.pickupsRemaining == null ? 'Unlimited' : String(subscription.pickupsRemaining);
+
+      if (current) current.textContent = '';
+      if (manageCard) {
+        manageCard.style.display = '';
+        manageCard.innerHTML = `
+          <div class="sub-manage-card">
+            <div class="sub-manage-card__plan">
+              <span class="sub-manage-card__name">${planName}</span>
+              <span class="sub-manage-card__badge">Active</span>
+            </div>
+            <div class="sub-manage-card__bar">
+              <div class="sub-usage-label">
+                <span>Items used this month</span>
+                <span style="font-weight:700;color:${colour}">${used} / ${included}</span>
+              </div>
+              <div class="sub-usage-track">
+                <div class="sub-usage-fill" style="transform:scaleX(${pct / 100});background:${colour}"></div>
+              </div>
+            </div>
+            <div class="sub-manage-card__stats">
+              <div class="sub-manage-card__stat"><span>Items remaining</span><strong>${itemsLeft}</strong></div>
+              <div class="sub-manage-card__stat"><span>Pickups remaining</span><strong>${picks}</strong></div>
+              <div class="sub-manage-card__stat"><span>Renewal</span><strong>${ren || '—'}</strong></div>
+            </div>
+          </div>`;
       }
+      if (payBtn) payBtn.querySelector('.btn__label').textContent = 'Change Plan';
+      if (cancelBtn) cancelBtn.style.display = '';
     } else {
       if (current) current.textContent = 'No active subscription.';
+      if (manageCard) manageCard.style.display = 'none';
+      if (payBtn) payBtn.querySelector('.btn__label').textContent = 'Subscribe';
+      if (cancelBtn) cancelBtn.style.display = 'none';
     }
 
     if (!plans.length) {
@@ -1846,19 +1886,36 @@ const HomePage = (() => {
   async function handleSubscribePay() {
     if (!user) return;
     const freshSub = await SpaccleDB.getSubscription(user.userId);
-    if (freshSub?.status === 'active') { showToast('You already have an active subscription'); return; }
     const btn = document.getElementById('btn-subscribe-pay');
+    const allPlans = await SpaccleDB.listPlans({ includeInactive: false });
+    const selected = allPlans.find(p => p._id === selectedSubPlanId);
+    if (!selected) { showToast('Select a plan'); return; }
+
+    // If already subscribed, change plan directly without payment
+    if (freshSub?.status === 'active') {
+      setButtonLoading(btn, true);
+      try {
+        const currentPlan = freshSub.planId || freshSub.planName || '';
+        if (selected._id === currentPlan || selected.name === currentPlan) {
+          showToast('Already on this plan');
+          setButtonLoading(btn, false);
+          return;
+        }
+        await SpaccleDB.setSubscription({ userId: user.userId, planId: selected._id, useWaitlistPrice: true });
+        subscription = await SpaccleDB.getSubscription(user.userId);
+        closeAllSheets();
+        showToast(`Changed to ${selected.name || 'new plan'}`);
+      } catch {
+        showToast('Could not change plan');
+        setButtonLoading(btn, false);
+      }
+      return;
+    }
+
     setButtonLoading(btn, true);
 
     let handler;
     try {
-      const allPlans = await SpaccleDB.listPlans({ includeInactive: false });
-      const selected = allPlans.find(p => p._id === selectedSubPlanId);
-      if (!selected) {
-        showToast('Select a plan');
-        return;
-      }
-
       const cfg = await SpaccleDB.getPreference('integrations_config', null);
       const pk = (cfg?.paystackPublicKey || getConfig().paystack?.publicKey || '').trim();
       if (!pk) {

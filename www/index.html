@@ -1068,6 +1068,13 @@
                 <span data-i18n="Payment Methods">Payment Methods</span>
                 <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               </button>
+              <button class="profile-menu__item" id="btn-open-profile-subscription">
+                <div class="profile-menu__item-icon" style="background:#F0EEFF">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#5B4FBE" stroke-width="1.8" fill="none"/></svg>
+                </div>
+                <span data-i18n="My Plan">My Plan</span>
+                <svg class="profile-menu__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
               <button class="profile-menu__item" id="btn-open-change-password">
                 <div class="profile-menu__item-icon" style="background:#FCE4EC">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#E91E63" stroke-width="1.8" fill="none"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#E91E63" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -1333,6 +1340,7 @@
       </div>
       <div class="sheet__content">
         <div class="tab-subtitle" id="sub-current"></div>
+        <div id="sub-manage-card" style="display:none"></div>
         <div class="plan-cards" id="sub-plan-cards"></div>
         <button class="btn btn--ghost btn--full" id="btn-custom-plan-chat" style="margin:8px 0 4px;font-size:13px">
           Need a custom plan? Chat with us →
