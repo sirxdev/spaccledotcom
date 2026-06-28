@@ -367,7 +367,7 @@ function init(data = {}) {
 
     const page = orderPage[currentOrderFilter] || 0;
     const totalPages = Math.ceil(filtered.length / ORDER_PAGE_SIZE) || 1;
-    const start = 0;
+    const start = page * ORDER_PAGE_SIZE;
     const end = Math.min((page + 1) * ORDER_PAGE_SIZE, filtered.length);
 
     list.innerHTML = '';
@@ -393,7 +393,7 @@ function init(data = {}) {
     }
     const info = document.createElement('span');
     info.style.cssText = 'font-size:12px;color:var(--text-3)';
-    info.textContent = `${end} of ${filtered.length}`;
+    info.textContent = `Page ${page + 1}: ${end - start} of ${filtered.length}`;
     nav.appendChild(info);
     if (end < filtered.length) {
       const next = document.createElement('button');
