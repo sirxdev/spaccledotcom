@@ -513,10 +513,24 @@ const HomePage = (() => {
 
     // Wizard navigation
     document.querySelectorAll('.wizard-next').forEach(btn => {
-      btn.addEventListener('click', () => goToWizardStep(parseInt(btn.dataset.next)));
+      btn.addEventListener('click', () => {
+        const current = parseInt(btn.dataset.next) - 1;
+        if (validateStep(current)) goToWizardStep(parseInt(btn.dataset.next));
+      });
     });
     document.querySelectorAll('.wizard-back').forEach(btn => {
       btn.addEventListener('click', () => goToWizardStep(parseInt(btn.dataset.prev)));
+    });
+    // Click completed step indicators to jump back
+    document.querySelectorAll('.wizard-step').forEach(step => {
+      step.addEventListener('click', () => {
+        const sNum = parseInt(step.dataset.step);
+        // Only allow jumping to completed or current steps
+        if (step.classList.contains('completed') || step.classList.contains('active')) {
+          goToWizardStep(sNum);
+        }
+      });
+      step.style.cursor = 'pointer';
     });
 
     // Change password
@@ -869,6 +883,37 @@ const HomePage = (() => {
     computeItemsBreakdown();
     if (document.getElementById('wizard-panel-3')?.style.display !== 'none') renderOrderSummary();
   }
+
+  function clearStepErrors() {
+    document.querySelectorAll('.validation-error').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+  }
+
+  function validateStep(step) {
+    clearStepErrors();
+    if (step === 1) {
+      const { total } = computeItemsBreakdown();
+      if (total <= 0) {
+        document.getElementById('step1-error').textContent = 'Add at least one item to continue.';
+        document.getElementById('step1-error').style.display = '';
+        return false;
+      }
+    }
+    if (step === 2) {
+      const addr = document.getElementById('pickup-address')?.value.trim();
+      if (!addr) {
+        document.getElementById('step2-error').textContent = 'Enter a pickup address to continue.';
+        document.getElementById('step2-error').style.display = '';
+        return false;
+      }
+      if (!selectedPickupTime) {
+        document.getElementById('step2-error').textContent = 'Select a pickup time slot to continue.';
+        document.getElementById('step2-error').style.display = '';
+        return false;
+      }
+    }
+    return true;
+  }
+
   function goToWizardStep(step) {
     document.querySelectorAll('.wizard-panel').forEach(p => p.style.display = 'none');
     const panel = document.getElementById(`wizard-panel-${step}`);

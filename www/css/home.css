@@ -2390,6 +2390,14 @@ body.dark .offline-banner { background: #2A1A00; border-color: #5A3800; color: #
   padding: 16px;
 }
 
+/* ── Validation errors ─────────────────────────────────────── */
+.validation-error {
+  font-size: 12px;
+  color: #E53935;
+  padding: 6px 2px 0;
+  line-height: 1.4;
+}
+
 /* ── Pricing group contextual help tooltip ──────────────────── */
 .pricing-group__name-wrap {
   display: inline-flex;
