@@ -700,15 +700,21 @@ async function listAllUsers() {
 
   async function ensureDefaultServices() {
     const existing = await getPreference('services_config', null);
-    if (existing) return existing;
     const defaults = {
-      'wash-fold':  { name: 'Wash, Iron & Fold',  pricePerItem: 900,  unit: 'item',  display: '₦900/item' },
-      'dry-clean':  { name: 'Dry Cleaning',        pricePerItem: 900,  unit: 'item',  display: '₦900/item' },
-      'iron-press': { name: 'Iron & Press',        pricePerItem: 600,  unit: 'item',  display: '₦600/item' },
-      'duvet':      { name: 'Duvet & Bedding',     pricePerItem: 7500, unit: 'item',  display: 'From ₦7,500' },
-      'alteration': { name: 'Alterations',         pricePerItem: 1200, unit: 'item',  display: 'From ₦1,200/item' },
-      'shoe-clean': { name: 'Shoe Cleaning',       pricePerItem: 2000, unit: 'pair',  display: 'From ₦2,000/pair' },
+      'regular-laundry':    { name: 'Regular Laundry',          pricePerItem: null, unit: 'item', display: 'From ₦900' },
+      'specialty-dry-clean':{ name: 'Specialty Dry Cleaning',    pricePerItem: null, unit: 'item', display: 'From ₦1,500' },
+      'iron-only':          { name: 'Iron Only',                pricePerItem: 600,  unit: 'item', display: '₦600/item' },
+      'specialty-items':    { name: 'Specialty Items',          pricePerItem: null, unit: 'item', display: 'Varies' },
     };
+    const oldKeys = ['wash-fold', 'dry-clean', 'iron-press', 'duvet', 'alteration', 'shoe-clean'];
+    if (existing) {
+      const hasOld = Object.keys(existing).some(k => oldKeys.includes(k));
+      if (hasOld) {
+        await setPreference('services_config', defaults);
+        return defaults;
+      }
+      return existing;
+    }
     await setPreference('services_config', defaults);
     return defaults;
   }
@@ -721,25 +727,48 @@ async function listAllUsers() {
     return setPreference('services_config', config);
   }
 
-  /* ── Item pricing guide ─────────────────────────────────────────── */
+  /* ── Item pricing guide (pricing groups) ──────────────────────── */
   async function ensureDefaultItemPricing() {
     const existing = await getPreference('item_pricing', null);
-    if (existing) return existing;
     const defaults = [
-      { key: 'suit',         name: "Men's / Women's Suit",  price: 4000 },
-      { key: 'bedsheet',     name: 'Bedsheet',              price: 1500 },
-      { key: 'pillow-case',  name: 'Pillow Case',           price: 500  },
-      { key: 'towel',        name: 'Towel',                 price: 1700 },
-      { key: 'ladies-dress', name: "Ladies' Classy Dress",  price: 4000 },
-      { key: 'extra-item',   name: 'Extra Item (over plan)', price: 700  },
-      { key: 'express-24hr', name: '24hrs Express Service', price: 3000 },
-      { key: 'stain-remover',name: 'Stain Remover Add-on',  price: 2000 },
+      { key: 'everyday-clothing', name: 'Everyday Clothing',      price: 900,  unit: 'item' },
+      { key: 'dresses-gowns',     name: 'Dresses & Gowns',        price: 2500, unit: 'item' },
+      { key: 'bedding',           name: 'Bedding',                price: 1500, unit: 'item' },
+      { key: 'shoes',             name: 'Shoes',                  price: 2000, unit: 'pair' },
+      { key: 'bags',              name: 'Bags',                   price: 3500, unit: 'item' },
+      { key: 'curtains',          name: 'Curtains',               price: 3000, unit: 'panel' },
+      { key: 'rugs',              name: 'Rugs',                   price: 5000, unit: 'item' },
+      { key: 'other-specialty',   name: 'Other Specialty Items',  price: 2000, unit: 'item' },
     ];
+    const oldKeys = ['suit', 'bedsheet', 'towel', 'ladies-dress', 'extra-item', 'express-24hr', 'stain-remover'];
+    if (existing) {
+      const hasOld = existing.some(i => oldKeys.includes(i.key));
+      if (hasOld) {
+        await setPreference('item_pricing', defaults);
+        return defaults;
+      }
+      return existing;
+    }
     await setPreference('item_pricing', defaults);
     return defaults;
   }
   async function getItemPricing()         { return getPreference('item_pricing', null); }
   async function saveItemPricing(items)   { return setPreference('item_pricing', items); }
+
+  /* ── Price calculation helper ────────────────────────────────── */
+  async function calculateEstimatedPrice({ service, itemsBreakdown }) {
+    const pricing = await ensureDefaultItemPricing();
+    const priceMap = {};
+    pricing.forEach(p => { priceMap[p.key] = p.price; });
+    let total = 0;
+    if (itemsBreakdown && typeof itemsBreakdown === 'object') {
+      Object.entries(itemsBreakdown).forEach(([key, qty]) => {
+        const unitPrice = priceMap[key] || 0;
+        total += (Number(qty) || 0) * unitPrice;
+      });
+    }
+    return total;
+  }
 
   /* ── Recurring pickup ───────────────────────────────────────────── */
   async function setRecurringPickup(userId, schedule) {

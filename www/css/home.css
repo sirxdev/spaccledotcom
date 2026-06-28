@@ -1513,6 +1513,33 @@
 .admin-panel { display: none; }
 .admin-panel.active { display: block; }
 
+/* ── Subscription upsell ─────────────────────────────────────── */
+.sub-upsell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px dashed var(--primary);
+  border-radius: var(--radius-lg);
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.sub-upsell svg {
+  flex-shrink: 0;
+}
+.sub-upsell__link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
 .admin-list {
   display: grid;
   grid-template-columns: 1fr;
@@ -1737,6 +1764,32 @@
   font-weight: 500;
 }
 .date-chip.active .date-chip__month { color: rgba(255,255,255,0.75); }
+
+/* ── Time chips ──────────────────────────────────────────────── */
+.time-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.time-chip {
+  flex: 1 1 auto;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  transition: border-color 0.15s, background 0.15s;
+  text-align: center;
+  min-width: 100px;
+}
+.time-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
 .form-label-hint {
   font-weight: 600;
   color: var(--primary);
@@ -2229,55 +2282,95 @@ body.dark .offline-banner { background: #2A1A00; border-color: #5A3800; color: #
 }
 
 /* ─── Item category grid ─── */
-.item-category-grid {
+/* ── Pricing groups ──────────────────────────────────────────── */
+.pricing-groups {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   margin: 4px 0 8px;
 }
-
-.item-category-row {
+.pricing-group {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-}
-
-.item-category-name {
-  font-size: 13px;
-  color: var(--text-1);
-  flex: 1;
-}
-
-.item-category-input {
-  width: 56px;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 4px 2px;
+  padding: 10px 12px;
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-1);
+  border-radius: var(--radius-lg);
+}
+.pricing-group__info {
+  flex: 1;
+  min-width: 0;
+}
+.pricing-group__name {
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text-1);
-  outline: none;
-  transition: border-color 0.15s;
 }
-
-.item-category-input:focus {
-  border-color: var(--primary);
+.pricing-group__price {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 1px;
 }
-
-.item-total-row {
+.pricing-group__stepper {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.stepper-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-1);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.stepper-btn:active { transform: scale(0.93); }
+.stepper-btn--minus { color: var(--text-3); }
+.stepper-btn--plus { color: var(--primary); border-color: var(--primary); }
+.stepper-value {
+  min-width: 28px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+.pricing-group__subtotal {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  min-width: 60px;
+  text-align: right;
+}
+.pricing-total {
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
   padding: 8px 2px 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-2);
   border-top: 1px solid var(--border);
-  margin-top: 6px;
+  margin-top: 4px;
+}
+.pricing-total strong {
+  color: var(--text-1);
+  font-size: 16px;
 }
 
-.item-total-row strong {
-  color: var(--text-1);
+/* ── Iron Only single stepper ───────────────────────────────── */
+.iron-only-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
 }

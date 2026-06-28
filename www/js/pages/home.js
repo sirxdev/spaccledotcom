@@ -4,7 +4,7 @@ const HomePage = (() => {
   let activeTab = 'home';
   let user = null;
   let initialized = false;
-  let selectedService = 'wash-fold';
+  let selectedService = 'regular-laundry';
   let selectedPlanId = null;
   let selectedSubPlanId = null;
   let billingMode = 'payg';
@@ -15,7 +15,10 @@ const HomePage = (() => {
   let refreshTimer = null;
   let unsubscribeSync = null;
   let selectedPickupDate = null;
+  let selectedPickupTime = '2:00 PM – 4:00 PM';
   let servicesConfig = null;
+  let itemPricing = null;
+  let pendingItemsBreakdown = null;
 
   function init(data = {}) {
     user = data.user || SpaccleDB.getSession();
@@ -49,30 +52,10 @@ const HomePage = (() => {
     await initTheme();
     try {
       servicesConfig = await SpaccleDB.ensureDefaultServices();
-      // Migrate existing installs to updated service names/prices
-      if (servicesConfig['wash-fold']?.name === 'Wash & Fold') {
-        servicesConfig['wash-fold'].name    = 'Wash, Iron & Fold';
-        await SpaccleDB.saveServicesConfig(servicesConfig);
-      }
-      if (servicesConfig['iron-press']?.pricePerItem === 900) {
-        servicesConfig['iron-press'].pricePerItem = 600;
-        servicesConfig['iron-press'].display      = '₦600/item';
-        await SpaccleDB.saveServicesConfig(servicesConfig);
-      }
       renderServiceCardPrices();
     } catch { }
     try {
-      // Migrate item pricing: add new items if missing
-      const items = await SpaccleDB.ensureDefaultItemPricing();
-      const keys = items.map(i => i.key);
-      const newItems = [
-        { key: 'extra-item',    name: 'Extra Item (over plan)', price: 700  },
-        { key: 'express-24hr',  name: '24hrs Express Service',  price: 3000 },
-        { key: 'stain-remover', name: 'Stain Remover Add-on',   price: 2000 },
-      ].filter(i => !keys.includes(i.key));
-      if (newItems.length) {
-        await SpaccleDB.saveItemPricing([...items, ...newItems]);
-      }
+      itemPricing = await SpaccleDB.ensureDefaultItemPricing();
     } catch { }
     try {
       await SpaccleDB.ensureDefaultPlans();
@@ -216,7 +199,7 @@ const HomePage = (() => {
 
 
     document.querySelectorAll('.service-card').forEach(card => {
-      card.addEventListener('click', () => handleServiceTap(card.dataset.service));
+      card.addEventListener('click', () => handleNewOrder(card.dataset.service));
     });
 
     document.getElementById('btn-open-profile-info').addEventListener('click', openProfileInfo);
@@ -234,29 +217,19 @@ const HomePage = (() => {
     });
   }
 
-  async function handleNewOrder() {
+  async function handleNewOrder(service) {
     supportOrderId = null;
     billingMode = 'payg';
     appliedPromo = null;
-    selectedService = 'wash-fold';
+    selectedService = service || 'regular-laundry';
     document.querySelectorAll('.service-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.service === 'wash-fold'));
+      p.classList.toggle('active', p.dataset.service === selectedService));
     const promoInput = document.getElementById('promo-input');
     if (promoInput) promoInput.value = '';
     const promoStatus = document.getElementById('promo-status');
     if (promoStatus) promoStatus.textContent = '';
-    ['promo-input', 'promo-input-3'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    ['promo-status', 'promo-status-3'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = '';
-    });
-    // Reset category inputs
-    document.querySelectorAll('.item-category-input').forEach(inp => inp.value = '0');
-    computeItemsBreakdown();
     buildDatePicker();
+    buildTimeChips();
     goToWizardStep(1);
     const hasActiveSubscription = user && await hasActiveSub();
     if (hasActiveSubscription) {
@@ -376,17 +349,36 @@ const HomePage = (() => {
     selectedPickupDate = today.toISOString().split('T')[0];
   }
 
+  /* ── Time chip picker ───────────────────────────────────────── */
+  const TIME_SLOTS = [
+    '8:00 AM – 10:00 AM',
+    '10:00 AM – 12:00 PM',
+    '12:00 PM – 2:00 PM',
+    '2:00 PM – 4:00 PM',
+    '4:00 PM – 6:00 PM',
+  ];
+
+  function buildTimeChips() {
+    const container = document.getElementById('time-chips');
+    if (!container) return;
+    container.innerHTML = '';
+    TIME_SLOTS.forEach(slot => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'time-chip' + (slot === selectedPickupTime ? ' active' : '');
+      btn.textContent = slot;
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        selectedPickupTime = slot;
+      });
+      container.appendChild(btn);
+    });
+  }
+
   function handleNotifications() {
     requestNotificationPermission();
     openNotificationPanel();
-  }
-
-  function handleServiceTap(service) {
-    selectedService = service;
-    document.querySelectorAll('.service-pill').forEach(p => {
-      p.classList.toggle('active', p.dataset.service === service);
-    });
-    showToast(serviceName(service) + ' — tap Schedule Pickup to add');
   }
 
   async function handleLogout() {
@@ -423,14 +415,7 @@ const HomePage = (() => {
       pill.addEventListener('click', () => {
         selectedService = pill.dataset.service;
         document.querySelectorAll('.service-pill').forEach(p => p.classList.toggle('active', p === pill));
-        updateItemTotalPrice(computeItemsBreakdown().total);
-      });
-    });
-
-    document.querySelectorAll('.item-category-input').forEach(inp => {
-      inp.addEventListener('input', () => {
-        const { total } = computeItemsBreakdown();
-        // Re-render summary if on step 3
+        renderPricingGroups();
         if (document.getElementById('wizard-panel-3')?.style.display !== 'none') renderOrderSummary();
       });
     });
@@ -448,6 +433,7 @@ const HomePage = (() => {
     document.getElementById('btn-billing-payg').addEventListener('click', () => setBillingMode('payg'));
     document.getElementById('btn-billing-sub').addEventListener('click', () => setBillingMode('subscription'));
     document.getElementById('btn-open-subscribe').addEventListener('click', openSubscriptionSheet);
+    document.getElementById('btn-sub-upsell')?.addEventListener('click', openSubscriptionSheet);
     document.getElementById('btn-subscribe-pay').addEventListener('click', handleSubscribePay);
 
     document.getElementById('btn-order-track').addEventListener('click', () => {
@@ -514,19 +500,10 @@ const HomePage = (() => {
     document.getElementById('btn-open-pricing-guide').addEventListener('click', openPricingGuide);
     document.getElementById('btn-pricing-guide-close').addEventListener('click', closeAllSheets);
 
-    // Exceed plan checkbox
-    document.getElementById('chk-exceeds-plan').addEventListener('change', e => {
-      document.getElementById('extra-items-group').style.display = e.target.checked ? '' : 'none';
-    });
-
     // Promo code
     document.getElementById('btn-apply-promo').addEventListener('click', handleApplyPromo);
     document.getElementById('promo-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); }
-    });
-    document.getElementById('btn-apply-promo-3')?.addEventListener('click', handleApplyPromoStep3);
-    document.getElementById('promo-input-3')?.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); handleApplyPromoStep3(); }
     });
 
     // Wizard navigation
@@ -700,36 +677,169 @@ const HomePage = (() => {
     btn.classList.toggle('loading', isLoading);
   }
 
-  /* ── Item breakdown ─────────────────────────────────────────────── */
+  /* ── Pricing groups ──────────────────────────────────────────── */
+  const SERVICE_PRICING_GROUPS = {
+    'regular-laundry': ['everyday-clothing', 'dresses-gowns', 'bedding'],
+    'specialty-dry-clean': ['everyday-clothing', 'dresses-gowns', 'bedding'],
+    'iron-only': [],
+    'specialty-items': ['shoes', 'bags', 'curtains', 'rugs', 'other-specialty'],
+  };
+
+  function getPricingMap() {
+    const map = {};
+    if (itemPricing) itemPricing.forEach(p => { map[p.key] = p.price; });
+    return map;
+  }
+
+  function renderPricingGroups() {
+    const container = document.getElementById('pricing-groups');
+    if (!container) return;
+    const groups = SERVICE_PRICING_GROUPS[selectedService] || [];
+    container.innerHTML = '';
+
+    if (selectedService === 'iron-only') {
+      container.innerHTML = `
+        <div class="iron-only-stepper">
+          <button class="stepper-btn stepper-btn--minus" data-iron-minus>-</button>
+          <span class="stepper-value" id="iron-count">0</span>
+          <button class="stepper-btn stepper-btn--plus" data-iron-plus>+</button>
+          <span style="font-size:13px;color:var(--text-2);margin-left:8px">× ₦600/item</span>
+        </div>`;
+      container.querySelector('[data-iron-minus]').addEventListener('click', () => {
+        const el = document.getElementById('iron-count');
+        const v = Math.max(0, (parseInt(el.textContent) || 0) - 1);
+        el.textContent = v;
+        onPricingChange();
+      });
+      container.querySelector('[data-iron-plus]').addEventListener('click', () => {
+        const el = document.getElementById('iron-count');
+        el.textContent = (parseInt(el.textContent) || 0) + 1;
+        onPricingChange();
+      });
+      restorePendingBreakdown();
+      return;
+    }
+
+    const priceMap = getPricingMap();
+    groups.forEach(key => {
+      const p = itemPricing?.find(x => x.key === key);
+      if (!p) return;
+      const row = document.createElement('div');
+      row.className = 'pricing-group';
+      row.innerHTML = `
+        <div class="pricing-group__info">
+          <div class="pricing-group__name">${p.name}</div>
+          <div class="pricing-group__price">₦${Number(p.price).toLocaleString('en-NG')}/${p.unit}</div>
+        </div>
+        <div class="pricing-group__stepper">
+          <button class="stepper-btn stepper-btn--minus" data-minus="${key}">−</button>
+          <span class="stepper-value" data-value="${key}">0</span>
+          <button class="stepper-btn stepper-btn--plus" data-plus="${key}">+</button>
+        </div>
+        <span class="pricing-group__subtotal" data-subtotal="${key}">₦0</span>`;
+      row.querySelector(`[data-minus="${key}"]`).addEventListener('click', () => {
+        const valEl = row.querySelector(`[data-value="${key}"]`);
+        const v = Math.max(0, (parseInt(valEl.textContent) || 0) - 1);
+        valEl.textContent = v;
+        updateGroupSubtotal(key, v, p.price);
+        onPricingChange();
+      });
+      row.querySelector(`[data-plus="${key}"]`).addEventListener('click', () => {
+        const valEl = row.querySelector(`[data-value="${key}"]`);
+        const v = (parseInt(valEl.textContent) || 0) + 1;
+        valEl.textContent = v;
+        updateGroupSubtotal(key, v, p.price);
+        onPricingChange();
+      });
+      container.appendChild(row);
+    });
+    restorePendingBreakdown();
+  }
+
+  function restorePendingBreakdown() {
+    if (!pendingItemsBreakdown) return;
+    const bd = pendingItemsBreakdown;
+    pendingItemsBreakdown = null;
+    if (selectedService === 'iron-only') {
+      const count = bd['iron-items'] || 0;
+      const el = document.getElementById('iron-count');
+      if (el && count > 0) el.textContent = count;
+      computeItemsBreakdown();
+      return;
+    }
+    Object.entries(bd).forEach(([key, count]) => {
+      if (count <= 0) return;
+      const valEl = document.querySelector(`[data-value="${key}"]`);
+      if (!valEl) return;
+      valEl.textContent = count;
+      const p = itemPricing?.find(x => x.key === key);
+      if (p) updateGroupSubtotal(key, count, p.price);
+    });
+    computeItemsBreakdown();
+  }
+
+  function updateGroupSubtotal(key, qty, price) {
+    const el = document.querySelector(`[data-subtotal="${key}"]`);
+    if (el) el.textContent = `₦${(qty * price).toLocaleString('en-NG')}`;
+  }
+
   function computeItemsBreakdown() {
-    const inputs = document.querySelectorAll('.item-category-input');
-    let total = 0;
     const breakdown = {};
-    inputs.forEach(inp => {
-      const count = Math.floor(Number(inp.value.replace(/[^0-9]/g, '')) || 0);
-      if (count < 0) inp.value = '0';
-      const cat = inp.dataset.category;
-      breakdown[cat] = count;
+    let total = 0;
+
+    if (selectedService === 'iron-only') {
+      const count = parseInt(document.getElementById('iron-count')?.textContent) || 0;
+      breakdown['iron-items'] = count;
+      total = count;
+      updateEstimatedTotal(total, 600);
+      return { breakdown, total };
+    }
+
+    const groups = SERVICE_PRICING_GROUPS[selectedService] || [];
+    const priceMap = getPricingMap();
+    groups.forEach(key => {
+      const valEl = document.querySelector(`[data-value="${key}"]`);
+      const count = valEl ? (parseInt(valEl.textContent) || 0) : 0;
+      breakdown[key] = count;
       total += count;
     });
-    const hidden = document.getElementById('pickup-items');
-    if (hidden) hidden.value = total;
-    const totalEl = document.getElementById('item-total-count');
-    if (totalEl) totalEl.textContent = total;
-    updateItemTotalPrice(total);
+    updateEstimatedTotal(breakdown, priceMap);
     return { breakdown, total };
   }
 
-  function updateItemTotalPrice(total) {
-    const svcCfg = servicesConfig?.[selectedService] || {};
-    const price = svcCfg.pricePerItem || 900;
-    const isSub = billingMode === 'subscription';
-    const rateEl = document.getElementById('item-total-rate');
-    if (rateEl) rateEl.textContent = `₦${price.toLocaleString('en-NG')}`;
-    const priceRow = document.getElementById('item-total-price');
-    if (priceRow) priceRow.style.display = isSub ? 'none' : '';
-    const amountEl = document.getElementById('item-total-amount');
-    if (amountEl) amountEl.textContent = `₦${(total * price).toLocaleString('en-NG')}`;
+  function updateEstimatedTotal(breakdown, priceMap) {
+    const totalEl = document.getElementById('pricing-total-amount');
+    if (!totalEl) return;
+    if (selectedService === 'iron-only') {
+      const count = typeof breakdown === 'number' ? breakdown : 0;
+      totalEl.textContent = `₦${(count * 600).toLocaleString('en-NG')}`;
+      return;
+    }
+    let amount = 0;
+    if (typeof breakdown === 'object') {
+      Object.entries(breakdown).forEach(([key, qty]) => {
+        const price = typeof priceMap === 'object' ? (priceMap[key] || 0) : 0;
+        amount += (Number(qty) || 0) * price;
+      });
+    }
+    totalEl.textContent = `₦${amount.toLocaleString('en-NG')}`;
+  }
+
+  function computePriceFromGroups(breakdown) {
+    if (selectedService === 'iron-only') {
+      return (breakdown?.['iron-items'] || 0) * 600;
+    }
+    const priceMap = getPricingMap();
+    let total = 0;
+    Object.entries(breakdown || {}).forEach(([key, qty]) => {
+      total += (Number(qty) || 0) * (priceMap[key] || 0);
+    });
+    return total;
+  }
+
+  function onPricingChange() {
+    computeItemsBreakdown();
+    if (document.getElementById('wizard-panel-3')?.style.display !== 'none') renderOrderSummary();
   }
   function goToWizardStep(step) {
     document.querySelectorAll('.wizard-panel').forEach(p => p.style.display = 'none');
@@ -742,7 +852,8 @@ const HomePage = (() => {
       s.classList.toggle('completed', sNum < step);
     });
 
-    // Render order summary when reaching step 3
+    // Render pricing groups when reaching step 1, order summary on step 3
+    if (step === 1) renderPricingGroups();
     if (step === 3) renderOrderSummary();
   }
 
@@ -752,7 +863,7 @@ const HomePage = (() => {
     if (!wrap) return;
 
     const day = selectedPickupDate || new Date().toISOString().split('T')[0];
-    const time = document.getElementById('pickup-time')?.value || '';
+    const time = selectedPickupTime;
     const address = document.getElementById('pickup-address')?.value.trim() || '';
     const deliveryMode = document.getElementById('deliver-back-checkbox')?.checked;
     const deliveryAddr = deliveryMode
@@ -763,35 +874,32 @@ const HomePage = (() => {
     const dateLabel = new Date(day + 'T12:00:00').toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
     const { breakdown, total: itemsCount } = computeItemsBreakdown();
-
+    const priceMap = getPricingMap();
     const isSub = billingMode === 'subscription';
-    const svcCfg = servicesConfig?.[selectedService] || {};
-    const perItemPrice = svcCfg.pricePerItem || 900;
-    const subtotal = perItemPrice * itemsCount;
-    const total = isSub ? 0 : applyPromoDiscount(subtotal);
-
-    const catLabels = {
-      shirts: 'Shirts / Blouses',
-      trousers: 'Trousers / Jeans',
-      dresses: 'Dresses / Skirts',
-      suits: 'Suits / Jackets',
-      bedsheets: 'Bedsheets',
-      towels: 'Towels',
-      other: 'Other',
-    };
 
     let breakdownHtml = '';
+    let subtotal = 0;
     if (itemsCount > 0) {
-      const rows = Object.entries(breakdown)
-        .filter(([, count]) => count > 0)
-        .map(([key, count]) => {
-          const label = catLabels[key] || key;
-          const linePrice = count * perItemPrice;
-          return `<div class="order-summary__item-cat"><span>${label}</span><span>${count} × ₦${perItemPrice.toLocaleString('en-NG')} = ₦${linePrice.toLocaleString('en-NG')}</span></div>`;
-        })
-        .join('');
-      breakdownHtml = `<div class="order-summary__items-breakdown">${rows}</div>`;
+      if (selectedService === 'iron-only') {
+        subtotal = itemsCount * 600;
+        breakdownHtml = `<div class="order-summary__items-breakdown"><div class="order-summary__item-cat"><span>Iron Only</span><span>${itemsCount} × ₦600</span></div></div>`;
+      } else {
+        const rows = Object.entries(breakdown)
+          .filter(([, count]) => count > 0)
+          .map(([key, count]) => {
+            const p = itemPricing?.find(x => x.key === key);
+            const label = p?.name || key;
+            const unitPrice = p?.price || (priceMap[key] || 900);
+            const linePrice = count * unitPrice;
+            subtotal += linePrice;
+            return `<div class="order-summary__item-cat"><span>${label}</span><span>${count} × ₦${unitPrice.toLocaleString('en-NG')} = ₦${linePrice.toLocaleString('en-NG')}</span></div>`;
+          })
+          .join('');
+        breakdownHtml = `<div class="order-summary__items-breakdown">${rows}</div>`;
+      }
     }
+
+    const total = isSub ? 0 : applyPromoDiscount(subtotal);
 
     wrap.innerHTML = `
       <div class="order-summary__row">
@@ -816,10 +924,7 @@ const HomePage = (() => {
         <span class="order-summary__value">${isSub ? 'Monthly Plan' : 'Pay As You Go'}${isSub && itemsCount ? ` · ${itemsCount} items` : ''}</span>
       </div>
       ${!isSub ? `
-      <div class="order-summary__row">
-        <span class="order-summary__label">Items</span>
-        <span class="order-summary__value">${itemsCount} × ₦${perItemPrice.toLocaleString('en-NG')}</span>
-      </div>
+      ${breakdownHtml}
       ${appliedPromo ? `
       <div class="order-summary__row">
         <span class="order-summary__label">Discount</span>
@@ -831,7 +936,6 @@ const HomePage = (() => {
         <span class="order-summary__label">Total</span>
         <span class="order-summary__value">₦${total.toLocaleString('en-NG')}</span>
       </div>` : ''}
-      ${breakdownHtml}
     `;
   }
 
@@ -839,7 +943,7 @@ const HomePage = (() => {
     if (!user) return;
     const btn = document.getElementById('btn-schedule-confirm');
     const day = selectedPickupDate || new Date().toISOString().split('T')[0];
-    const time = document.getElementById('pickup-time').value;
+    const time = selectedPickupTime;
     const addressEl = document.getElementById('pickup-address');
     const notes = document.getElementById('pickup-notes').value.trim();
     const address = addressEl.value.trim();
@@ -856,16 +960,12 @@ const HomePage = (() => {
     }
 
     if (!time) {
-      const timeEl = document.getElementById('pickup-time');
-      if (timeEl) timeEl.focus();
       showToast('Please select a pickup time');
       return;
     }
 
     if (billingMode === 'payg' && (!itemsCount || itemsCount <= 0)) {
-      const firstInput = document.querySelector('.item-category-input');
-      if (firstInput) firstInput.focus();
-      showToast('Enter item quantities');
+      showToast('Add at least one item');
       return;
     }
 
@@ -882,10 +982,6 @@ const HomePage = (() => {
 
     if (billingMode === 'subscription') {
       let order;
-      const exceedsEl = document.getElementById('chk-exceeds-plan');
-      const extraEl = document.getElementById('extra-items-count');
-      const exceedsItems = exceedsEl?.checked;
-      const extraItemsCount = exceedsItems ? (parseInt(extraEl?.value) || 0) : null;
       try {
         order = await SpaccleDB.createOrder({
           userId: user.userId,
@@ -894,7 +990,6 @@ const HomePage = (() => {
           planId: subscription?.planId,
           itemsCount: Number(itemsCount) || null,
           itemsBreakdown,
-          extraItemsCount,
           pickupDay: day,
           pickupTime: time,
           address,
@@ -902,9 +997,6 @@ const HomePage = (() => {
           notes,
           amountPaid: null,
         });
-        if (document.getElementById('chk-recurring-pickup')?.checked) {
-          SpaccleDB.setRecurringPickup(user.userId, { dayOfWeek: new Date(day).getDay(), time, address, setAt: new Date().toISOString() }).catch(() => showToast('Could not save recurring pickup'));
-        }
       } catch (createErr) {
         showToast('Could not schedule: ' + (createErr?.message || 'unknown error'));
         setButtonLoading(btn, false);
@@ -914,14 +1006,13 @@ const HomePage = (() => {
         await SpaccleDB.consumeSubscription({ userId: user.userId, itemsCount });
       } catch (consumeErr) {
         if (consumeErr.message === 'NOT_ENOUGH_ITEMS') {
-          showToast('Not enough items remaining in your plan — reduce the count or check "Exceeds plan" for extra items');
+          showToast('Not enough items remaining in your plan — reduce the count or upgrade your plan');
         } else {
           console.warn('Order created but subscription consumption failed — admin may need to debit manually');
         }
       }
       document.getElementById('pickup-address').value = '';
       document.getElementById('pickup-notes').value = '';
-      if (document.getElementById('pickup-items')) document.getElementById('pickup-items').value = '';
       closeAllSheets();
       showToast('Pickup scheduled');
       selectedOrderId = order._id;
@@ -943,9 +1034,8 @@ const HomePage = (() => {
 
       await loadPaystack();
       const reference = `SPACCLE_PICKUP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
-      const svcCfg = servicesConfig?.[selectedService] || {};
-      const pricePerItem = svcCfg.pricePerItem || 900;
-      amountKobo = applyPromoDiscount(itemsCount * pricePerItem) * 100;
+      const amount = computePriceFromGroups(itemsBreakdown);
+      amountKobo = applyPromoDiscount(amount) * 100;
 
       if (amountKobo <= 0) {
         // Free order path
@@ -996,16 +1086,7 @@ const HomePage = (() => {
 
   async function placeOrder({ userId, day, time, address, deliveryAddress, notes, itemsCount, paystackRef = null }) {
     const { breakdown: itemsBreakdown } = computeItemsBreakdown();
-    const svcCfg = servicesConfig?.[selectedService] || {};
-    const pricePerItem = svcCfg.pricePerItem || 900;
-    const amountPaid = billingMode === 'payg' ? (Number(itemsCount) || 0) * pricePerItem : null;
-
-    const exceedsEl = document.getElementById('chk-exceeds-plan');
-    const extraEl   = document.getElementById('extra-items-count');
-    const recurringEl = document.getElementById('chk-recurring-pickup');
-    const exceedsItems = billingMode === 'subscription' && exceedsEl?.checked;
-    const extraItemsCount = exceedsItems ? (parseInt(extraEl?.value) || 0) : null;
-    const recurring = billingMode === 'subscription' && recurringEl?.checked;
+    const amountPaid = billingMode === 'payg' ? computePriceFromGroups(itemsBreakdown) : null;
 
     const order = await SpaccleDB.createOrder({
       userId,
@@ -1021,20 +1102,11 @@ const HomePage = (() => {
       notes,
       paystackRef,
       amountPaid,
-      exceedsItems,
-      extraItemsCount,
-      recurring,
     });
-
-    if (recurring && billingMode === 'subscription') {
-      SpaccleDB.setRecurringPickup(userId, { dayOfWeek: new Date(day).getDay(), time, address, setAt: new Date().toISOString() })
-        .catch(() => showToast('Could not save recurring pickup'));
-    }
 
     const btn = document.getElementById('btn-schedule-confirm');
     document.getElementById('pickup-address').value = '';
     document.getElementById('pickup-notes').value = '';
-    if (document.getElementById('pickup-items')) document.getElementById('pickup-items').value = '';
     closeAllSheets();
     showToast('Pickup scheduled');
     selectedOrderId = order._id;
@@ -1085,14 +1157,12 @@ const HomePage = (() => {
 
   function serviceName(service) {
     const names = {
-      'wash-fold':  'Wash, Iron & Fold',
-      'dry-clean':  'Dry Cleaning',
-      'iron-press': 'Iron & Press',
-      'duvet':      'Duvet & Bedding',
-      'alteration': 'Clothes Alteration / Repair',
-      'shoe-clean': 'Shoe Cleaning',
+      'regular-laundry':    'Regular Laundry',
+      'specialty-dry-clean':'Specialty Dry Cleaning',
+      'iron-only':          'Iron Only',
+      'specialty-items':    'Specialty Items',
     };
-    return names[service] || 'Laundry Service';
+    return names[service] || 'Regular Laundry';
   }
 
   function statusLabel(status) {
@@ -1492,27 +1562,15 @@ const HomePage = (() => {
     // For subscription users items count is optional (no validation), for PAYG it's required
     if (itemsGroup) itemsGroup.style.display = '';
 
-    const exceedGroup = document.getElementById('exceed-plan-group');
-    if (exceedGroup) exceedGroup.style.display = isSub ? '' : 'none';
-    const recurringGroup = document.getElementById('recurring-pickup-group');
-    if (recurringGroup) recurringGroup.style.display = isSub ? '' : 'none';
-
-    const rateHint = document.getElementById('items-payg-rate');
-    if (rateHint) {
-      rateHint.style.display = isSub ? 'none' : '';
-      const svcCfg = servicesConfig?.[selectedService] || {};
-      rateHint.textContent = svcCfg.display || '₦900/item';
-    }
-    const itemsLabel = document.getElementById('items-count-label');
-    if (itemsLabel) itemsLabel.textContent = 'Number of items';
+    // Subscription upsell — visible only for non-subscribed users
+    const upsell = document.getElementById('sub-upsell');
+    if (upsell) upsell.style.display = isSub ? 'none' : '';
 
     // Promo visible only for PAYG
-    ['promo-group', 'promo-group-step3'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = isSub ? 'none' : '';
-    });
+    const promoGroup = document.getElementById('promo-group');
+    if (promoGroup) promoGroup.style.display = isSub ? 'none' : '';
 
-    updateItemTotalPrice(computeItemsBreakdown().total);
+    computeItemsBreakdown();
 
     if (billingMode === 'subscription' && user) {
       subscription = await SpaccleDB.getSubscription(user.userId);
@@ -2503,15 +2561,7 @@ const HomePage = (() => {
     document.querySelectorAll('.service-pill').forEach(p =>
       p.classList.toggle('active', p.dataset.service === selectedService));
     billingMode = order.billingMode || 'payg';
-    // Restore breakdown if present
-    document.querySelectorAll('.item-category-input').forEach(inp => inp.value = '0');
-    if (order.itemsBreakdown) {
-      Object.entries(order.itemsBreakdown).forEach(([cat, count]) => {
-        const inp = document.querySelector(`.item-category-input[data-category="${cat}"]`);
-        if (inp && count > 0) inp.value = String(count);
-      });
-    }
-    computeItemsBreakdown();
+    pendingItemsBreakdown = order.itemsBreakdown || null;
     buildDatePicker();
     updateBillingUI();
     openSheet('sheet-schedule');
@@ -2519,10 +2569,10 @@ const HomePage = (() => {
     loadSavedAddresses();
     setTimeout(() => {
       const addrEl = document.getElementById('pickup-address');
-      const timeEl = document.getElementById('pickup-time');
       if (addrEl && order.address) addrEl.value = order.address;
-      if (timeEl && order.pickupTime) {
-        Array.from(timeEl.options).forEach(o => { if (o.value === order.pickupTime) o.selected = true; });
+      if (order.pickupTime) {
+        selectedPickupTime = order.pickupTime;
+        buildTimeChips();
       }
     }, 100);
   }
@@ -2571,39 +2621,6 @@ const HomePage = (() => {
         ? `${promo.value}% off`
         : `₦${Number(promo.value).toLocaleString('en-NG')} off`;
       if (statusEl) { statusEl.textContent = `✓ ${discountText} applied`; statusEl.style.color = '#2E7D32'; }
-      // Sync to step 3
-      const input3 = document.getElementById('promo-input-3');
-      const status3 = document.getElementById('promo-status-3');
-      if (input3) input3.value = code;
-      if (status3) { status3.textContent = statusEl.textContent; status3.style.color = statusEl.style.color; }
-      showToast(`Promo applied — ${discountText}`);
-    } catch {
-      if (statusEl) { statusEl.textContent = 'Could not validate code'; statusEl.style.color = '#E53935'; }
-    }
-  }
-
-  async function handleApplyPromoStep3() {
-    const input = document.getElementById('promo-input-3');
-    const code = input?.value.trim().toUpperCase();
-    const statusEl = document.getElementById('promo-status-3');
-    if (!code) return;
-    try {
-      const promo = await SpaccleDB.validatePromoCode(code);
-      if (!promo) {
-        if (statusEl) { statusEl.textContent = 'Invalid or expired code'; statusEl.style.color = '#E53935'; }
-        appliedPromo = null;
-        return;
-      }
-      appliedPromo = promo;
-      const discountText = promo.discountType === 'percent'
-        ? `${promo.value}% off`
-        : `₦${Number(promo.value).toLocaleString('en-NG')} off`;
-      if (statusEl) { statusEl.textContent = `✓ ${discountText} applied`; statusEl.style.color = '#2E7D32'; }
-      // Sync back to step 2
-      const input2 = document.getElementById('promo-input');
-      const status2 = document.getElementById('promo-status');
-      if (input2) input2.value = code;
-      if (status2) { status2.textContent = statusEl.textContent; status2.style.color = statusEl.style.color; }
       renderOrderSummary();
       showToast(`Promo applied — ${discountText}`);
     } catch {
