@@ -302,34 +302,31 @@ const HomePage = (() => {
       }
     } catch { pillsEl.style.display = 'none'; }
 
-    // Show "Save address" button when user types something not already saved
     // Clone to remove any previously-attached listeners from earlier sheet opens
     const freshInput = addrInput.cloneNode(true);
     addrInput.replaceWith(freshInput);
     addrInput = freshInput;
     initPlaceAutocomplete(addrInput);
-    freshInput.addEventListener('input', () => {
-      if (saveBtn) saveBtn.style.display = freshInput.value.trim() ? '' : 'none';
-    });
+    // Auto-save address on blur if it looks like a new address
+    freshInput.addEventListener('blur', () => autoSaveAddress(freshInput));
+  }
 
-    if (saveBtn) {
-      saveBtn.onclick = async () => {
-        const raw = freshInput.value.trim();
-        if (!raw) return;
-        const parts = raw.split(',').map(s => s.trim());
-        try {
-          await SpaccleDB.saveAddress(user?.userId || user?._id, {
-            street: parts[0] || raw,
-            city: parts.slice(1).join(', ') || '',
-            label: raw.slice(0, 30),
-            isDefault: false,
-          });
-          saveBtn.style.display = 'none';
-          showToast('Address saved');
-          loadSavedAddresses();
-        } catch { showToast('Could not save address'); }
-      };
-    }
+  async function autoSaveAddress(input) {
+    if (!user) return;
+    const raw = input?.value.trim();
+    if (!raw || raw.length < 5) return;
+    try {
+      const addrs = await SpaccleDB.getAddresses(user.userId || user._id);
+      const exists = addrs?.some(a => raw.includes(a.street) || a.street.includes(raw));
+      if (exists) return;
+      const parts = raw.split(',').map(s => s.trim());
+      await SpaccleDB.saveAddress(user.userId || user._id, {
+        street: parts[0] || raw,
+        city: parts.slice(1).join(', ') || '',
+        label: raw.slice(0, 30),
+        isDefault: !addrs?.length,
+      });
+    } catch { /* silent — non-critical */ }
   }
 
   function buildDatePicker() {
@@ -476,7 +473,6 @@ const HomePage = (() => {
     });
     document.getElementById('btn-open-subscribe')?.addEventListener('click', openSubscriptionSheet);
     document.getElementById('btn-sub-upsell')?.addEventListener('click', openSubscriptionSheet);
-    document.getElementById('btn-subscribe-pay').addEventListener('click', handleSubscribePay);
 
     document.getElementById('btn-order-track').addEventListener('click', () => {
       closeAllSheets();
@@ -981,6 +977,11 @@ const HomePage = (() => {
       const { breakdown } = computeItemsBreakdown();
       pendingItemsBreakdown = breakdown;
     }
+    // Auto-save address when leaving step 2
+    if (step !== 2 && document.getElementById('wizard-panel-2')?.style.display !== 'none') {
+      const addrInput = document.getElementById('pickup-address');
+      if (addrInput) autoSaveAddress(addrInput);
+    }
 
     document.querySelectorAll('.wizard-panel').forEach(p => p.style.display = 'none');
     const panel = document.getElementById(`wizard-panel-${step}`);
@@ -1062,10 +1063,11 @@ const HomePage = (() => {
         <span class="order-summary__value">${isSub ? 'Monthly Plan' : 'Pay As You Go'}${isSub && itemsCount ? ` · ${itemsCount} items` : ''}</span>
       </div>
       ${!isSub && breakdownRows ? `
-      <div class="order-summary__breakdown-toggle">
-        <button class="btn btn--ghost btn--sm breakdown-toggle-btn" type="button">Show price breakdown</button>
+      <div class="order-summary__breakdown-toggle" id="bd-toggle">
+        <span class="order-summary__label">Price breakdown</span>
+        <svg class="bd-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="order-summary__items-breakdown" style="display:none">${breakdownRows}</div>
+      <div class="order-summary__items-breakdown" id="bd-body" style="display:none">${breakdownRows}</div>
       ${appliedPromo ? `
       <div class="order-summary__row">
         <span class="order-summary__label">Discount</span>
@@ -1079,16 +1081,15 @@ const HomePage = (() => {
       </div>` : ''}
     `;
 
-    // Wire toggle button
-    const toggleBtn = wrap.querySelector('.breakdown-toggle-btn');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        const bd = toggleBtn.parentElement.nextElementSibling;
-        if (bd && bd.classList.contains('order-summary__items-breakdown')) {
-          const hidden = bd.style.display === 'none';
-          bd.style.display = hidden ? '' : 'none';
-          toggleBtn.textContent = hidden ? 'Hide price breakdown' : 'Show price breakdown';
-        }
+    // Wire breakdown toggle
+    const bdToggle = wrap.querySelector('#bd-toggle');
+    const bdBody = wrap.querySelector('#bd-body');
+    if (bdToggle && bdBody) {
+      bdToggle.style.cursor = 'pointer';
+      bdToggle.addEventListener('click', () => {
+        const hidden = bdBody.style.display === 'none';
+        bdBody.style.display = hidden ? '' : 'none';
+        bdToggle.querySelector('.bd-chevron').style.transform = hidden ? 'rotate(180deg)' : '';
       });
     }
   }
@@ -1832,7 +1833,6 @@ const HomePage = (() => {
     const manageCard = document.getElementById('sub-manage-card');
     const wrap = document.getElementById('sub-plan-cards');
     const titleEl = document.getElementById('sheet-subscription-title');
-    const payBtn = document.getElementById('btn-subscribe-pay');
     const cancelBtn = document.getElementById('btn-subscribe-cancel');
     if (!wrap) return;
     const allPlans = await SpaccleDB.listPlans({ includeInactive: false });
@@ -1877,12 +1877,10 @@ const HomePage = (() => {
             </div>
           </div>`;
       }
-      if (payBtn) payBtn.querySelector('.btn__label').textContent = 'Change Plan';
       if (cancelBtn) cancelBtn.style.display = '';
     } else {
       if (current) current.textContent = 'No active subscription.';
       if (manageCard) manageCard.style.display = 'none';
-      if (payBtn) payBtn.querySelector('.btn__label').textContent = 'Subscribe';
       if (cancelBtn) cancelBtn.style.display = 'none';
     }
 
@@ -1931,7 +1929,7 @@ const HomePage = (() => {
       btn.appendChild(right);
       btn.addEventListener('click', () => {
         selectedSubPlanId = plan._id;
-        Array.from(wrap.querySelectorAll('.plan-card')).forEach(x => x.classList.toggle('active', x.dataset.planId === selectedSubPlanId));
+        handleSubscribePay();
       });
       wrap.appendChild(btn);
     });
@@ -1940,19 +1938,16 @@ const HomePage = (() => {
   async function handleSubscribePay() {
     if (!user) return;
     const freshSub = await SpaccleDB.getSubscription(user.userId);
-    const btn = document.getElementById('btn-subscribe-pay');
     const allPlans = await SpaccleDB.listPlans({ includeInactive: false });
     const selected = allPlans.find(p => p._id === selectedSubPlanId);
     if (!selected) { showToast('Select a plan'); return; }
 
     // If already subscribed, change plan directly without payment
     if (freshSub?.status === 'active') {
-      setButtonLoading(btn, true);
       try {
         const currentPlan = freshSub.planId || freshSub.planName || '';
         if (selected._id === currentPlan || selected.name === currentPlan) {
           showToast('Already on this plan');
-          setButtonLoading(btn, false);
           return;
         }
         await SpaccleDB.setSubscription({ userId: user.userId, planId: selected._id, useWaitlistPrice: true });
@@ -1961,12 +1956,9 @@ const HomePage = (() => {
         showToast(`Changed to ${selected.name || 'new plan'}`);
       } catch {
         showToast('Could not change plan');
-        setButtonLoading(btn, false);
       }
       return;
     }
-
-    setButtonLoading(btn, true);
 
     let handler;
     try {
@@ -2004,18 +1996,15 @@ const HomePage = (() => {
         },
         onClose: function() {
           showToast('Payment closed');
-          setButtonLoading(btn, false);
         },
       });
     } catch (err) {
       showToast('Could not subscribe: ' + (err?.message || 'unknown error'));
-      setButtonLoading(btn, false);
       return;
     }
 
     // Open iframe OUTSIDE try/finally so finally does not immediately re-enable the button
     handler.openIframe();
-    // button loading cleared in callback/onClose
   }
 
   function normalizeDbName(name) {

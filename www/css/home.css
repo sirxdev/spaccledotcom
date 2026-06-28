@@ -1151,20 +1151,6 @@ body.dark .nav-badge--payg { background: #E65100; color: #FFF3E0; }
   color: var(--primary);
 }
 
-.save-address-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--primary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
 /* ── Sheets (Schedule / Order / Support) ─────────────────────────── */
 .sheet-overlay {
   position: absolute;
@@ -2371,6 +2357,21 @@ body.dark .offline-banner { background: #2A1A00; border-color: #5A3800; color: #
   color: var(--text-1);
   text-align: right;
   font-weight: 500;
+}
+
+/* ── Subtle price breakdown toggle ──────────────────────────── */
+.order-summary__breakdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0 4px;
+  font-size: 12px;
+  color: var(--text-2);
+  user-select: none;
+}
+.order-summary__breakdown-toggle .bd-chevron {
+  transition: transform 0.2s ease;
+  color: var(--text-3);
 }
 
 .order-summary__items-breakdown {
