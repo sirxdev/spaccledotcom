@@ -764,6 +764,27 @@
 /* Hide active indicator for center FAB */
 .bottom-nav__item--center::after { display: none; }
 
+.nav-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 99px;
+  vertical-align: super;
+  margin-left: 2px;
+  line-height: 1.4;
+}
+.nav-badge--sub {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+.nav-badge--payg {
+  background: #FFF3E0;
+  color: #E65100;
+}
+body.dark .nav-badge--sub { background: #1B5E20; color: #C8E6C9; }
+body.dark .nav-badge--payg { background: #E65100; color: #FFF3E0; }
+
 @media (min-width: 600px) {
   .services-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -2472,6 +2493,19 @@ body.dark .offline-banner { background: #2A1A00; border-color: #5A3800; color: #
   padding: 6px 2px 0;
   line-height: 1.4;
 }
+
+/* ── Step 1 estimated total ─────────────────────────────────── */
+.pricing-total {
+  text-align: right;
+  padding: 12px 0 8px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.pricing-total strong {
+  font-size: 18px;
+  color: #1C1B3A;
+}
+body.dark .pricing-total strong { color: var(--text-1); }
 
 /* ── Pricing group contextual help tooltip ──────────────────── */
 .pricing-group__name-wrap {

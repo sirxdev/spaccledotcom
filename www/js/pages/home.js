@@ -14,7 +14,7 @@ const HomePage = (() => {
   let refreshTimer = null;
   let unsubscribeSync = null;
   let selectedPickupDate = null;
-  let selectedPickupTime = '2:00 PM – 4:00 PM';
+  let selectedPickupTime = null;
   let servicesConfig = null;
   let itemPricing = null;
   let pendingItemsBreakdown = null;
@@ -387,9 +387,9 @@ const HomePage = (() => {
     if (isToday) {
       const cutoff = new Date(now.getTime() + MIN_LEAD_HOURS * 60 * 60 * 1000);
       availableSlots = TIME_SLOTS.filter(slot => {
-        const slotEnd = new Date(now);
-        slotEnd.setHours(slot.endHour, 0, 0, 0);
-        return slotEnd > cutoff;
+        const slotStart = new Date(now);
+        slotStart.setHours(slot.startHour, 0, 0, 0);
+        return slotStart > cutoff;
       });
       // If no slots remain today, auto-advance to tomorrow
       if (availableSlots.length === 0) {
@@ -558,14 +558,20 @@ const HomePage = (() => {
     document.querySelectorAll('.wizard-back').forEach(btn => {
       btn.addEventListener('click', () => goToWizardStep(parseInt(btn.dataset.prev)));
     });
-    // Click completed step indicators to jump back
+    // Click step indicators to navigate — validate current step before advancing
     document.querySelectorAll('.wizard-step').forEach(step => {
       step.addEventListener('click', () => {
         const sNum = parseInt(step.dataset.step);
-        // Only allow jumping to completed or current steps
-        if (step.classList.contains('completed') || step.classList.contains('active')) {
-          goToWizardStep(sNum);
+        // Determine current visible step from panels
+        let currentStep = 1;
+        for (let i = 1; i <= 3; i++) {
+          const p = document.getElementById(`wizard-panel-${i}`);
+          if (p && p.style.display !== 'none') { currentStep = i; break; }
         }
+        // Going back — always allowed
+        if (sNum < currentStep) { goToWizardStep(sNum); return; }
+        // Going forward — validate current step first
+        if (validateStep(currentStep)) goToWizardStep(sNum);
       });
       step.style.cursor = 'pointer';
     });
@@ -907,7 +913,20 @@ const HomePage = (() => {
   function onPricingChange() {
     computeItemsBreakdown();
     if (document.getElementById('wizard-panel-3')?.style.display !== 'none') renderOrderSummary();
+    updateStepTotal();
     updateUpgradePrompt();
+  }
+
+  function updateStepTotal() {
+    const el = document.getElementById('step1-total');
+    if (!el) return;
+    if (billingMode === 'subscription') { el.style.display = 'none'; return; }
+    const { breakdown, total: itemsCount } = computeItemsBreakdown();
+    if (itemsCount <= 0) { el.style.display = 'none'; return; }
+    const subtotal = computePriceFromGroups(breakdown);
+    const finalTotal = applyPromoDiscount(subtotal);
+    el.style.display = '';
+    el.innerHTML = `Estimated Total: <strong>₦${finalTotal.toLocaleString('en-NG')}</strong>`;
   }
 
   function updateUpgradePrompt() {
@@ -957,6 +976,12 @@ const HomePage = (() => {
   }
 
   function goToWizardStep(step) {
+    // Save current breakdown before leaving step 1
+    if (step !== 1 && document.getElementById('wizard-panel-1')?.style.display !== 'none') {
+      const { breakdown } = computeItemsBreakdown();
+      pendingItemsBreakdown = breakdown;
+    }
+
     document.querySelectorAll('.wizard-panel').forEach(p => p.style.display = 'none');
     const panel = document.getElementById(`wizard-panel-${step}`);
     if (panel) panel.style.display = '';
@@ -970,6 +995,7 @@ const HomePage = (() => {
     // Render pricing groups when reaching step 1, order summary on step 3
     if (step === 1) renderPricingGroups();
     if (step === 3) renderOrderSummary();
+    updateStepTotal();
   }
 
   /* ── Order summary ──────────────────────────────────────────────── */
@@ -994,10 +1020,10 @@ const HomePage = (() => {
     const categories = deriveServiceCategories(breakdown);
     const catLabel = serviceName(categories);
 
-    let breakdownHtml = '';
     let subtotal = 0;
+    let breakdownRows = '';
     if (itemsCount > 0) {
-      const rows = Object.entries(breakdown)
+      breakdownRows = Object.entries(breakdown)
         .filter(([, count]) => count > 0)
         .map(([key, count]) => {
           const p = key === 'iron-items' ? null : itemPricing?.find(x => x.key === key);
@@ -1008,10 +1034,10 @@ const HomePage = (() => {
           return `<div class="order-summary__item-cat"><span>${label}</span><span>${count} × ₦${unitPrice.toLocaleString('en-NG')} = ₦${linePrice.toLocaleString('en-NG')}</span></div>`;
         })
         .join('');
-      breakdownHtml = `<div class="order-summary__items-breakdown">${rows}</div>`;
     }
 
     const total = isSub ? 0 : applyPromoDiscount(subtotal);
+    const breakdownId = 'review-bd-' + Date.now();
 
     wrap.innerHTML = `
       <div class="order-summary__row">
@@ -1035,8 +1061,11 @@ const HomePage = (() => {
         <span class="order-summary__label">Billing</span>
         <span class="order-summary__value">${isSub ? 'Monthly Plan' : 'Pay As You Go'}${isSub && itemsCount ? ` · ${itemsCount} items` : ''}</span>
       </div>
-      ${!isSub ? `
-      ${breakdownHtml}
+      ${!isSub && breakdownRows ? `
+      <div class="order-summary__breakdown-toggle">
+        <button class="btn btn--ghost btn--sm breakdown-toggle-btn" type="button">Show price breakdown</button>
+      </div>
+      <div class="order-summary__items-breakdown" style="display:none">${breakdownRows}</div>
       ${appliedPromo ? `
       <div class="order-summary__row">
         <span class="order-summary__label">Discount</span>
@@ -1049,6 +1078,19 @@ const HomePage = (() => {
         <span class="order-summary__value">₦${total.toLocaleString('en-NG')}</span>
       </div>` : ''}
     `;
+
+    // Wire toggle button
+    const toggleBtn = wrap.querySelector('.breakdown-toggle-btn');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const bd = toggleBtn.parentElement.nextElementSibling;
+        if (bd && bd.classList.contains('order-summary__items-breakdown')) {
+          const hidden = bd.style.display === 'none';
+          bd.style.display = hidden ? '' : 'none';
+          toggleBtn.textContent = hidden ? 'Hide price breakdown' : 'Show price breakdown';
+        }
+      });
+    }
   }
 
   async function handleScheduleConfirm() {
@@ -1691,6 +1733,18 @@ const HomePage = (() => {
         document.getElementById('btn-upgrade-prompt')?.addEventListener('click', openSubscriptionSheet);
       } else {
         upgradeEl.style.display = 'none';
+      }
+    }
+
+    // Navbar billing badge
+    const navBadge = document.getElementById('nav-billing-badge');
+    if (navBadge) {
+      if (isSub) {
+        navBadge.textContent = 'Plan';
+        navBadge.className = 'nav-badge nav-badge--sub';
+      } else {
+        navBadge.textContent = 'PAYG';
+        navBadge.className = 'nav-badge nav-badge--payg';
       }
     }
   }
