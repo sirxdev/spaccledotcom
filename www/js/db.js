@@ -302,7 +302,7 @@ async function ensureAdminUser({ email, password, name }) {
     return `SP-${short.toUpperCase()}`;
   }
 
-  async function createOrder({ userId, service, billingMode = 'payg', planId = null, itemsCount = null, itemsBreakdown = null, pickupDay, pickupTime, address, deliveryAddress, notes, paystackRef = null, amountPaid = null, exceedsItems = false, extraItemsCount = null, recurring = false }) {
+  async function createOrder({ userId, service, serviceCategories = null, billingMode = 'payg', planId = null, itemsCount = null, itemsBreakdown = null, pickupDay, pickupTime, address, deliveryAddress, notes, paystackRef = null, amountPaid = null, exceedsItems = false, extraItemsCount = null, recurring = false }) {
     if (!userId) throw new Error('MISSING_USER');
     const nowIso = new Date().toISOString();
     const _id = generateOrderId(userId);
@@ -317,6 +317,7 @@ async function ensureAdminUser({ email, password, name }) {
       userId,
       publicId,
       service,
+      serviceCategories,
       planId,
       billingMode,
       itemsCount,
@@ -734,6 +735,7 @@ async function listAllUsers() {
       { key: 'everyday-clothing', name: 'Everyday Clothing',      price: 900,  unit: 'item' },
       { key: 'dresses-gowns',     name: 'Dresses & Gowns',        price: 2500, unit: 'item' },
       { key: 'bedding',           name: 'Bedding',                price: 1500, unit: 'item' },
+      { key: 'underwear',         name: 'Underwear',              price: 400,  unit: 'item' },
       { key: 'shoes',             name: 'Shoes',                  price: 2000, unit: 'pair' },
       { key: 'bags',              name: 'Bags',                   price: 3500, unit: 'item' },
       { key: 'curtains',          name: 'Curtains',               price: 3000, unit: 'panel' },

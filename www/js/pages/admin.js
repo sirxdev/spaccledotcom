@@ -2288,14 +2288,19 @@ function init(data = {}) {
   }
 
   function serviceLabel(s) {
-    return ({
+    const keys = {
       'wash-fold':  'Wash, Iron & Fold',
       'dry-clean':  'Dry Cleaning',
       'iron-press': 'Iron & Press',
       'duvet':      'Duvet & Bedding',
       'alteration': 'Alterations',
       'shoe-clean': 'Shoe Cleaning',
-    })[s] || s || 'Service';
+      'laundry':    'Laundry',
+      'specialty-items': 'Specialty Items',
+      'iron-only':  'Iron Only',
+    };
+    if (Array.isArray(s)) return s.map(k => keys[k] || k).join(', ') || 'Service';
+    return keys[s] || s || 'Service';
   }
 
   function statusLabel(s) {

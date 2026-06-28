@@ -81,7 +81,7 @@ const StaffPage = (() => {
 
     let breakdownHtml = '';
     if (order.itemsBreakdown) {
-      const catLabels = { shirts:'Shirts', trousers:'Trousers', dresses:'Dresses', suits:'Suits', bedsheets:'Bedsheets', towels:'Towels', other:'Other', 'everyday-clothing':'Everyday Clothing', 'dresses-gowns':'Dresses & Gowns', 'bedding':'Bedding', 'shoes':'Shoes', 'bags':'Bags', 'curtains':'Curtains', 'rugs':'Rugs', 'other-specialty':'Other Specialty', 'iron-items':'Iron Only' };
+      const catLabels = { shirts:'Shirts', trousers:'Trousers', dresses:'Dresses', suits:'Suits', bedsheets:'Bedsheets', towels:'Towels', other:'Other', 'everyday-clothing':'Everyday Clothing', 'dresses-gowns':'Dresses & Gowns', 'bedding':'Bedding', 'underwear':'Underwear', 'shoes':'Shoes', 'bags':'Bags', 'curtains':'Curtains', 'rugs':'Rugs', 'other-specialty':'Other Specialty', 'iron-items':'Iron Only' };
       const parts = Object.entries(order.itemsBreakdown).filter(([,c]) => c > 0).map(([k,c]) => `${catLabels[k]||k}: ${c}`);
       if (parts.length) breakdownHtml = `<div class="staff-card__row">📦 ${parts.join(', ')}</div>`;
     }

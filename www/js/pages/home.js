@@ -4,7 +4,6 @@ const HomePage = (() => {
   let activeTab = 'home';
   let user = null;
   let initialized = false;
-  let selectedService = 'regular-laundry';
   let selectedPlanId = null;
   let selectedSubPlanId = null;
   let billingMode = 'payg';
@@ -19,6 +18,12 @@ const HomePage = (() => {
   let servicesConfig = null;
   let itemPricing = null;
   let pendingItemsBreakdown = null;
+
+  const CATEGORY_SECTIONS = [
+    { name: 'Laundry', groups: ['everyday-clothing', 'dresses-gowns', 'bedding', 'underwear'] },
+    { name: 'Specialty Items', groups: ['shoes', 'bags', 'curtains', 'rugs', 'other-specialty'] },
+  ];
+  const ALL_PRICING_GROUP_KEYS = CATEGORY_SECTIONS.flatMap(s => s.groups);
 
   function init(data = {}) {
     user = data.user || SpaccleDB.getSession();
@@ -199,7 +204,7 @@ const HomePage = (() => {
 
 
     document.querySelectorAll('.service-card').forEach(card => {
-      card.addEventListener('click', () => handleNewOrder(card.dataset.service));
+      card.addEventListener('click', handleNewOrder);
     });
 
     document.getElementById('btn-open-profile-info').addEventListener('click', openProfileInfo);
@@ -217,13 +222,10 @@ const HomePage = (() => {
     });
   }
 
-  async function handleNewOrder(service) {
+  async function handleNewOrder() {
     supportOrderId = null;
     billingMode = 'payg';
     appliedPromo = null;
-    selectedService = service || 'regular-laundry';
-    document.querySelectorAll('.service-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.service === selectedService));
     const promoInput = document.getElementById('promo-input');
     if (promoInput) promoInput.value = '';
     const promoStatus = document.getElementById('promo-status');
@@ -410,15 +412,6 @@ const HomePage = (() => {
     document.getElementById('btn-profile-payment-close').addEventListener('click', closeAllSheets);
     document.getElementById('btn-profile-notifications-close').addEventListener('click', closeAllSheets);
     document.getElementById('btn-profile-settings-close').addEventListener('click', closeAllSheets);
-
-    document.querySelectorAll('.service-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        selectedService = pill.dataset.service;
-        document.querySelectorAll('.service-pill').forEach(p => p.classList.toggle('active', p === pill));
-        renderPricingGroups();
-        if (document.getElementById('wizard-panel-3')?.style.display !== 'none') renderOrderSummary();
-      });
-    });
 
     document.getElementById('btn-schedule-confirm').addEventListener('click', handleScheduleConfirm);
     document.getElementById('deliver-back-checkbox').addEventListener('change', e => {
@@ -678,81 +671,87 @@ const HomePage = (() => {
   }
 
   /* ── Pricing groups ──────────────────────────────────────────── */
-  const SERVICE_PRICING_GROUPS = {
-    'regular-laundry': ['everyday-clothing', 'dresses-gowns', 'bedding'],
-    'specialty-dry-clean': ['everyday-clothing', 'dresses-gowns', 'bedding'],
-    'iron-only': [],
-    'specialty-items': ['shoes', 'bags', 'curtains', 'rugs', 'other-specialty'],
-  };
-
   function getPricingMap() {
     const map = {};
     if (itemPricing) itemPricing.forEach(p => { map[p.key] = p.price; });
     return map;
   }
 
+  function buildSectionRow(key) {
+    const p = itemPricing?.find(x => x.key === key);
+    if (!p) return null;
+    const row = document.createElement('div');
+    row.className = 'pricing-group';
+    row.innerHTML = `
+      <div class="pricing-group__info">
+        <div class="pricing-group__name">${p.name}</div>
+        <div class="pricing-group__price">₦${Number(p.price).toLocaleString('en-NG')}/${p.unit}</div>
+      </div>
+      <div class="pricing-group__stepper">
+        <button class="stepper-btn stepper-btn--minus" data-minus="${key}">−</button>
+        <span class="stepper-value" data-value="${key}">0</span>
+        <button class="stepper-btn stepper-btn--plus" data-plus="${key}">+</button>
+      </div>
+      <span class="pricing-group__subtotal" data-subtotal="${key}">₦0</span>`;
+    row.querySelector(`[data-minus="${key}"]`).addEventListener('click', () => {
+      const valEl = row.querySelector(`[data-value="${key}"]`);
+      const v = Math.max(0, (parseInt(valEl.textContent) || 0) - 1);
+      valEl.textContent = v;
+      updateGroupSubtotal(key, v, p.price);
+      onPricingChange();
+    });
+    row.querySelector(`[data-plus="${key}"]`).addEventListener('click', () => {
+      const valEl = row.querySelector(`[data-value="${key}"]`);
+      const v = (parseInt(valEl.textContent) || 0) + 1;
+      valEl.textContent = v;
+      updateGroupSubtotal(key, v, p.price);
+      onPricingChange();
+    });
+    return row;
+  }
+
   function renderPricingGroups() {
     const container = document.getElementById('pricing-groups');
     if (!container) return;
-    const groups = SERVICE_PRICING_GROUPS[selectedService] || [];
     container.innerHTML = '';
 
-    if (selectedService === 'iron-only') {
-      container.innerHTML = `
-        <div class="iron-only-stepper">
-          <button class="stepper-btn stepper-btn--minus" data-iron-minus>-</button>
-          <span class="stepper-value" id="iron-count">0</span>
-          <button class="stepper-btn stepper-btn--plus" data-iron-plus>+</button>
-          <span style="font-size:13px;color:var(--text-2);margin-left:8px">× ₦600/item</span>
-        </div>`;
-      container.querySelector('[data-iron-minus]').addEventListener('click', () => {
-        const el = document.getElementById('iron-count');
-        const v = Math.max(0, (parseInt(el.textContent) || 0) - 1);
-        el.textContent = v;
-        onPricingChange();
+    CATEGORY_SECTIONS.forEach(section => {
+      const hasGroup = section.groups.some(k => itemPricing?.some(p => p.key === k));
+      if (!hasGroup) return;
+      const header = document.createElement('div');
+      header.className = 'pricing-section__header';
+      header.textContent = section.name;
+      container.appendChild(header);
+      section.groups.forEach(key => {
+        const row = buildSectionRow(key);
+        if (row) container.appendChild(row);
       });
-      container.querySelector('[data-iron-plus]').addEventListener('click', () => {
-        const el = document.getElementById('iron-count');
-        el.textContent = (parseInt(el.textContent) || 0) + 1;
-        onPricingChange();
-      });
-      restorePendingBreakdown();
-      return;
-    }
-
-    const priceMap = getPricingMap();
-    groups.forEach(key => {
-      const p = itemPricing?.find(x => x.key === key);
-      if (!p) return;
-      const row = document.createElement('div');
-      row.className = 'pricing-group';
-      row.innerHTML = `
-        <div class="pricing-group__info">
-          <div class="pricing-group__name">${p.name}</div>
-          <div class="pricing-group__price">₦${Number(p.price).toLocaleString('en-NG')}/${p.unit}</div>
-        </div>
-        <div class="pricing-group__stepper">
-          <button class="stepper-btn stepper-btn--minus" data-minus="${key}">−</button>
-          <span class="stepper-value" data-value="${key}">0</span>
-          <button class="stepper-btn stepper-btn--plus" data-plus="${key}">+</button>
-        </div>
-        <span class="pricing-group__subtotal" data-subtotal="${key}">₦0</span>`;
-      row.querySelector(`[data-minus="${key}"]`).addEventListener('click', () => {
-        const valEl = row.querySelector(`[data-value="${key}"]`);
-        const v = Math.max(0, (parseInt(valEl.textContent) || 0) - 1);
-        valEl.textContent = v;
-        updateGroupSubtotal(key, v, p.price);
-        onPricingChange();
-      });
-      row.querySelector(`[data-plus="${key}"]`).addEventListener('click', () => {
-        const valEl = row.querySelector(`[data-value="${key}"]`);
-        const v = (parseInt(valEl.textContent) || 0) + 1;
-        valEl.textContent = v;
-        updateGroupSubtotal(key, v, p.price);
-        onPricingChange();
-      });
-      container.appendChild(row);
     });
+
+    // Iron Only — flat rate stepper
+    const ironSection = document.createElement('div');
+    ironSection.className = 'pricing-section__header';
+    ironSection.textContent = 'Iron Only';
+    container.appendChild(ironSection);
+    const ironWrap = document.createElement('div');
+    ironWrap.className = 'iron-only-stepper';
+    ironWrap.innerHTML = `
+      <button class="stepper-btn stepper-btn--minus" data-iron-minus>-</button>
+      <span class="stepper-value" id="iron-count">0</span>
+      <button class="stepper-btn stepper-btn--plus" data-iron-plus>+</button>
+      <span style="font-size:13px;color:var(--text-2);margin-left:8px">× ₦600/item</span>`;
+    ironWrap.querySelector('[data-iron-minus]').addEventListener('click', () => {
+      const el = document.getElementById('iron-count');
+      const v = Math.max(0, (parseInt(el.textContent) || 0) - 1);
+      el.textContent = v;
+      onPricingChange();
+    });
+    ironWrap.querySelector('[data-iron-plus]').addEventListener('click', () => {
+      const el = document.getElementById('iron-count');
+      el.textContent = (parseInt(el.textContent) || 0) + 1;
+      onPricingChange();
+    });
+    container.appendChild(ironWrap);
     restorePendingBreakdown();
   }
 
@@ -760,15 +759,15 @@ const HomePage = (() => {
     if (!pendingItemsBreakdown) return;
     const bd = pendingItemsBreakdown;
     pendingItemsBreakdown = null;
-    if (selectedService === 'iron-only') {
-      const count = bd['iron-items'] || 0;
+
+    // Restore iron count
+    if (bd['iron-items']) {
       const el = document.getElementById('iron-count');
-      if (el && count > 0) el.textContent = count;
-      computeItemsBreakdown();
-      return;
+      if (el) el.textContent = bd['iron-items'];
     }
+    // Restore pricing group steppers
     Object.entries(bd).forEach(([key, count]) => {
-      if (count <= 0) return;
+      if (count <= 0 || key === 'iron-items') return;
       const valEl = document.querySelector(`[data-value="${key}"]`);
       if (!valEl) return;
       valEl.textContent = count;
@@ -787,54 +786,54 @@ const HomePage = (() => {
     const breakdown = {};
     let total = 0;
 
-    if (selectedService === 'iron-only') {
-      const count = parseInt(document.getElementById('iron-count')?.textContent) || 0;
-      breakdown['iron-items'] = count;
-      total = count;
-      updateEstimatedTotal(total, 600);
-      return { breakdown, total };
-    }
-
-    const groups = SERVICE_PRICING_GROUPS[selectedService] || [];
-    const priceMap = getPricingMap();
-    groups.forEach(key => {
+    ALL_PRICING_GROUP_KEYS.forEach(key => {
       const valEl = document.querySelector(`[data-value="${key}"]`);
       const count = valEl ? (parseInt(valEl.textContent) || 0) : 0;
       breakdown[key] = count;
       total += count;
     });
-    updateEstimatedTotal(breakdown, priceMap);
+    const ironCount = parseInt(document.getElementById('iron-count')?.textContent) || 0;
+    if (ironCount > 0) {
+      breakdown['iron-items'] = ironCount;
+      total += ironCount;
+    }
+    updateEstimatedTotal(breakdown, getPricingMap());
     return { breakdown, total };
   }
 
   function updateEstimatedTotal(breakdown, priceMap) {
     const totalEl = document.getElementById('pricing-total-amount');
     if (!totalEl) return;
-    if (selectedService === 'iron-only') {
-      const count = typeof breakdown === 'number' ? breakdown : 0;
-      totalEl.textContent = `₦${(count * 600).toLocaleString('en-NG')}`;
-      return;
-    }
     let amount = 0;
-    if (typeof breakdown === 'object') {
-      Object.entries(breakdown).forEach(([key, qty]) => {
-        const price = typeof priceMap === 'object' ? (priceMap[key] || 0) : 0;
-        amount += (Number(qty) || 0) * price;
-      });
-    }
+    Object.entries(breakdown || {}).forEach(([key, qty]) => {
+      const unitPrice = key === 'iron-items' ? 600 : (priceMap?.[key] || 0);
+      amount += (Number(qty) || 0) * unitPrice;
+    });
     totalEl.textContent = `₦${amount.toLocaleString('en-NG')}`;
   }
 
   function computePriceFromGroups(breakdown) {
-    if (selectedService === 'iron-only') {
-      return (breakdown?.['iron-items'] || 0) * 600;
-    }
     const priceMap = getPricingMap();
     let total = 0;
     Object.entries(breakdown || {}).forEach(([key, qty]) => {
-      total += (Number(qty) || 0) * (priceMap[key] || 0);
+      const unitPrice = key === 'iron-items' ? 600 : (priceMap[key] || 0);
+      total += (Number(qty) || 0) * unitPrice;
     });
     return total;
+  }
+
+  function deriveServiceCategories(breakdown) {
+    const cats = [];
+    if (!breakdown) return cats;
+    // Check Laundry section
+    const laundryGroups = CATEGORY_SECTIONS[0].groups;
+    if (laundryGroups.some(k => (breakdown[k] || 0) > 0)) cats.push('laundry');
+    // Check Specialty Items section
+    const specialtyGroups = CATEGORY_SECTIONS[1].groups;
+    if (specialtyGroups.some(k => (breakdown[k] || 0) > 0)) cats.push('specialty-items');
+    // Check Iron Only
+    if ((breakdown['iron-items'] || 0) > 0) cats.push('iron-only');
+    return cats;
   }
 
   function onPricingChange() {
@@ -870,41 +869,38 @@ const HomePage = (() => {
       ? address
       : (document.getElementById('delivery-address')?.value.trim() || address);
     const notes = document.getElementById('pickup-notes')?.value.trim() || '';
-    const svcLabel = document.querySelector('.service-pill.active')?.textContent?.trim() || '—';
     const dateLabel = new Date(day + 'T12:00:00').toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
     const { breakdown, total: itemsCount } = computeItemsBreakdown();
     const priceMap = getPricingMap();
     const isSub = billingMode === 'subscription';
 
+    const categories = deriveServiceCategories(breakdown);
+    const catLabel = serviceName(categories);
+
     let breakdownHtml = '';
     let subtotal = 0;
     if (itemsCount > 0) {
-      if (selectedService === 'iron-only') {
-        subtotal = itemsCount * 600;
-        breakdownHtml = `<div class="order-summary__items-breakdown"><div class="order-summary__item-cat"><span>Iron Only</span><span>${itemsCount} × ₦600</span></div></div>`;
-      } else {
-        const rows = Object.entries(breakdown)
-          .filter(([, count]) => count > 0)
-          .map(([key, count]) => {
-            const p = itemPricing?.find(x => x.key === key);
-            const label = p?.name || key;
-            const unitPrice = p?.price || (priceMap[key] || 900);
-            const linePrice = count * unitPrice;
-            subtotal += linePrice;
-            return `<div class="order-summary__item-cat"><span>${label}</span><span>${count} × ₦${unitPrice.toLocaleString('en-NG')} = ₦${linePrice.toLocaleString('en-NG')}</span></div>`;
-          })
-          .join('');
-        breakdownHtml = `<div class="order-summary__items-breakdown">${rows}</div>`;
-      }
+      const rows = Object.entries(breakdown)
+        .filter(([, count]) => count > 0)
+        .map(([key, count]) => {
+          const p = key === 'iron-items' ? null : itemPricing?.find(x => x.key === key);
+          const label = key === 'iron-items' ? 'Iron Only' : (p?.name || key);
+          const unitPrice = key === 'iron-items' ? 600 : (p?.price || priceMap[key] || 0);
+          const linePrice = count * unitPrice;
+          subtotal += linePrice;
+          return `<div class="order-summary__item-cat"><span>${label}</span><span>${count} × ₦${unitPrice.toLocaleString('en-NG')} = ₦${linePrice.toLocaleString('en-NG')}</span></div>`;
+        })
+        .join('');
+      breakdownHtml = `<div class="order-summary__items-breakdown">${rows}</div>`;
     }
 
     const total = isSub ? 0 : applyPromoDiscount(subtotal);
 
     wrap.innerHTML = `
       <div class="order-summary__row">
-        <span class="order-summary__label">Service</span>
-        <span class="order-summary__value">${svcLabel}</span>
+        <span class="order-summary__label">Categories</span>
+        <span class="order-summary__value">${catLabel}</span>
       </div>
       <div class="order-summary__row">
         <span class="order-summary__label">Date &amp; Time</span>
@@ -933,7 +929,7 @@ const HomePage = (() => {
         </span>
       </div>` : ''}
       <div class="order-summary__row order-summary__row--total">
-        <span class="order-summary__label">Total</span>
+        <span class="order-summary__label">Estimated Total</span>
         <span class="order-summary__value">₦${total.toLocaleString('en-NG')}</span>
       </div>` : ''}
     `;
@@ -985,7 +981,7 @@ const HomePage = (() => {
       try {
         order = await SpaccleDB.createOrder({
           userId: user.userId,
-          service: selectedService,
+          serviceCategories: deriveServiceCategories(itemsBreakdown),
           billingMode,
           planId: subscription?.planId,
           itemsCount: Number(itemsCount) || null,
@@ -1090,7 +1086,7 @@ const HomePage = (() => {
 
     const order = await SpaccleDB.createOrder({
       userId,
-      service: selectedService,
+      serviceCategories: deriveServiceCategories(itemsBreakdown),
       billingMode,
       planId: billingMode === 'subscription' ? subscription?.planId : null,
       itemsCount: Number(itemsCount) || null,
@@ -1161,7 +1157,11 @@ const HomePage = (() => {
       'specialty-dry-clean':'Specialty Dry Cleaning',
       'iron-only':          'Iron Only',
       'specialty-items':    'Specialty Items',
+      'laundry':            'Laundry',
     };
+    if (Array.isArray(service)) {
+      return service.map(s => names[s] || s).join(', ') || 'Items';
+    }
     return names[service] || 'Regular Laundry';
   }
 
@@ -1263,7 +1263,7 @@ const HomePage = (() => {
     document.getElementById('order-status-label').textContent = statusLabel(order.status);
     document.getElementById('order-id-val').textContent = '#' + (order.publicId || 'SP-000000');
     document.getElementById('order-pickup-val').textContent = `${order.pickupDay || '—'}, ${order.pickupTime || '—'}`;
-    document.getElementById('order-items-val').textContent = serviceName(order.service);
+    document.getElementById('order-items-val').textContent = serviceName(order.serviceCategories || order.service);
 
     const steps = Array.from(card.querySelectorAll('.order-track-step'));
     const map = {
@@ -1308,7 +1308,7 @@ const HomePage = (() => {
 
       const title = document.createElement('div');
       title.className = 'order-item__title';
-      title.textContent = serviceName(order.service);
+      title.textContent = serviceName(order.serviceCategories || order.service);
 
       const meta = document.createElement('div');
       meta.className = 'order-item__meta';
@@ -1402,7 +1402,7 @@ const HomePage = (() => {
       .join('');
 
     return `
-      <div class="order-detail__row"><strong>Service:</strong> ${escapeHtml(serviceName(order.service))}</div>
+      <div class="order-detail__row"><strong>Service:</strong> ${escapeHtml(serviceName(order.serviceCategories || order.service))}</div>
       <div class="order-detail__row"><strong>Pickup:</strong> ${escapeHtml(`${order.pickupDay || '—'}, ${order.pickupTime || '—'}`)}</div>
       <div class="order-detail__row"><strong>Address:</strong> ${escapeHtml(order.address || '—')}</div>
       <div class="order-detail__row"><strong>Delivery:</strong> ${escapeHtml(order.deliveryAddress || order.address || '—')}</div>
@@ -2557,9 +2557,6 @@ const HomePage = (() => {
     if (pi2) pi2.value = '';
     if (ps2) ps2.textContent = '';
     closeAllSheets();
-    selectedService = order.service || selectedService;
-    document.querySelectorAll('.service-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.service === selectedService));
     billingMode = order.billingMode || 'payg';
     pendingItemsBreakdown = order.itemsBreakdown || null;
     buildDatePicker();
