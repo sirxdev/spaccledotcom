@@ -25,6 +25,18 @@ const HomePage = (() => {
   ];
   const ALL_PRICING_GROUP_KEYS = CATEGORY_SECTIONS.flatMap(s => s.groups);
 
+  const GROUP_HELP = {
+    'everyday-clothing': 'T-shirts, polos, shirts, blouses, trousers, jeans, shorts, skirts, hoodies, jackets.',
+    'dresses-gowns': 'Evening gowns, bridal wear, cocktail dresses, and formal dresses.',
+    'bedding': 'Bedsheets, pillowcases, duvet covers, and blankets.',
+    'underwear': 'Boxers, briefs, panties, bras, singlets, and socks.',
+    'shoes': 'Sneakers, loafers, heels, flats, and boots. Shine and care included.',
+    'bags': 'Handbags, totes, backpacks, and luggage.',
+    'curtains': 'Curtain panels, drapes, and sheers.',
+    'rugs': 'Area rugs, mats, and runners.',
+    'other-specialty': 'Items not listed above. Contact support if unsure.',
+  };
+
   function init(data = {}) {
     user = data.user || SpaccleDB.getSession();
     // Reset per-session state so a different user logging in starts clean
@@ -520,6 +532,19 @@ const HomePage = (() => {
     document.getElementById('ticket-reply-input').addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleUserTicketReply(); }
     });
+
+    // Help icon tooltip toggle (tap on mobile)
+    document.addEventListener('click', e => {
+      const icon = e.target.closest('.help-icon');
+      // Close all other tooltips
+      document.querySelectorAll('.help-icon.show').forEach(el => {
+        if (el !== icon) el.classList.remove('show');
+      });
+      if (icon) {
+        e.preventDefault();
+        icon.classList.toggle('show');
+      }
+    });
   }
 
   function openSheet(sheetId) {
@@ -682,9 +707,13 @@ const HomePage = (() => {
     if (!p) return null;
     const row = document.createElement('div');
     row.className = 'pricing-group';
+    const help = GROUP_HELP[key];
     row.innerHTML = `
       <div class="pricing-group__info">
-        <div class="pricing-group__name">${p.name}</div>
+        <div class="pricing-group__name-wrap">
+          <span class="pricing-group__name">${p.name}</span>
+          ${help ? `<button type="button" class="help-icon" aria-label="More info about ${p.name}"><span>(i)</span><span class="help-tooltip">${help}</span></button>` : ''}
+        </div>
         <div class="pricing-group__price">₦${Number(p.price).toLocaleString('en-NG')}/${p.unit}</div>
       </div>
       <div class="pricing-group__stepper">
@@ -731,7 +760,7 @@ const HomePage = (() => {
     // Iron Only — flat rate stepper
     const ironSection = document.createElement('div');
     ironSection.className = 'pricing-section__header';
-    ironSection.textContent = 'Iron Only';
+    ironSection.innerHTML = 'Iron Only <button type="button" class="help-icon" aria-label="More info about Iron Only"><span>(i)</span><span class="help-tooltip">For pre-washed items that only need pressing and folding.</span></button>';
     container.appendChild(ironSection);
     const ironWrap = document.createElement('div');
     ironWrap.className = 'iron-only-stepper';
