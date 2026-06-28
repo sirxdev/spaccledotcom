@@ -1421,7 +1421,8 @@ const HomePage = (() => {
 
     document.getElementById('order-status-label').textContent = statusLabel(order.status);
     document.getElementById('order-id-val').textContent = '#' + (order.publicId || 'SP-000000');
-    document.getElementById('order-pickup-val').textContent = `${order.pickupDay || '—'}, ${order.pickupTime || '—'}`;
+    document.getElementById('order-date-val').textContent = order.pickupDay || '—';
+    document.getElementById('order-time-val').textContent = order.pickupTime || '—';
     document.getElementById('order-items-val').textContent = serviceName(order.serviceCategories || order.service);
 
     const steps = Array.from(card.querySelectorAll('.order-track-step'));
@@ -1562,7 +1563,8 @@ const HomePage = (() => {
 
     return `
       <div class="order-detail__row"><strong>Service:</strong> ${escapeHtml(serviceName(order.serviceCategories || order.service))}</div>
-      <div class="order-detail__row"><strong>Pickup:</strong> ${escapeHtml(`${order.pickupDay || '—'}, ${order.pickupTime || '—'}`)}</div>
+      <div class="order-detail__row"><strong>Date:</strong> ${escapeHtml(order.pickupDay || '—')}</div>
+      <div class="order-detail__row"><strong>Time:</strong> ${escapeHtml(order.pickupTime || '—')}</div>
       <div class="order-detail__row"><strong>Address:</strong> ${escapeHtml(order.address || '—')}</div>
       <div class="order-detail__row"><strong>Delivery:</strong> ${escapeHtml(order.deliveryAddress || order.address || '—')}</div>
       <div class="order-detail__row"><strong>Items:</strong> ${escapeHtml(String(order.itemsCount || '—'))}</div>
@@ -1614,7 +1616,8 @@ const HomePage = (() => {
       pillEl.textContent = statusLabel(order.status);
       pillEl.className = 'track-card__pill status-pill status-pill--' + (order.status || 'scheduled');
     }
-    document.getElementById('track-pickup').textContent = `${order.pickupDay || '—'}, ${order.pickupTime || '—'}`;
+    document.getElementById('track-date').textContent = order.pickupDay || '—';
+    document.getElementById('track-time').textContent = order.pickupTime || '—';
     document.getElementById('track-ready').textContent = estimateReady(order);
 
     selectedOrderId = order._id;

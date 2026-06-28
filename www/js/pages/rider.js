@@ -454,8 +454,12 @@ function setupSheets() {
             <span class="rider-order-item__val">${order.publicId || order.orderId || order._id.slice(-6)}</span>
           </div>
           <div class="rider-order-item__row">
-            <span class="rider-order-item__label">${order.status === ORDER_STATUS.COMPLETED ? 'Delivered' : 'Pickup'}</span>
-            <span class="rider-order-item__val">${formatDateTime(order.pickupTime || order.updatedAt)}</span>
+            <span class="rider-order-item__label">Date</span>
+            <span class="rider-order-item__val">${order.pickupDay || '—'}</span>
+          </div>
+          <div class="rider-order-item__row">
+            <span class="rider-order-item__label">Time</span>
+            <span class="rider-order-item__val">${order.pickupTime || '—'}</span>
           </div>
           <div class="rider-order-item__row">
             <span class="rider-order-item__label">Items</span>
@@ -669,6 +673,7 @@ function setupSheets() {
     document.getElementById('rider-sheet-items').textContent = (order.itemsCount || 0) + ' items';
     document.getElementById('rider-sheet-customer').textContent = order.customerName || 'N/A';
     document.getElementById('rider-sheet-phone').textContent = formatPhone(order.customerPhone);
+    document.getElementById('rider-sheet-date').textContent = order.pickupDay || '—';
     document.getElementById('rider-sheet-time').textContent = order.pickupTime || '—';
     document.getElementById('rider-sheet-notes').textContent = order.notes || '—';
 
