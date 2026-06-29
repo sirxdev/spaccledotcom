@@ -445,7 +445,7 @@ function init(data = {}) {
     const detailEl = document.getElementById('admin-order-details');
     const rows = [
       ['Status',       escapeHtml(statusLabel(order.status))],
-      ['Service',      escapeHtml(serviceLabel(order.service))],
+      ['Service',      escapeHtml(serviceLabel(order.service || order.serviceCategories))],
       ['Billing',      order.billingMode === 'subscription' ? 'Subscription' : 'Pay As You Go'],
       ['Items',        escapeHtml(String(order.itemsCount || '—'))],
       ['Amount Paid',  order.amountPaid ? `₦${formatNaira(order.amountPaid)}` : '—'],
@@ -453,14 +453,32 @@ function init(data = {}) {
       ['Pickup Day',   escapeHtml(order.pickupDay   || '—')],
       ['Pickup Time',  escapeHtml(order.pickupTime  || '—')],
       ['Address',      escapeHtml(order.address     || '—')],
+      ['Delivery Address', escapeHtml(order.deliveryAddress || order.address || '—')],
       ['Notes',        escapeHtml(order.notes       || '—')],
       ['Created',      escapeHtml(formatDateTime(order.createdAt))],
     ];
     if (order.exceedsItems)    rows.push(['⚠ Exceeds Plan', `Yes — ${escapeHtml(String(order.extraItemsCount || 0))} extra items`]);
     if (order.recurring)       rows.push(['Recurring',      'Set as recurring pickup']);
     if (order.rating)          rows.push(['Rating', '★'.repeat(order.rating) + ' ' + escapeHtml(order.ratingNote || '')]);
-    if (order.assignedDriver)  rows.push(['Rider', escapeHtml(order.assignedDriver)]);
-    else if (order.riderId)    rows.push(['Rider ID',      escapeHtml(order.riderId)]);
+    if (order.assignedDriver || order.pickupRiderId)  rows.push(['Pickup Rider', escapeHtml(order.assignedDriver || order.pickupRiderId)]);
+    if (order.deliveryRiderId) rows.push(['Delivery Rider', escapeHtml(order.deliveryRiderId)]);
+    if (order.assignedAt)      rows.push(['Assigned At',   escapeHtml(formatDateTime(order.assignedAt))]);
+    if (order.processedByName) rows.push(['Processed By',  escapeHtml(order.processedByName)]);
+    if (order.deliveryCode)    rows.push(['Delivery Code', escapeHtml(order.deliveryCode)]);
+
+    // Items breakdown
+    if (order.itemsBreakdown) {
+      const catLabels = {
+        'tops': 'Tops', 'bottoms': 'Bottoms', 'underwear': 'Underwear',
+        'jackets': 'Jackets', 'suits': 'Suits', 'dresses': 'Dresses',
+        'beddings': 'Beddings', 'towels': 'Towels', 'shoes': 'Shoes',
+        'traditional': 'Traditional', 'others': 'Others',
+      };
+      const parts = Object.entries(order.itemsBreakdown).filter(([,c]) => c > 0).map(([k,c]) => `${catLabels[k]||k}: ${c}`);
+      if (parts.length) {
+        rows.push(['Items Breakdown', parts.join(' · ')]);
+      }
+    }
     detailEl.innerHTML = rows.map(([l, v]) =>
       `<div class="admin-detail-row">` +
       `<span class="admin-detail-row__label">${escapeHtml(l)}</span>` +
@@ -521,6 +539,17 @@ function init(data = {}) {
         deliveryInfo.style.display = 'none';
         if (deliveryForm) deliveryForm.style.display = '';
       }
+    }
+
+    // Render event timeline
+    const eventsEl = document.getElementById('admin-order-events');
+    if (eventsEl) {
+      const evts = Array.isArray(order.events) ? order.events : [];
+      eventsEl.innerHTML = evts.map(e =>
+        `<div class="admin-detail-row">` +
+        `<span class="admin-detail-row__label">${escapeHtml(statusLabel(e.status))}</span>` +
+        `<span class="admin-detail-row__value">${escapeHtml(formatDateTime(e.at))}</span></div>`
+      ).join('');
     }
 
     document.getElementById('admin-order-overlay').classList.add('open');
