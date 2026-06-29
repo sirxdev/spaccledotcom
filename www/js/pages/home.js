@@ -1564,15 +1564,18 @@ const HomePage = (() => {
 
     return `
       <div class="order-detail__row"><strong>Service:</strong> ${escapeHtml(serviceName(order.serviceCategories || order.service))}</div>
+      <div class="order-detail__row"><strong>Billing:</strong> ${order.billingMode === 'subscription' ? 'Subscription' : 'Pay As You Go'}</div>
       <div class="order-detail__row"><strong>Date:</strong> ${escapeHtml(order.pickupDay || '—')}</div>
       <div class="order-detail__row"><strong>Time:</strong> ${escapeHtml(order.pickupTime || '—')}</div>
       <div class="order-detail__row"><strong>Address:</strong> ${escapeHtml(order.address || '—')}</div>
       <div class="order-detail__row"><strong>Delivery:</strong> ${escapeHtml(order.deliveryAddress || order.address || '—')}</div>
       <div class="order-detail__row"><strong>Items:</strong> ${escapeHtml(String(order.itemsCount || '—'))}</div>
-      <div class="order-detail__row"><strong>Amount:</strong> ${order.amountPaid ? '₦' + Number(order.amountPaid).toLocaleString() : '—'}</div>
+      ${order.itemsBreakdown ? `<div class="order-detail__row"><strong>Items Breakdown:</strong> ${escapeHtml(Object.entries(order.itemsBreakdown).filter(([,c]) => c > 0).map(([k,c]) => k + ': ' + c).join(' · '))}</div>` : ''}
+      <div class="order-detail__row"><strong>Amount:</strong> ${order.amountPaid ? '₦' + Number(order.amountPaid).toLocaleString() : order.billingMode === 'subscription' ? 'Covered by subscription' : '—'}</div>
       <div class="order-detail__row"><strong>Pickup Rider:</strong> <span id="order-detail-pickup-rider">${escapeHtml(order.assignedDriver || order.pickupRiderId || '—')}</span></div>
       ${order.deliveryRiderId ? `<div class="order-detail__row"><strong>Delivery Rider:</strong> <span id="order-detail-delivery-rider">${escapeHtml(order.deliveryRiderId || '—')}</span></div>` : ''}
       <div class="order-detail__row"><strong>Status:</strong> ${escapeHtml(statusLabel(order.status))}</div>
+      ${order.notes ? `<div class="order-detail__row"><strong>Notes:</strong> ${escapeHtml(order.notes)}</div>` : ''}
       <div class="order-detail__row"><strong>Ordered:</strong> ${escapeHtml(formatTime(order.createdAt))}</div>
       <div style="height:12px"></div>
       ${timeline}
