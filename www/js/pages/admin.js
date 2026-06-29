@@ -439,6 +439,9 @@ function init(data = {}) {
 
   function openOrderDetail(order) {
     currentOrderId = order._id;
+    // Clear any existing pending timer
+    if (window.pendingOrderTimer) clearInterval(window.pendingOrderTimer);
+
     document.getElementById('admin-order-title').textContent =
       order.publicId || order._id.slice(-8).toUpperCase();
 
@@ -508,6 +511,34 @@ function init(data = {}) {
     }
 
     loadRidersForSelect();
+
+    // Pending rider
+    const pendingSection = document.getElementById('admin-pending-rider-section');
+    const pendingName = document.getElementById('admin-pending-rider-name');
+    const pendingTimer = document.getElementById('admin-pending-rider-timer');
+    if (order.pendingRiderId && order.pendingExpiresAt && new Date(order.pendingExpiresAt) > new Date()) {
+      pendingSection.style.display = '';
+      
+      // Resolve rider name (3c)
+      SpaccleDB.getDocument(order.pendingRiderId).then(r => {
+        pendingName.textContent = 'Offered to: ' + (r.name || 'Unknown Rider');
+      }).catch(() => {
+        pendingName.textContent = 'Offered to: Unknown Rider';
+      });
+
+      // Countdown clock (3b)
+      window.pendingOrderTimer = setInterval(() => {
+        const remaining = Math.max(0, Math.floor((new Date(order.pendingExpiresAt) - new Date()) / 1000));
+        if (remaining <= 0) {
+          clearInterval(window.pendingOrderTimer);
+          pendingSection.style.display = 'none';
+        } else {
+          pendingTimer.textContent = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
+        }
+      }, 1000);
+    } else {
+      pendingSection.style.display = 'none';
+    }
 
     // Pickup rider
     const hasPickupRider = !!(order.pickupRiderId || order.assignedDriver);
