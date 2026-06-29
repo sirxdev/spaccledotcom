@@ -486,7 +486,7 @@ function setupSheets() {
 
     document.getElementById('rider-active-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
     document.getElementById('rider-active-status').textContent = isDeliveryPending ? 'Delivery Available' : isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
-    document.getElementById('rider-active-pickup').textContent = order.pickupAddress || 'N/A';
+    document.getElementById('rider-active-pickup').textContent = order.address || order.pickupAddress || 'N/A';
     document.getElementById('rider-active-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
     document.getElementById('rider-active-items').textContent = (order.itemsCount || 0) + ' items';
 
@@ -668,14 +668,44 @@ function setupSheets() {
     activeOrder = order;
     document.getElementById('rider-sheet-order-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
     document.getElementById('rider-sheet-order-status').textContent = isDeliveryPending ? 'Delivery Available' : isPending ? 'Awaiting Acceptance' : formatStatus(order.status);
-    document.getElementById('rider-sheet-pickup').textContent = order.pickupAddress || 'N/A';
+    document.getElementById('rider-sheet-pickup').textContent = order.address || order.pickupAddress || 'N/A';
     document.getElementById('rider-sheet-delivery').textContent = order.deliveryAddress || order.address || 'N/A';
     document.getElementById('rider-sheet-items').textContent = (order.itemsCount || 0) + ' items';
-    document.getElementById('rider-sheet-customer').textContent = order.customerName || 'N/A';
-    document.getElementById('rider-sheet-phone').textContent = formatPhone(order.customerPhone);
-    document.getElementById('rider-sheet-date').textContent = order.pickupDay || '—';
-    document.getElementById('rider-sheet-time').textContent = order.pickupTime || '—';
-    document.getElementById('rider-sheet-notes').textContent = order.notes || '—';
+    document.getElementById('rider-sheet-date').textContent = order.pickupDay || '-';
+    document.getElementById('rider-sheet-time').textContent = order.pickupTime || '-';
+    document.getElementById('rider-sheet-notes').textContent = order.notes || '-';
+
+    // Fetch customer info from user doc
+    SpaccleDB.getUserProfile(order.userId).then(u => {
+      if (u) {
+        document.getElementById('rider-sheet-customer').textContent = u.name || 'N/A';
+        document.getElementById('rider-sheet-phone').textContent = formatPhone(u.phone);
+      }
+    }).catch(() => {});
+    document.getElementById('rider-sheet-service').textContent = serviceLabel(order.service);
+    document.getElementById('rider-sheet-billing').textContent = order.billingMode === 'subscription' ? 'Subscription' : 'Pay As You Go';
+    document.getElementById('rider-sheet-amount').textContent = order.amountPaid ? '₦' + formatNaira(order.amountPaid) : '-';
+    document.getElementById('rider-sheet-created').textContent = formatDateTime(order.createdAt);
+
+    // Items breakdown
+    const breakdownEl = document.getElementById('rider-sheet-row-breakdown');
+    const breakdownVal = document.getElementById('rider-sheet-breakdown');
+    if (breakdownEl && breakdownVal && order.itemsBreakdown) {
+      const catLabels = { 'tops': 'Tops', 'bottoms': 'Bottoms', 'underwear': 'Underwear', 'jackets': 'Jackets', 'suits': 'Suits', 'dresses': 'Dresses', 'beddings': 'Beddings', 'towels': 'Towels', 'shoes': 'Shoes', 'traditional': 'Traditional', 'others': 'Others' };
+      const parts = Object.entries(order.itemsBreakdown).filter(([,c]) => c > 0).map(([k,c]) => (catLabels[k]||k) + ': ' + c);
+      if (parts.length) {
+        breakdownVal.textContent = parts.join('  ');
+        breakdownEl.style.display = '';
+      }
+    }
+
+    // Delivery code
+    const codeRow = document.getElementById('rider-sheet-row-delivery-code');
+    const codeVal = document.getElementById('rider-sheet-delivery-code');
+    if (codeRow && codeVal && order.deliveryCode) {
+      codeVal.textContent = order.deliveryCode;
+      codeRow.style.display = '';
+    }
 
     const pickupStage = ['assigned', 'picked_up'].includes(order.status);
     const deliveryStage = ['ready', 'out_for_delivery'].includes(order.status);
@@ -1114,7 +1144,7 @@ function setupSheets() {
       </div>
       <div class="rider-new-order-alert__body">
         <strong>${isDeliveryPending ? 'Delivery Available!' : 'New Order Assigned!'}</strong>
-        <span>${isDeliveryPending ? '' : '#'}${order.publicId || order.orderId || order._id.slice(-6)} — ${isDeliveryPending ? 'Ready for delivery' : (order.pickupAddress || 'Pickup ready')}</span>
+        <span>${isDeliveryPending ? '' : '#'}${order.publicId || order.orderId || order._id.slice(-6)} — ${isDeliveryPending ? 'Ready for delivery' : (order.address || order.pickupAddress || 'Pickup ready')}</span>
       </div>
       <button class="rider-new-order-alert__close" aria-label="Dismiss">✕</button>`;
     document.getElementById('page-rider')?.appendChild(alert);
@@ -1124,6 +1154,21 @@ function setupSheets() {
   }
 
   /* ── Helpers ─────────────────────────────────────────────── */
+  function serviceLabel(s) {
+    return ({
+      'wash-fold':  'Wash, Iron & Fold',
+      'dry-clean':  'Dry Cleaning',
+      'iron-press': 'Iron & Press',
+      'duvet':      'Duvet & Bedding',
+      'alteration': 'Alterations',
+      'shoe-clean': 'Shoe Cleaning',
+    })[s] || s || 'Laundry Service';
+  }
+
+  function formatNaira(n) {
+    return Number(n || 0).toLocaleString('en-NG');
+  }
+
   function formatStatus(status) {
     const labels = {
       [ORDER_STATUS.SCHEDULED]:  'Scheduled',
