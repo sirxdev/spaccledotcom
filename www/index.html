@@ -2080,17 +2080,7 @@
                 <span class="rider-earn-card__val" id="rider-earnings-today">₦0</span>
               </div>
             </div>
-            <div class="rider-earn-card">
-              <div class="rider-earn-card__icon" style="background:#E6FBF6">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 12H4M4 12l4-4m-4 4l4 4" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div class="rider-earn-card__body">
-                <span class="rider-earn-card__label">Tips</span>
-                <span class="rider-earn-card__val" id="rider-earnings-tips">₦0</span>
-              </div>
-            </div>
+
           </div>
 
           <div class="rider-payout-section">
@@ -2396,39 +2386,6 @@
           <textarea class="rider-msg-textarea" id="rider-msg-input" placeholder="E.g. I'm at the gate, please come down…" rows="3"></textarea>
           <button class="btn btn--primary btn--sm btn--full" id="btn-rider-msg-send">Send Message</button>
         </div>
-      </div>
-    </div>
-
-    <!-- Tip Sheet -->
-    <div class="rider-tip-sheet" id="rider-tip-sheet">
-      <div class="rider-sheet-backdrop"></div>
-      <div class="rider-sheet">
-        <div class="rider-sheet__handle"></div>
-        <div class="rider-sheet__header">
-          <button class="rider-sheet__close" id="btn-rider-tip-close" aria-label="Close tip sheet">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-        <div class="rider-tip-sheet__title">Add Tip</div>
-        <div class="rider-tip-sheet__order">Order #<span id="rider-tip-order-id">SP-0001</span></div>
-        <div class="rider-tip-sheet__customer">for <span id="rider-tip-customer">Customer</span></div>
-        <div class="rider-tip-sheet__amounts">
-          <button class="rider-tip-amount" data-amount="200">₦200</button>
-          <button class="rider-tip-amount" data-amount="500">₦500</button>
-          <button class="rider-tip-amount" data-amount="1000">₦1000</button>
-          <button class="rider-tip-amount" data-amount="2000">₦2000</button>
-        </div>
-        <div class="rider-tip-sheet__custom">
-          <label>Or enter custom amount</label>
-          <div class="rider-tip-input-wrap">
-            <span>₦</span>
-            <input type="number" id="rider-tip-input" placeholder="0" inputmode="numeric" />
-          </div>
-        </div>
-        <input type="hidden" id="rider-tip-amount" value="200" />
-        <button class="btn btn--accent btn--full btn--lg" id="btn-rider-tip-add">Add Tip</button>
       </div>
     </div>
 

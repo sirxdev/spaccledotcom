@@ -773,8 +773,7 @@
 }
 
 /* Sheets */
-.rider-order-sheet,
-.rider-tip-sheet {
+.rider-order-sheet {
   position: fixed;
   inset: 0;
   z-index: 500;
@@ -782,8 +781,7 @@
   align-items: flex-end;
 }
 
-.rider-order-sheet.open,
-.rider-tip-sheet.open {
+.rider-order-sheet.open {
   display: flex;
 }
 
@@ -1167,94 +1165,6 @@
 
 .rider-payout-form {
   margin-top: 18px;
-}
-
-/* Tip sheet */
-.rider-tip-sheet__title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-1);
-  text-align: center;
-}
-
-.rider-tip-sheet__order {
-  font-size: 14px;
-  color: var(--text-2);
-  text-align: center;
-  margin-top: 4px;
-}
-
-.rider-tip-sheet__customer {
-  font-size: 14px;
-  color: var(--text-2);
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.rider-tip-sheet__amounts {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.rider-tip-amount {
-  padding: 14px 8px;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-1);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-.rider-tip-amount.active,
-.rider-tip-amount:active {
-  border-color: var(--primary);
-  background: rgba(91, 79, 190, 0.1);
-}
-
-.rider-tip-sheet__custom {
-  margin-bottom: 20px;
-}
-
-.rider-tip-sheet__custom label {
-  display: block;
-  font-size: 13px;
-  color: var(--text-2);
-  margin-bottom: 8px;
-}
-
-.rider-tip-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 0 16px;
-}
-
-.rider-tip-input-wrap span {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-2);
-}
-
-.rider-tip-input-wrap input {
-  flex: 1;
-  padding: 14px 0;
-  background: none;
-  border: none;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-1);
-}
-
-.rider-tip-input-wrap input:focus {
-  outline: none;
 }
 
 /* Profile badge */

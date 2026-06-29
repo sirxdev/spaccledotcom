@@ -328,23 +328,6 @@ function setupSheets() {
         if (e.target.id === 'rider-order-sheet') closeOrderSheet();
       });
       el('btn-rider-order-close')?.addEventListener('click', closeOrderSheet);
-      el('rider-tip-sheet')?.addEventListener('click', e => {
-        if (e.target.id === 'rider-tip-sheet') closeTipSheet();
-      });
-      el('btn-rider-tip-close')?.addEventListener('click', closeTipSheet);
-      el('btn-rider-tip-add')?.addEventListener('click', submitTip);
-      // Wire quick-amount buttons to update hidden input and highlight selection
-      document.querySelectorAll('.rider-tip-amount[data-amount]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.rider-tip-amount[data-amount]')
-            .forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const hidden = document.getElementById('rider-tip-amount');
-          if (hidden) hidden.value = btn.dataset.amount;
-          const customInput = document.getElementById('rider-tip-input');
-          if (customInput) customInput.value = '';
-        });
-      });
       el('btn-rider-msg-customer')?.addEventListener('click', toggleMsgCompose);
       el('btn-rider-msg-send')?.addEventListener('click', sendMessageToCustomer);
     } catch(e) { console.error('setupSheets error:', e); }
@@ -784,7 +767,7 @@ function setupSheets() {
     } else if (s === ORDER_STATUS.OUT_FOR_DELIVERY) {
       actions.push({ id: 'delivered', label: 'Mark Delivered', style: 'primary' });
     } else if (s === ORDER_STATUS.DELIVERED || s === ORDER_STATUS.COMPLETED) {
-      actions.push({ id: 'tip', label: 'View / Add Tip', style: 'accent' });
+      // no actions for delivered/completed (tip feature removed)
     }
 
     if (!actions.length) {
@@ -815,11 +798,6 @@ function setupSheets() {
       transit:   ORDER_STATUS.OUT_FOR_DELIVERY,
       delivered: ORDER_STATUS.DELIVERED,
     };
-
-    if (action === 'tip') {
-      openTipSheet(order);
-      return;
-    }
 
     if (action === 'cancel') {
       if (!await showConfirm('Decline this order?')) return;
@@ -905,45 +883,6 @@ function setupSheets() {
     });
   }
 
-  /* ── Tips ─────────────────────────────────────────────────────── */
-  function openTipSheet(order) {
-    activeOrder = order;
-    document.getElementById('rider-tip-order-id').textContent = order.publicId || order.orderId || order._id.slice(-6);
-    document.getElementById('rider-tip-customer').textContent = order.customerName || 'Customer';
-    document.getElementById('rider-tip-input').value = '';
-    document.getElementById('rider-tip-amount').value = '200';
-    document.querySelectorAll('.rider-tip-amount[data-amount]').forEach(b =>
-      b.classList.toggle('active', b.dataset.amount === '200'));
-    document.getElementById('rider-tip-sheet').classList.add('open');
-  }
-
-  function closeTipSheet() {
-    document.getElementById('rider-tip-sheet').classList.remove('open');
-  }
-
-  async function submitTip() {
-    const customAmount = document.getElementById('rider-tip-input').value;
-    const quickAmount = document.getElementById('rider-tip-amount').value;
-    const amount = customAmount || quickAmount;
-
-    if (!amount || Number(amount) < 50) {
-      showToast('Enter a valid tip amount');
-      return;
-    }
-
-    if (!activeOrder) return;
-
-    try {
-      await SpaccleDB.addTip(activeOrder._id, Number(amount));
-      closeTipSheet();
-      closeOrderSheet();
-      await renderOrders();
-      showToast('Tip added successfully!');
-    } catch (err) {
-      showToast('Failed to add tip');
-    }
-  }
-
   /* ── Earnings ─────────────────────────────────────────────── */
   async function renderEarnings() {
     try {
@@ -954,22 +893,18 @@ function setupSheets() {
       );
 
       let totalEarnings = 0;
-      let totalTips = 0;
       let todayEarnings = 0;
 
       completed.forEach(o => {
         const earnings = o.riderEarnings || o.deliveryFee || 0;
-        const tips = o.tip || 0;
         totalEarnings += earnings;
-        totalTips += tips;
         if (isToday(o.updatedAt)) {
-          todayEarnings += earnings + tips;
+          todayEarnings += earnings;
         }
       });
 
-      availableEarnings = totalEarnings + totalTips;
+      availableEarnings = totalEarnings;
       document.getElementById('rider-earnings-total').textContent = '₦' + totalEarnings.toLocaleString();
-      document.getElementById('rider-earnings-tips').textContent = '₦' + totalTips.toLocaleString();
       document.getElementById('rider-earnings-today').textContent = '₦' + todayEarnings.toLocaleString();
     } catch (err) {
       console.error('Failed to load earnings:', err);
