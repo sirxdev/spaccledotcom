@@ -17,14 +17,14 @@
   <link rel="stylesheet" href="css/staff.css" />
   <link rel="stylesheet" href="css/admin.css" />
 </head>
-<body>
+<body class="light">
 
   <div id="app">
 
     <!-- Splash Screen -->
     <div id="page-splash" class="page page--splash active">
       <div class="splash__content">
-        <img src="../SpaccleWebsite/images/logo.png" class="splash__logo-img" alt="Spaccle" />
+        <img src="img/logo-text.png" class="splash__logo-img" alt="Spaccle" />
         <p class="splash__tagline">Clean clothes, zero effort</p>
       </div>
       <div class="splash__footer">
@@ -38,25 +38,35 @@
 
     <!-- Onboarding Screen -->
     <div id="page-onboarding" class="page page--onboarding">
+      <div class="onboarding__topbar">
+        <img src="img/logo-text.png" class="onboarding__logo" alt="Spaccle" />
+        <button class="onboarding__skip" id="btn-skip">Skip</button>
+      </div>
+
       <div class="onboarding__slides" id="onboarding-slides">
 
         <div class="onboarding__slide active" data-slide="0">
-          <div class="onboarding__illustration">
-            <svg viewBox="0 0 280 260" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="140" cy="140" rx="110" ry="100" fill="#EDE9FF"/>
-              <path d="M80 160 Q80 200 140 200 Q200 200 200 160 L195 130 Q195 120 140 120 Q85 120 85 130 Z" fill="#5B4FBE"/>
-              <path d="M95 140 Q140 135 185 140" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
-              <path d="M90 155 Q140 148 190 155" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
-              <path d="M92 170 Q140 163 188 170" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
-              <path d="M105 120 Q105 90 140 90 Q175 90 175 120" stroke="#5B4FBE" stroke-width="8" fill="none" stroke-linecap="round"/>
-              <path d="M110 125 Q115 100 125 105 Q120 120 120 125" fill="#06D6A0"/>
-              <path d="M150 122 Q158 98 168 103 Q162 118 160 122" fill="#FF6B6B"/>
-              <circle cx="140" cy="95" r="6" fill="#FFD166"/>
-              <path d="M60 80 L63 73 L66 80 L73 83 L66 86 L63 93 L60 86 L53 83 Z" fill="#FFD166"/>
-              <path d="M210 100 L212 95 L214 100 L219 102 L214 104 L212 109 L210 104 L205 102 Z" fill="#06D6A0" opacity="0.8"/>
-              <circle cx="75" cy="110" r="4" fill="#FF6B6B" opacity="0.6"/>
-              <circle cx="205" cy="75" r="3" fill="#5B4FBE" opacity="0.5"/>
-            </svg>
+          <div class="onboarding__card">
+            <div class="onboarding__illustration">
+              <svg viewBox="0 0 300 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="85" y="60" width="130" height="150" rx="20" fill="white" stroke="#E0E0E0" stroke-width="1.5"/>
+                <rect x="100" y="80" width="100" height="110" rx="10" fill="#f8f0ff"/>
+                <circle cx="150" cy="135" r="38" stroke="url(#fd-grad)" stroke-width="2.5" fill="rgba(255,107,129,0.04)"/>
+                <circle cx="150" cy="135" r="24" stroke="url(#fd-grad)" stroke-width="2" fill="rgba(255,107,129,0.08)"/>
+                <path d="M136 135 Q143 128 150 135 Q157 142 164 135" stroke="url(#fd-grad)" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <rect x="130" y="45" width="8" height="18" rx="4" fill="#E0E0E0"/>
+                <rect x="162" y="45" width="8" height="18" rx="4" fill="#E0E0E0"/>
+                <circle cx="140" cy="55" r="3" fill="#2FA0E8" opacity="0.4"/>
+                <circle cx="165" cy="52" r="4" fill="#FF6B81" opacity="0.3"/>
+                <circle cx="185" cy="62" r="2" fill="#8B5CF6" opacity="0.3"/>
+                <rect x="112" y="88" width="76" height="6" rx="3" fill="#EDE9FF"/>
+                <rect x="112" y="100" width="55" height="5" rx="2.5" fill="#DDD8F8"/>
+                <rect x="112" y="110" width="65" height="5" rx="2.5" fill="#DDD8F8"/>
+                <circle cx="158" cy="208" r="8" fill="#FF6B81"/>
+                <path d="M153 208 l5 4 l8 -8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <defs><linearGradient id="fd-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF6B81"/><stop offset="100%" stop-color="#2FA0E8"/></linearGradient></defs>
+              </svg>
+            </div>
           </div>
           <div class="onboarding__text">
             <h2 class="onboarding__title">Fresh Laundry,<br/>At Your Door</h2>
@@ -65,68 +75,78 @@
         </div>
 
         <div class="onboarding__slide" data-slide="1">
-          <div class="onboarding__illustration">
-            <svg viewBox="0 0 280 260" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="140" cy="145" rx="105" ry="95" fill="#E6FBF6"/>
-              <rect x="100" y="70" width="80" height="140" rx="12" fill="#1C1B3A"/>
-              <rect x="105" y="85" width="70" height="112" rx="6" fill="#F7F8FF"/>
-              <rect x="125" y="73" width="30" height="8" rx="4" fill="#2D2B50"/>
-              <rect x="108" y="88" width="64" height="60" rx="4" fill="#C8F5EA"/>
-              <path d="M115 108 L172 108" stroke="white" stroke-width="2"/>
-              <path d="M140 95 L140 148" stroke="white" stroke-width="2"/>
-              <circle cx="120" cy="100" r="5" fill="#5B4FBE"/>
-              <circle cx="160" cy="132" r="5" fill="#06D6A0"/>
-              <path d="M120 100 Q120 132 160 132" stroke="#5B4FBE" stroke-width="2" stroke-dasharray="4,3" fill="none"/>
-              <rect x="132" y="112" width="16" height="9" rx="2" fill="#FF6B6B"/>
-              <circle cx="135" cy="121" r="2" fill="#1C1B3A"/>
-              <circle cx="145" cy="121" r="2" fill="#1C1B3A"/>
-              <rect x="108" y="152" width="64" height="14" rx="3" fill="#EDE9FF"/>
-              <rect x="112" y="156" width="40" height="6" rx="3" fill="#5B4FBE" opacity="0.6"/>
-              <rect x="108" y="170" width="64" height="8" rx="3" fill="#E8E6FF"/>
-              <rect x="108" y="182" width="48" height="6" rx="3" fill="#E8E6FF"/>
-              <circle cx="140" cy="117" r="14" stroke="#FF6B6B" stroke-width="1.5" opacity="0.4" fill="none"/>
-              <circle cx="140" cy="117" r="22" stroke="#FF6B6B" stroke-width="1" opacity="0.2" fill="none"/>
-            </svg>
+          <div class="onboarding__card">
+            <div class="onboarding__illustration">
+              <svg viewBox="0 0 300 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="150" cy="145" r="55" fill="#f8f0ff"/>
+                <rect x="115" y="120" width="70" height="50" rx="12" fill="white" stroke="#E0E0E0" stroke-width="1.5"/>
+                <rect x="130" y="145" width="40" height="25" rx="6" fill="#FF6B81" opacity="0.12"/>
+                <circle cx="130" cy="178" r="7" fill="#2FA0E8" opacity="0.15"/>
+                <circle cx="130" cy="178" r="3" fill="#2FA0E8"/>
+                <circle cx="170" cy="178" r="7" fill="#2FA0E8" opacity="0.15"/>
+                <circle cx="170" cy="178" r="3" fill="#2FA0E8"/>
+                <rect x="132" y="108" width="36" height="18" rx="4" fill="#1C1B3A"/>
+                <path d="M105 125 Q105 100 135 100 L165 100 Q195 100 195 125" stroke="url(#tr-grad)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <path d="M185 140 Q185 100 150 85 Q115 100 115 140" stroke="url(#tr-grad)" stroke-width="1.5" stroke-dasharray="5,5" fill="none" opacity="0.6"/>
+                <circle cx="104" cy="146" r="3" fill="#FF6B81"/>
+                <circle cx="115" cy="180" r="2.5" fill="#2FA0E8"/>
+                <circle cx="185" cy="178" r="2" fill="#8B5CF6"/>
+                <circle cx="196" cy="148" r="3" fill="#FF6B81" opacity="0.6"/>
+                <defs><linearGradient id="tr-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF6B81"/><stop offset="100%" stop-color="#2FA0E8"/></linearGradient></defs>
+              </svg>
+              <div class="onboarding__badge">
+                <span class="onboarding__badge-dot"></span>
+                <span class="onboarding__badge-text">IN TRANSIT</span>
+              </div>
+            </div>
           </div>
           <div class="onboarding__text">
-            <h2 class="onboarding__title">Track Every Step,<br/>In Real Time</h2>
-            <p class="onboarding__desc">Know exactly where your clothes are — from pickup to delivery, live on your map.</p>
+            <h2 class="onboarding__title">Track Every Step</h2>
+            <p class="onboarding__desc">Follow your laundry journey in real-time. From pickup to delivery, stay informed with every step our professional riders take.</p>
           </div>
         </div>
 
         <div class="onboarding__slide" data-slide="2">
-          <div class="onboarding__illustration">
-            <svg viewBox="0 0 280 260" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="140" cy="145" rx="110" ry="95" fill="#FFF3E0"/>
-              <path d="M100 100 L80 130 L105 130 L105 195 L175 195 L175 130 L200 130 L180 100 L160 110 Q140 125 120 110 Z" fill="white" stroke="#E0E0E0" stroke-width="1.5"/>
-              <path d="M120 110 Q140 100 160 110 L140 130 Z" fill="#EDE9FF"/>
-              <path d="M115 150 L115 185" stroke="#E8E6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
-              <path d="M165 150 L165 185" stroke="#E8E6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
-              <circle cx="168" cy="108" r="24" fill="#06D6A0"/>
-              <path d="M157 108 L164 116 L180 100" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-              <path d="M75 155 L77.5 148 L80 155 L87 157.5 L80 160 L77.5 167 L75 160 L68 157.5 Z" fill="#FFD166"/>
-              <path d="M195 160 L197 155 L199 160 L204 162 L199 164 L197 169 L195 164 L190 162 Z" fill="#5B4FBE" opacity="0.7"/>
-              <circle cx="90" cy="200" r="5" fill="#FF6B6B" opacity="0.5"/>
-              <circle cx="200" cy="195" r="4" fill="#06D6A0" opacity="0.6"/>
-            </svg>
+          <div class="onboarding__card">
+            <div class="onboarding__illustration">
+              <svg viewBox="0 0 300 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="95" y="50" width="110" height="200" rx="18" fill="#f0faff"/>
+                <rect x="95" y="50" width="110" height="60" rx="18" fill="#2FA0E8" opacity="0.08"/>
+                <rect x="115" y="55" width="30" height="30" rx="4" fill="white"/>
+                <rect x="150" y="55" width="30" height="30" rx="4" fill="white"/>
+                <rect x="115" y="90" width="65" height="6" rx="3" fill="#EDE9FF"/>
+                <rect x="115" y="102" width="50" height="5" rx="2.5" fill="#DDD8F8"/>
+                <rect x="115" y="170" width="40" height="6" rx="3" fill="#EDE9FF"/>
+                <rect x="115" y="182" width="55" height="5" rx="2.5" fill="#DDD8F8"/>
+                <rect x="115" y="130" width="50" height="35" rx="8" fill="#FF6B81" opacity="0.1"/>
+                <rect x="118" y="132" width="44" height="12" rx="4" fill="#FF6B81" opacity="0.3"/>
+                <rect x="118" y="147" width="30" height="6" rx="3" fill="#FF6B81" opacity="0.2"/>
+                <rect x="118" y="157" width="36" height="6" rx="3" fill="#FF6B81" opacity="0.15"/>
+                <circle cx="105" cy="210" r="15" fill="#FF6B81" opacity="0.08"/>
+                <circle cx="105" cy="210" r="7" fill="#FF6B81" opacity="0.2"/>
+                <circle cx="195" cy="215" r="10" fill="#2FA0E8" opacity="0.08"/>
+                <circle cx="195" cy="215" r="4" fill="#2FA0E8" opacity="0.2"/>
+                <circle cx="150" cy="235" r="12" fill="#8B5CF6" opacity="0.06"/>
+                <defs><linearGradient id="pc-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF6B81"/><stop offset="100%" stop-color="#2FA0E8"/></linearGradient></defs>
+              </svg>
+            </div>
           </div>
           <div class="onboarding__text">
-            <h2 class="onboarding__title">Pro Care,<br/>Every Time</h2>
-            <p class="onboarding__desc">Expert handling for every fabric. Stains removed, clothes returned folded and fresh.</p>
+            <h2 class="onboarding__title">Pro Care</h2>
+            <p class="onboarding__desc">Expert cleaning, delicate handling, and zero effort for you. Join thousands of happy customers who trust Spaccle for their daily laundry needs.</p>
           </div>
         </div>
 
       </div>
 
-      <div class="onboarding__dots" id="onboarding-dots">
-        <span class="onboarding__dot active" data-dot="0"></span>
-        <span class="onboarding__dot" data-dot="1"></span>
-        <span class="onboarding__dot" data-dot="2"></span>
-      </div>
+      <div class="onboarding__bottom">
+        <div class="onboarding__dots" id="onboarding-dots">
+          <span class="onboarding__dot active" data-dot="0"></span>
+          <span class="onboarding__dot" data-dot="1"></span>
+          <span class="onboarding__dot" data-dot="2"></span>
+        </div>
 
-      <div class="onboarding__nav">
-        <button class="btn btn--ghost" id="btn-skip">Skip</button>
-        <button class="btn btn--primary btn--pill" id="btn-next">
+        <button class="onboarding__btn" id="btn-next">
           <span id="btn-next-label">Next</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>

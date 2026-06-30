@@ -80,33 +80,19 @@ const OnboardingPage = (() => {
       dot.classList.toggle('active', i === currentSlide);
     });
 
-    // Update tab indicator
-    updateTabIndicator();
-
     // Update next button
     const label = document.getElementById('btn-next-label');
     const btn = document.getElementById('btn-next');
 
     if (currentSlide === TOTAL_SLIDES - 1) {
       label.textContent = 'Get Started';
-      btn.classList.add('get-started');
     } else {
       label.textContent = 'Next';
-      btn.classList.remove('get-started');
     }
 
     // Show/hide skip
     const skipBtn = document.getElementById('btn-skip');
     skipBtn.style.visibility = currentSlide === TOTAL_SLIDES - 1 ? 'hidden' : 'visible';
-  }
-
-  function updateTabIndicator() {
-    const dots = document.querySelectorAll('.onboarding__dot');
-    const activeDot = dots[currentSlide];
-    const indicator = document.querySelector('.onboarding__tab-indicator');
-    if (!indicator || !activeDot) return;
-    indicator.style.left = activeDot.offsetLeft + 'px';
-    indicator.style.width = activeDot.offsetWidth + 'px';
   }
 
   async function finish() {
