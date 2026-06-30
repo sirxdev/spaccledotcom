@@ -243,15 +243,14 @@
       <div class="auth__header">
         <div class="auth__header-bg"></div>
         <div class="auth__header-content">
-          <div class="auth__logo" id="auth-logo-tap">
-            <svg width="36" height="36" viewBox="0 0 80 80" fill="none">
-              <circle cx="40" cy="40" r="28" fill="rgba(255,255,255,0.15)"/>
-              <circle cx="40" cy="40" r="20" stroke="white" stroke-width="2.5" fill="none"/>
-              <circle cx="40" cy="40" r="8" stroke="white" stroke-width="2" fill="rgba(255,255,255,0.2)"/>
-              <path d="M28 42 Q31 38 34 42 Q37 46 40 42 Q43 38 46 42 Q49 46 52 42" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
-              <rect x="37" y="22" width="6" height="3" rx="1.5" fill="white"/>
+          <button class="auth__back" id="auth-back" aria-label="Go back" style="display:none">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span class="auth__logo-text">Spaccle</span>
+          </button>
+          <div class="auth__header-text" id="auth-logo-tap">
+            <h1 class="auth__header-title" id="auth-header-title">Sign In</h1>
+            <p class="auth__header-sub" id="auth-header-sub">Welcome back to Spaccle</p>
           </div>
           <span class="auth__rider-tag" id="auth-rider-tag">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -269,15 +268,10 @@
         <div class="auth__tabs">
           <button class="auth__tab active" data-tab="login">Sign In</button>
           <button class="auth__tab" data-tab="register">Create Account</button>
-          <div class="auth__tab-indicator"></div>
         </div>
 
         <!-- Login Form -->
         <form class="auth__form active" id="form-login" data-form="login" novalidate>
-          <div class="auth__greeting">
-            <h2 class="auth__form-title">Welcome back</h2>
-            <p class="auth__form-sub">Sign in to your account</p>
-          </div>
 
           <div class="form-group">
             <label class="form-label" for="login-email">Email address</label>
@@ -313,7 +307,7 @@
           <button type="button" class="auth__forgot" id="btn-forgot">Forgot password?</button>
           <div class="auth__alert" id="login-alert"></div>
 
-          <button type="submit" class="btn btn--primary btn--full btn--lg" id="btn-login">
+          <button type="submit" class="btn btn--gradient btn--full btn--lg" id="btn-login">
             <span class="btn__label">Sign In</span>
             <div class="btn__spinner"></div>
           </button>
@@ -322,52 +316,15 @@
         <!-- Register Form — 2 steps -->
         <form class="auth__form" id="form-register" data-form="register" novalidate>
 
-          <!-- Step indicator -->
-          <div class="reg-steps">
-            <div class="reg-step active" id="reg-step-ind-1">
-              <span class="reg-step__num">1</span>
-              <span class="reg-step__label">Account</span>
-            </div>
-            <div class="reg-step__line"><div class="reg-step__line-fill" id="reg-step-line-fill"></div></div>
-            <div class="reg-step" id="reg-step-ind-2">
-              <span class="reg-step__num">2</span>
-              <span class="reg-step__label">Recovery</span>
-            </div>
+          <!-- Progress dots -->
+          <div class="auth__progress" id="reg-step-progress">
+            <span class="auth__progress__dot active" data-step="1"></span>
+            <span class="auth__progress__dot" data-step="2"></span>
+            <span class="auth__progress__dot" data-step="3"></span>
           </div>
 
           <!-- ── Step 1: Account details ── -->
           <div class="reg-body active" id="reg-body-1">
-            <div class="auth__greeting">
-              <h2 class="auth__form-title">Join Spaccle</h2>
-              <p class="auth__form-sub">Create your free account</p>
-            </div>
-
-            <div class="form-group" id="reg-role-group">
-              <label class="form-label">I want to use Spaccle as a</label>
-              <div class="reg-role-options">
-                <label class="reg-role-option active" data-role="customer">
-                  <input type="radio" name="reg-role" value="customer" checked />
-                  <div class="reg-role-option__icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#4A90E2" stroke-width="1.8"/>
-                      <circle cx="12" cy="7" r="4" stroke="#4A90E2" stroke-width="1.8"/>
-                    </svg>
-                  </div>
-                  <span>Customer</span>
-                </label>
-                <label class="reg-role-option" data-role="rider">
-                  <input type="radio" name="reg-role" value="rider" />
-                  <div class="reg-role-option__icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M14 18V16a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="#06D6A0" stroke-width="1.8"/>
-                      <path d="M18 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#06D6A0" stroke-width="1.8"/>
-                      <path d="M14 10h4l2 4h2" stroke="#06D6A0" stroke-width="1.8"/>
-                    </svg>
-                  </div>
-                  <span>Rider</span>
-                </label>
-              </div>
-            </div>
 
             <div class="form-group">
               <label class="form-label" for="reg-name">Full name</label>
@@ -433,12 +390,12 @@
               <label class="checkbox-label">
                 <input type="checkbox" id="reg-terms" class="checkbox-input" />
                 <span class="checkbox-custom"></span>
-                <span class="checkbox-text">I agree to the <a href="#" class="auth__link">Terms</a> and <a href="#" class="auth__link">Privacy Policy</a></span>
+                <span class="checkbox-text">I agree to the <a href="#" class="auth__link">Terms &amp; Conditions</a> and <a href="#" class="auth__link">Privacy Policy</a></span>
               </label>
               <span class="form-error" id="reg-terms-err"></span>
             </div>
 
-            <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-reg-continue">
+            <button type="button" class="btn btn--gradient btn--full btn--lg" id="btn-reg-continue">
               Continue
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -446,15 +403,15 @@
             </button>
           </div>
 
-          <!-- ── Step 2: Recovery question ── -->
+          <!-- ── Step 2: Final Details ── -->
           <div class="reg-body" id="reg-body-2">
             <div class="auth__greeting">
-              <h2 class="auth__form-title">Recovery Setup</h2>
-              <p class="auth__form-sub">Choose a question only you can answer</p>
+              <h2 class="auth__form-title">Final Details</h2>
+              <p class="auth__form-sub">Complete your profile security and choose how you'll use Spaccle.</p>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="reg-question">Security question</label>
+              <label class="form-label" for="reg-question">Security Question</label>
               <div class="form-select-wrap">
                 <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
@@ -472,7 +429,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="reg-answer">Your answer</label>
+              <label class="form-label" for="reg-answer">Your Answer</label>
               <div class="form-input-wrap">
                 <svg class="form-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -490,42 +447,86 @@
               <span class="form-error" id="reg-answer-err"></span>
             </div>
 
+            <!-- Role Selection (moved from Step 1) -->
+            <div class="form-group" id="reg-role-group">
+              <label class="form-label">Select Your Role</label>
+              <div class="reg-role-cards">
+                <label class="reg-role-card active" data-role="customer">
+                  <input type="radio" name="reg-role" value="customer" checked />
+                  <div class="reg-role-card__icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#4A90E2" stroke-width="1.8"/>
+                      <circle cx="12" cy="7" r="4" stroke="#4A90E2" stroke-width="1.8"/>
+                    </svg>
+                  </div>
+                  <div class="reg-role-card__body">
+                    <div class="reg-role-card__row">
+                      <span class="reg-role-card__title">Customer</span>
+                      <span class="reg-role-card__badge">MOST POPULAR</span>
+                    </div>
+                    <span class="reg-role-card__desc">Order laundry &amp; deliveries</span>
+                  </div>
+                  <div class="reg-role-card__check">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </label>
+                <label class="reg-role-card" data-role="rider">
+                  <input type="radio" name="reg-role" value="rider" />
+                  <div class="reg-role-card__icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M14 18V16a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="#06D6A0" stroke-width="1.8"/>
+                      <path d="M18 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#06D6A0" stroke-width="1.8"/>
+                      <path d="M14 10h4l2 4h2" stroke="#06D6A0" stroke-width="1.8"/>
+                    </svg>
+                  </div>
+                  <div class="reg-role-card__body">
+                    <div class="reg-role-card__row">
+                      <span class="reg-role-card__title">Rider</span>
+                    </div>
+                    <span class="reg-role-card__desc">Earn money by delivering</span>
+                  </div>
+                  <div class="reg-role-card__check">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div class="auth__alert" id="register-alert"></div>
 
-            <div class="reg-step2-nav">
-              <button type="button" class="btn btn--ghost" id="btn-reg-back">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Back
-              </button>
-              <button type="submit" class="btn btn--primary btn--lg" id="btn-register">
-                <span class="btn__label">Create Account</span>
-                <div class="btn__spinner"></div>
-              </button>
-            </div>
+            <button type="submit" class="btn btn--gradient btn--full btn--lg" id="btn-register">
+              <span class="btn__label">Create Account</span>
+              <div class="btn__spinner"></div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <p class="auth__terms-text">By continuing, you agree to our <a href="#" class="auth__link">Terms of Service</a></p>
           </div>
 
         </form>
       </div>
 
-      <div class="auth__divider"><span>or continue with</span></div>
+      <div class="auth__divider"><span>OR CONTINUE WITH</span></div>
 
       <div class="auth__social">
-        <button class="btn btn--social">
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+        <button class="auth__social-btn" aria-label="Continue with Google">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          Google
         </button>
-        <button class="btn btn--social">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
+        <button class="auth__social-btn" aria-label="Continue with Facebook">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
           </svg>
-          Facebook
         </button>
       </div>
     </div>
@@ -557,15 +558,13 @@
       <!-- Progress dots -->
       <div class="forgot-progress">
         <div class="forgot-progress__dot active" data-step="1"></div>
-        <div class="forgot-progress__line"><div class="forgot-progress__line-fill" id="fp-line-1"></div></div>
         <div class="forgot-progress__dot" data-step="2"></div>
-        <div class="forgot-progress__line"><div class="forgot-progress__line-fill" id="fp-line-2"></div></div>
         <div class="forgot-progress__dot" data-step="3"></div>
       </div>
 
       <!-- Step 1: Enter email -->
       <div class="forgot-step active" id="fp-step-1">
-        <p class="forgot-step__desc">Enter the email address associated with your account.</p>
+        <p class="forgot-step__desc">Enter your email to find your account.</p>
         <div class="form-group">
           <label class="form-label" for="fp-email">Email address</label>
           <div class="form-input-wrap">
@@ -578,10 +577,14 @@
           <span class="form-error" id="fp-email-err"></span>
         </div>
         <div class="auth__alert" id="fp-step1-alert"></div>
-        <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-find">
+        <button type="button" class="btn btn--gradient btn--full btn--lg" id="btn-fp-find">
           <span class="btn__label">Find Account</span>
           <div class="btn__spinner"></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
+        <button type="button" class="auth__cancel-link" id="btn-fp-cancel">Cancel and go back</button>
       </div>
 
       <!-- Step 2: Answer security question -->
@@ -614,7 +617,7 @@
           <span class="form-error" id="fp-answer-err"></span>
         </div>
         <div class="auth__alert" id="fp-step2-alert"></div>
-        <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-verify">
+        <button type="button" class="btn btn--gradient btn--full btn--lg" id="btn-fp-verify">
           <span class="btn__label">Verify Answer</span>
           <div class="btn__spinner"></div>
         </button>
@@ -654,7 +657,7 @@
           <span class="form-error" id="fp-confirmpw-err"></span>
         </div>
         <div class="auth__alert" id="fp-step3-alert"></div>
-        <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-reset">
+        <button type="button" class="btn btn--gradient btn--full btn--lg" id="btn-fp-reset">
           <span class="btn__label">Reset Password</span>
           <div class="btn__spinner"></div>
         </button>
@@ -670,7 +673,7 @@
           </div>
           <h3 class="forgot-success__title">Password Reset!</h3>
           <p class="forgot-success__desc">Your password has been updated. You can now sign in with your new password.</p>
-          <button type="button" class="btn btn--primary btn--full btn--lg" id="btn-fp-done">Sign In Now</button>
+          <button type="button" class="btn btn--gradient btn--full btn--lg" id="btn-fp-done">Sign In Now</button>
         </div>
       </div>
 

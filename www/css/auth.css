@@ -60,6 +60,7 @@
   height: 100%;
   display: flex;
   align-items: flex-start;
+  gap: 4px;
   padding: 0 var(--gutter);
   padding-top: calc(env(safe-area-inset-top, 20px) + 20px);
   width: 100%;
@@ -68,17 +69,40 @@
   margin-right: auto;
 }
 
-.auth__logo {
+.auth__back {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  color: rgba(255,255,255,0.85);
+  transition: background 0.2s;
+  margin-left: -8px;
+}
+.auth__back:hover { background: rgba(255,255,255,0.12); }
+
+.auth__header-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
-.auth__logo-text {
-  color: white;
-  font-size: 24px;
+.auth__header-title {
+  font-size: 26px;
   font-weight: 800;
+  color: white;
   letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.auth__header-sub {
+  margin-top: 4px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.78);
+  font-weight: 500;
 }
 
 /* Card */
@@ -93,36 +117,52 @@
   z-index: 1;
 }
 
-/* Tabs */
+/* Tabs — pill/segment style */
 .auth__tabs {
   display: flex;
-  position: relative;
-  border-bottom: 1.5px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius-full);
+  padding: 4px;
   margin-bottom: 28px;
+  gap: 4px;
 }
 
 .auth__tab {
   flex: 1;
-  padding: 20px 8px 18px;
-  font-size: 15px;
+  padding: 12px 16px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-3);
-  letter-spacing: 0.01em;
-  transition: color 0.2s;
-  position: relative;
-  z-index: 1;
+  transition: all 0.3s var(--ease-smooth);
 }
 
-.auth__tab.active { color: var(--primary); }
+.auth__tab.active {
+  background: var(--surface);
+  color: var(--text-1);
+  box-shadow: 0 1px 4px rgba(91,79,190,0.1);
+}
 
-.auth__tab-indicator {
-  position: absolute;
-  bottom: -1.5px;
-  left: 0;
-  height: 2.5px;
+/* Progress dots (register step indicator) */
+.auth__progress {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-top: 4px;
+}
+
+.auth__progress__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s, transform 0.3s var(--ease-spring);
+}
+
+.auth__progress__dot.active {
   background: var(--primary);
-  border-radius: var(--radius-full) var(--radius-full) 0 0;
-  transition: transform 0.3s var(--ease-spring);
+  transform: scale(1.2);
 }
 
 /* Forms */
@@ -192,12 +232,68 @@
   background: var(--border);
 }
 
-/* Social buttons */
+/* Social buttons — circular */
 .auth__social {
   display: flex;
-  gap: 12px;
-  padding: 0 var(--gutter) 8px;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 var(--gutter) 12px;
 }
+
+.auth__social-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.auth__social-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--primary);
+}
+
+/* Gradient button (pink → blue) */
+.btn--gradient {
+  background: linear-gradient(135deg, #FF6B81 0%, #2FA0E8 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(255, 107, 129, 0.3);
+  border: none;
+}
+.btn--gradient:hover { opacity: 0.92; }
+.btn--gradient:active { transform: scale(0.97); }
+
+.btn--gradient .btn__spinner {
+  border-color: rgba(255,255,255,0.35);
+  border-top-color: white;
+}
+
+/* Terms text (step 2 footer) */
+.auth__terms-text {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+/* Cancel link (forgot sheet) */
+.auth__cancel-link {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-3);
+  margin-top: 16px;
+  padding: 8px;
+  transition: color 0.2s;
+}
+.auth__cancel-link:hover { color: var(--text-1); }
 
 @media (orientation: landscape) and (max-height: 520px) {
   .auth__header {
@@ -219,73 +315,7 @@
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* ── Registration step indicator ─────────────────────────────── */
-.reg-steps {
-  display: flex;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-top: 8px;
-}
-
-.reg-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.reg-step__num {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-3);
-  background: var(--bg);
-  transition: border-color 0.3s, background 0.3s, color 0.3s;
-}
-
-.reg-step__label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.02em;
-  transition: color 0.3s;
-}
-
-.reg-step.active .reg-step__num,
-.reg-step.done .reg-step__num {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: white;
-}
-.reg-step.active .reg-step__label,
-.reg-step.done .reg-step__label { color: var(--primary); }
-
-.reg-step__line {
-  flex: 1;
-  height: 2px;
-  background: var(--border);
-  margin: 0 8px;
-  margin-bottom: 14px;
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.reg-step__line-fill {
-  height: 100%;
-  background: var(--primary);
-  border-radius: var(--radius-full);
-  width: 100%;
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.5s var(--ease-smooth);
-}
+/* ── Role selection cards (Step 2) ──────────────────────────── */
 
 /* Step body transitions */
 .reg-body {
@@ -294,23 +324,117 @@
 }
 .reg-body.active { display: flex; animation: form-slide-in 0.3s var(--ease-out) both; }
 
-/* Step 2 nav row */
-.reg-step2-nav {
+.reg-role-cards {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
   margin-top: 4px;
 }
 
-.reg-step2-nav .btn--ghost {
-  flex-shrink: 0;
-  color: var(--text-2);
-  gap: 6px;
-  padding: 17px 12px;
+.reg-role-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  text-align: left;
+  width: 100%;
+  position: relative;
 }
 
-.reg-step2-nav .btn--primary {
+.reg-role-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reg-role-card.active {
+  border-color: var(--primary);
+  background: rgba(91, 79, 190, 0.04);
+  box-shadow: 0 0 0 1px rgba(91, 79, 190, 0.08);
+}
+
+.reg-role-card__icon {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reg-role-card.active .reg-role-card__icon {
+  background: rgba(91, 79, 190, 0.1);
+}
+
+.reg-role-card__body {
   flex: 1;
+  min-width: 0;
+}
+
+.reg-role-card__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.reg-role-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.reg-role-card__badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #FF6B81 0%, #2FA0E8 100%);
+  color: white;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  line-height: 1.2;
+}
+
+.reg-role-card__desc {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+.reg-role-card__check {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.reg-role-card.active .reg-role-card__check {
+  background: linear-gradient(135deg, #4A90E2 0%, #5B4FBE 100%);
+  border-color: transparent;
+}
+
+.reg-role-card__check svg {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.reg-role-card.active .reg-role-card__check svg {
+  opacity: 1;
 }
 
 /* ── Select field ─────────────────────────────────────────────── */
@@ -441,9 +565,9 @@
 /* Progress dots */
 .forgot-progress {
   display: flex;
-  align-items: center;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 28px;
-  gap: 0;
 }
 
 .forgot-progress__dot {
@@ -451,7 +575,6 @@
   height: 10px;
   border-radius: 50%;
   background: var(--border);
-  flex-shrink: 0;
   transition: background 0.3s, transform 0.3s var(--ease-spring);
 }
 
@@ -461,25 +584,6 @@
 }
 
 .forgot-progress__dot.done { background: var(--accent); }
-
-.forgot-progress__line {
-  flex: 1;
-  height: 2px;
-  background: var(--border);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  margin: 0 4px;
-}
-
-.forgot-progress__line-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: var(--radius-full);
-  width: 100%;
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.5s var(--ease-smooth);
-}
 
 /* Forgot steps */
 .forgot-step { display: none; flex-direction: column; gap: 0; }
@@ -551,61 +655,9 @@
   max-width: 280px;
 }
 
-/* Role selector on registration */
+/* Role selector group */
 .reg-role-group {
   margin-bottom: 20px;
-}
-
-.reg-role-options {
-  display: flex;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.reg-role-option {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 12px;
-  background: var(--bg);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
-}
-
-.reg-role-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.reg-role-option.active,
-.reg-role-option:focus-within {
-  border-color: var(--primary);
-  background: rgba(91, 79, 190, 0.05);
-}
-
-.reg-role-option__icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.reg-role-option.active .reg-role-option__icon {
-  background: rgba(91, 79, 190, 0.1);
-}
-
-.reg-role-option span {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-1);
 }
 
 /* ── Rider Portal tag in auth header ─────────────────────────── */
@@ -650,9 +702,6 @@
 }
 
 .page--auth--rider .auth__tab.active {
-  color: #06A07A;
-}
-
-.page--auth--rider .auth__tab-indicator {
-  background: #06D6A0;
+  background: rgba(6, 214, 160, 0.12);
+  color: #06D6A0;
 }

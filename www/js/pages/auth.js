@@ -56,33 +56,29 @@ const AuthPage = (() => {
     if (!riderMode) setupAdminZone();
     if (riderMode) hideRoleSelect();
     applyRiderMode(riderMode);
-    positionTabIndicator('login');
+    updateAuthHeader('login');
+    setupBackButton();
   }
 
   function applyRiderMode(isRider) {
     const authPage = document.getElementById('page-auth');
-    const loginTitle = document.querySelector('#form-login .auth__form-title');
-    const loginSub = document.querySelector('#form-login .auth__form-sub');
     if (isRider) {
       authPage.classList.add('page--auth--rider');
-      if (loginTitle) loginTitle.textContent = 'Rider Sign In';
-      if (loginSub) loginSub.textContent = 'Access your delivery dashboard';
     } else {
       authPage.classList.remove('page--auth--rider');
-      if (loginTitle) loginTitle.textContent = 'Welcome back';
-      if (loginSub) loginSub.textContent = 'Sign in to your account';
     }
+    updateAuthHeader(activeTab);
   }
 
   function setupRoleSelect() {
-    const options = document.querySelectorAll('.reg-role-option');
-    options.forEach(opt => {
-      opt.addEventListener('click', () => {
-        options.forEach(o => o.classList.remove('active'));
-        opt.classList.add('active');
-        const input = opt.querySelector('input');
-        if (input) input.checked = true;
-      });
+    document.addEventListener('click', e => {
+      const card = e.target.closest('.reg-role-card, .reg-role-option');
+      if (!card) return;
+      const all = document.querySelectorAll('.reg-role-card, .reg-role-option');
+      all.forEach(el => el.classList.remove('active'));
+      card.classList.add('active');
+      const input = card.querySelector('input');
+      if (input) input.checked = true;
     });
   }
 
@@ -153,22 +149,42 @@ const AuthPage = (() => {
 
     // Reset register to step 1 when switching back
     if (tab === 'register') goRegStep(1);
-    positionTabIndicator(tab);
+    updateAuthHeader(tab);
     clearAllAlerts();
   }
 
-  function positionTabIndicator(tab) {
-    const tabEl = document.querySelector(`.auth__tab[data-tab="${tab}"]`);
-    const indicator = document.querySelector('.auth__tab-indicator');
-    if (!tabEl || !indicator) return;
-    indicator.style.width = tabEl.offsetWidth + 'px';
-    indicator.style.transform = 'translateX(' + tabEl.offsetLeft + 'px)';
+  function updateAuthHeader(tab) {
+    const title = document.getElementById('auth-header-title');
+    const sub = document.getElementById('auth-header-sub');
+    const back = document.getElementById('auth-back');
+    if (!title || !sub) return;
+    if (riderMode) {
+      title.textContent = 'Rider Sign In';
+      sub.textContent = 'Access your delivery dashboard';
+      if (back) back.style.display = 'none';
+    } else if (tab === 'login') {
+      title.textContent = 'Sign In';
+      sub.textContent = 'Welcome back to Spaccle';
+      if (back) back.style.display = 'none';
+    } else {
+      title.textContent = 'Create Account';
+      sub.textContent = 'Join the Spaccle community today.';
+      if (back) back.style.display = 'flex';
+    }
+  }
+
+  function setupBackButton() {
+    const back = document.getElementById('auth-back');
+    if (back) {
+      back.addEventListener('click', () => {
+        if (activeTab === 'register') switchTab('login');
+      });
+    }
   }
 
   /* ── Registration multi-step ──────────────────────────────────── */
   function setupRegSteps() {
     document.getElementById('btn-reg-continue').addEventListener('click', handleRegContinue);
-    document.getElementById('btn-reg-back').addEventListener('click', () => goRegStep(1));
   }
 
   function handleRegContinue() {
@@ -185,17 +201,15 @@ const AuthPage = (() => {
     regStep = step;
     const body1 = document.getElementById('reg-body-1');
     const body2 = document.getElementById('reg-body-2');
-    const ind1  = document.getElementById('reg-step-ind-1');
-    const ind2  = document.getElementById('reg-step-ind-2');
-    const fill  = document.getElementById('reg-step-line-fill');
+    const dots = document.querySelectorAll('.auth__progress__dot');
 
     body1.classList.toggle('active', step === 1);
     body2.classList.toggle('active', step === 2);
 
-    ind1.classList.toggle('active', step === 1);
-    ind1.classList.toggle('done',   step === 2);
-    ind2.classList.toggle('active', step === 2);
-    fill.style.transform = step === 2 ? 'scaleX(1)' : 'scaleX(0)';
+    dots.forEach((d, i) => {
+      d.classList.remove('active');
+      if (i + 1 === step) d.classList.add('active');
+    });
 
     if (step === 2) {
       document.getElementById('reg-question').focus();
@@ -395,6 +409,9 @@ const AuthPage = (() => {
     document.getElementById('btn-fp-reset').addEventListener('click', handleFpReset);
     document.getElementById('btn-fp-done').addEventListener('click', () => { closeForgot(); switchTab('login'); });
 
+    const cancelBtn = document.getElementById('btn-fp-cancel');
+    if (cancelBtn) cancelBtn.addEventListener('click', closeForgot);
+
     // Close on swipe-down
     const sheet = document.querySelector('.forgot-sheet');
     let startY = 0;
@@ -426,8 +443,6 @@ const AuthPage = (() => {
       d.classList.toggle('active', i === 0);
       d.classList.remove('done');
     });
-    document.getElementById('fp-line-1').style.transform = 'scaleX(0)';
-    document.getElementById('fp-line-2').style.transform = 'scaleX(0)';
 
     // Clear fields & errors
     ['fp-email', 'fp-answer', 'fp-newpw', 'fp-confirmpw'].forEach(id => {
@@ -449,16 +464,12 @@ const AuthPage = (() => {
     document.querySelectorAll('.forgot-step').forEach(s => s.classList.remove('active'));
     document.getElementById('fp-step-' + step).classList.add('active');
 
-    // Progress: step 2 = line 1 filled, step 3 = line 2 filled, step 4 = all filled
     const dots = document.querySelectorAll('.forgot-progress__dot');
     dots.forEach((d, i) => {
       d.classList.remove('active', 'done');
       if (i + 1 < step)      d.classList.add('done');
       else if (i + 1 === step) d.classList.add('active');
     });
-
-    if (step >= 2) document.getElementById('fp-line-1').style.transform = 'scaleX(1)';
-    if (step >= 3) document.getElementById('fp-line-2').style.transform = 'scaleX(1)';
   }
 
   async function handleFpFind() {
