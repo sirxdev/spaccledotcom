@@ -143,19 +143,11 @@ const HomePage = (() => {
     const firstName = (user.name || '').split(' ')[0] || 'there';
     const initial = firstName[0].toUpperCase();
 
-    document.getElementById('home-greeting-sub').textContent = getGreeting() + ',';
-    document.getElementById('home-greeting-name').textContent = firstName;
+    document.getElementById('home-greeting-hello').textContent = `Hello, ${firstName}! 👋`;
     document.getElementById('home-avatar-letter').textContent = initial;
     document.getElementById('profile-avatar-lg').textContent = initial;
     document.getElementById('profile-name').textContent = user.name || firstName;
     document.getElementById('profile-email').textContent = user.email || '';
-  }
-
-  function getGreeting() {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
-    return 'Good evening';
   }
 
   /* ── Bottom nav ──────────────────────────────────────────────── */
@@ -480,7 +472,7 @@ const HomePage = (() => {
       switchTab('track');
     });
 
-    document.getElementById('btn-order-track-map').addEventListener('click', openOrderMap);
+    document.getElementById('btn-order-track-map')?.addEventListener('click', openOrderMap);
     document.getElementById('btn-order-map-close').addEventListener('click', closeOrderMap);
     document.getElementById('btn-order-chat-rider').addEventListener('click', () => {
       closeOrderMap();
@@ -1423,12 +1415,11 @@ const HomePage = (() => {
     card.style.display = '';
 
     document.getElementById('order-status-label').textContent = statusLabel(order.status);
-    document.getElementById('order-id-val').textContent = '#' + (order.publicId || 'SP-000000');
-    document.getElementById('order-date-val').textContent = order.pickupDay || '—';
-    document.getElementById('order-time-val').textContent = order.pickupTime || '—';
-    document.getElementById('order-items-val').textContent = serviceName(order.serviceCategories || order.service);
+    document.getElementById('order-id-val').textContent = 'Order #' + (order.publicId || 'SP-000000');
+    document.getElementById('order-status-text').textContent = statusTitle(order.status);
+    document.getElementById('order-eta-text').textContent = 'Estimated delivery: ' + estimateReady(order);
 
-    const steps = Array.from(card.querySelectorAll('.order-track-step'));
+    const dots = card.querySelectorAll('.order-progress-dot');
     const map = {
       scheduled:  0,
       assigned:   1,
@@ -1441,9 +1432,9 @@ const HomePage = (() => {
       cancelled:  0,
     };
     const activeIdx = map[order.status] ?? 0;
-    steps.forEach((s, idx) => {
-      s.classList.toggle('done', idx < activeIdx);
-      s.classList.toggle('active', idx === activeIdx);
+    dots.forEach((d, idx) => {
+      d.classList.toggle('done', idx < activeIdx);
+      d.classList.toggle('active', idx === activeIdx);
     });
 
     checkOrderStatusChange(order).catch(() => {});
@@ -2216,7 +2207,8 @@ const HomePage = (() => {
       const updated = await SpaccleDB.updateUserProfile(user.userId, { name, phone });
       user = SpaccleDB.getSession();
       document.getElementById('profile-name').textContent = updated.name;
-      document.getElementById('home-greeting-name').textContent = (updated.name || '').split(' ')[0];
+      const firstName = (updated.name || '').split(' ')[0] || 'there';
+      document.getElementById('home-greeting-hello').textContent = `Hello, ${firstName}! 👋`;
       if (updated.name?.length) {
         document.getElementById('home-avatar-letter').textContent = updated.name[0].toUpperCase();
         document.getElementById('profile-avatar-lg').textContent = updated.name[0].toUpperCase();
@@ -2856,14 +2848,20 @@ const HomePage = (() => {
       if (!included) { bar.style.display = 'none'; return; }
       const remaining = Number(sub.itemsRemaining) || 0;
       const pct = Math.min(100, Math.round(((included - remaining) / included) * 100));
-      const colour = pct >= 90 ? '#E53935' : pct >= 70 ? '#FB8C00' : '#06D6A0';
+      const colour = pct >= 90 ? '#E53935' : pct >= 70 ? '#FB8C00' : '#5B4FBE';
       const planName = sub.planName || 'Monthly Plan';
       bar.style.display = '';
       bar.innerHTML = `
-        <div class="sub-remaining">
-          <div class="sub-remaining__info">
-            <div class="sub-remaining__badge" style="background:${colour}">${remaining}<span class="sub-remaining__unit"> items left</span></div>
-            <div class="sub-remaining__plan">${escapeHtml(planName)}</div>
+        <div class="sub-card">
+          <div class="sub-card__top">
+            <div class="sub-card__plan">${escapeHtml(planName)}</div>
+            <div class="sub-card__remaining" style="color:${colour}">${remaining}<span class="sub-card__remaining-label"> items left</span></div>
+          </div>
+          <div class="sub-card__bar">
+            <div class="sub-card__track">
+              <div class="sub-card__fill" style="transform:scaleX(${pct / 100});background:${colour}"></div>
+            </div>
+            <div class="sub-card__text">${pct}% of monthly allowance used</div>
           </div>
         </div>`;
     } catch { }

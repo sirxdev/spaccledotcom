@@ -689,9 +689,11 @@
 
     <!-- Top bar -->
     <header class="home-topbar">
-      <div class="home-greeting">
-        <p class="home-greeting__sub" id="home-greeting-sub">Good morning,</p>
-        <h1 class="home-greeting__name" id="home-greeting-name">there</h1>
+      <button class="home-avatar" id="btn-home-avatar" aria-label="Profile">
+        <span id="home-avatar-letter">?</span>
+      </button>
+      <div class="home-topbar__brand">
+        <img src="img/logo-text.png" class="home-topbar__logo" alt="Spaccle" />
       </div>
       <div class="home-topbar__right">
         <button class="home-icon-btn" id="btn-home-theme" aria-label="Toggle dark mode" title="Toggle dark/light mode">
@@ -705,9 +707,6 @@
           </svg>
           <span class="home-badge" id="home-notify-badge"></span>
         </button>
-        <button class="home-avatar" id="btn-home-avatar" aria-label="Profile">
-          <span id="home-avatar-letter">?</span>
-        </button>
       </div>
     </header>
 
@@ -718,39 +717,23 @@
       <div class="home-tab active" id="tab-home">
         <div class="home-scroll">
 
-          <!-- Hero pickup card -->
-          <div class="hero-card">
-            <div class="hero-card__body">
-              <p class="hero-card__eyebrow" data-i18n="Free pickup &amp; delivery">Free pickup &amp; delivery</p>
-              <h2 class="hero-card__title" data-i18n="Ready for fresh laundry today?">Ready for fresh<br/>laundry today?</h2>
-              <button class="btn btn--accent btn--pill hero-card__cta" id="btn-schedule-pickup" data-i18n="Schedule Pickup">
-                Schedule Pickup
-              </button>
-            </div>
-            <div class="hero-card__illo">
-              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Machine body -->
-                <rect x="10" y="20" width="100" height="85" rx="10" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
-                <!-- Door circle -->
-                <circle cx="60" cy="68" r="28" stroke="rgba(255,255,255,0.5)" stroke-width="2.5" fill="rgba(255,255,255,0.08)"/>
-                <circle cx="60" cy="68" r="18" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="rgba(255,255,255,0.12)"/>
-                <!-- Water wave inside drum -->
-                <path d="M46 70 Q50 65 54 70 Q58 75 62 70 Q66 65 70 70 Q74 75 78 70" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/>
-                <!-- Control panel dots -->
-                <circle cx="30" cy="38" r="5" fill="rgba(255,255,255,0.6)"/>
-                <circle cx="46" cy="38" r="5" fill="rgba(255,255,255,0.3)"/>
-                <rect x="60" y="33" width="35" height="10" rx="5" fill="rgba(255,255,255,0.2)"/>
-                <!-- Handle -->
-                <rect x="55" y="41" width="10" height="4" rx="2" fill="rgba(255,255,255,0.6)"/>
-                <!-- Bubbles floating -->
-                <circle cx="88" cy="55" r="4" fill="rgba(255,255,255,0.25)"/>
-                <circle cx="95" cy="42" r="3" fill="rgba(255,255,255,0.2)"/>
-                <circle cx="18" cy="60" r="3" fill="rgba(255,255,255,0.2)"/>
-              </svg>
-            </div>
+          <!-- Greeting -->
+          <div class="home-greeting">
+            <h1 class="home-greeting__hello" id="home-greeting-hello">Hello, there! 👋</h1>
+            <p class="home-greeting__sub" id="home-greeting-sub">Ready for fresh laundry today?</p>
           </div>
 
-          <!-- Subscription usage bar (shown for plan users) -->
+          <!-- Schedule Pickup button -->
+          <button class="btn btn--schedule" id="btn-schedule-pickup">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <rect x="1" y="3" width="22" height="16" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+              <path d="M16 10l-6 4V6l6 4z" fill="currentColor"/>
+              <line x1="1" y1="9" x2="23" y2="9" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <span>Schedule Pickup</span>
+          </button>
+
+          <!-- Subscription card (shown for plan users) -->
           <div id="sub-usage-bar-wrap" class="sub-usage-wrap" style="display:none"></div>
 
           <!-- Active order section -->
@@ -777,60 +760,33 @@
             </div>
 
             <!-- Active order card (shown when order exists) -->
-            <div class="order-card" id="order-active-card" style="display:none">
-              <div class="order-card__status">
-                <div class="order-card__status-dot"></div>
-                <span id="order-status-label">In Progress</span>
-              </div>
-              <div class="order-card__info">
-                <div class="order-card__row">
-                  <span class="order-card__label" data-i18n="Order ID">Order ID</span>
-                  <span class="order-card__val" id="order-id-val">#SP-0001</span>
-                </div>
-                <div class="order-card__row">
-                  <span class="order-card__label" data-i18n="Date">Date</span>
-                  <span class="order-card__val" id="order-date-val">—</span>
-                </div>
-                <div class="order-card__row">
-                  <span class="order-card__label" data-i18n="Time">Time</span>
-                  <span class="order-card__val" id="order-time-val">—</span>
-                </div>
-                <div class="order-card__row">
-                  <span class="order-card__label" data-i18n="Service">Service</span>
-                  <span class="order-card__val" id="order-items-val">8 items</span>
+            <div class="order-progress-card" id="order-active-card" style="display:none">
+              <div class="order-progress-card__header">
+                <span class="status-pill status-pill--active" id="order-status-label">In Progress</span>
+                <div class="order-progress-card__icon" id="order-card-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                    <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="1.8"/>
+                    <line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="8" y1="17" x2="13" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
                 </div>
               </div>
-              <div class="order-card__track">
-              <div class="order-track-steps">
-                <div class="order-track-step done">
-                  <div class="order-track-step__dot"></div>
-                  <span data-i18n="Scheduled">Scheduled</span>
-                </div>
-                <div class="order-track-step">
-                  <div class="order-track-step__dot"></div>
-                  <span data-i18n="Picked up">Picked Up</span>
-                </div>
-                <div class="order-track-step">
-                  <div class="order-track-step__dot"></div>
-                  <span data-i18n="At Facility">At Facility</span>
-                </div>
-                <div class="order-track-step">
-                  <div class="order-track-step__dot"></div>
-                  <span data-i18n="Out for Delivery">Out for Delivery</span>
-                </div>
-                <div class="order-track-step">
-                  <div class="order-track-step__dot"></div>
-                  <span data-i18n="Delivered">Delivered</span>
-                </div>
+              <h4 class="order-progress-card__title" id="order-id-val">Order #SP-0001</h4>
+
+              <!-- Progress dots -->
+              <div class="order-progress-dots" id="order-progress-dots">
+                <div class="order-progress-dot"></div>
+                <div class="order-progress-dot"></div>
+                <div class="order-progress-dot"></div>
+                <div class="order-progress-dot"></div>
+                <div class="order-progress-dot"></div>
               </div>
+
+              <div class="order-progress-card__body">
+                <p class="order-progress-card__status-text" id="order-status-text">In Progress</p>
+                <p class="order-progress-card__eta" id="order-eta-text">Estimated delivery: —</p>
               </div>
-              <button class="btn btn--ghost btn--full btn--sm" id="btn-order-track-map" style="margin-top:12px">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.8"/>
-                  <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.8"/>
-                </svg>
-                Track on Map
-              </button>
             </div>
           </div>
 
@@ -1168,7 +1124,7 @@
       <button class="bottom-nav__item active" data-tab="home">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M3 10L12 3l9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/>
-          <path d="M9 21V12h6v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 21V12h6v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         </svg>
         <span data-i18n="Home">Home</span>
       </button>
@@ -1190,14 +1146,14 @@
       <button class="bottom-nav__item" data-tab="track">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M19 10c0 6-7 11-7 11S5 16 5 10a7 7 0 0 1 14 0z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/>
-          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" fill="none"/>
         </svg>
         <span data-i18n="Track">Track</span>
       </button>
       <button class="bottom-nav__item" data-tab="profile">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
-          <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
         </svg>
         <span data-i18n="Profile">Profile</span>
         <span class="nav-badge" id="nav-billing-badge"></span>

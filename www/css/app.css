@@ -101,14 +101,9 @@ body.dark .admin-card {
   border-color: var(--border);
 }
 
-body.dark .order-card,
 body.dark .plan-card {
   background: var(--surface);
   border-color: var(--border);
-}
-
-body.dark .hero-card {
-  background: linear-gradient(135deg, #3D3490 0%, #5B4FBE 100%);
 }
 
 /* ── Reset ───────────────────────────────────────────────────────── */
