@@ -203,6 +203,7 @@ const HomePage = (() => {
     document.getElementById('btn-home-theme').addEventListener('click', handleQuickThemeToggle);
     document.getElementById('btn-home-avatar').addEventListener('click', () => switchTab('profile'));
     document.getElementById('btn-view-orders').addEventListener('click', () => switchTab('orders'));
+    document.getElementById('btn-home-view-orders').addEventListener('click', () => switchTab('orders'));
     document.getElementById('btn-logout').addEventListener('click', handleLogout);
     document.getElementById('btn-open-support').addEventListener('click', () => openSupport());
     document.getElementById('btn-orders-new').addEventListener('click', handleNewOrder);
@@ -1388,6 +1389,7 @@ const HomePage = (() => {
     renderOrders(orders);
     renderTracking(activeOrder);
     renderSubscriptionUsageBar();
+    renderHomeRecentOrders(orders);
     updateBillingUI();
 
     if (!document.getElementById('sheet-order')?.classList.contains('active')) {
@@ -1486,6 +1488,35 @@ const HomePage = (() => {
       btn.appendChild(left);
       btn.appendChild(pill);
       list.appendChild(btn);
+    });
+  }
+
+  function renderHomeRecentOrders(orders) {
+    const container = document.getElementById('home-recent-orders');
+    if (!container) return;
+    const empty = document.getElementById('home-recent-empty');
+    const hasOrders = Array.isArray(orders) && orders.length > 0;
+    if (empty) empty.style.display = hasOrders ? 'none' : '';
+
+    // Remove old items (keep empty state)
+    container.querySelectorAll('.home-recent-item').forEach(el => el.remove());
+
+    if (!hasOrders) return;
+    const recent = orders.slice(0, 3);
+    recent.forEach(order => {
+      const item = document.createElement('button');
+      item.className = 'home-recent-item';
+      item.dataset.orderId = order._id;
+      item.innerHTML = `
+        <div class="home-recent-item__left">
+          <div class="home-recent-item__id">${order.publicId || 'SP-000000'}</div>
+          <div class="home-recent-item__name">${serviceName(order.serviceCategories || order.service)}</div>
+        </div>
+        <div class="status-pill status-pill--${order.status || 'scheduled'}">${statusLabel(order.status)}</div>`;
+      item.addEventListener('click', () => {
+        if (order._id) openOrderSheet(order._id);
+      });
+      container.appendChild(item);
     });
   }
 
@@ -2823,17 +2854,17 @@ const HomePage = (() => {
       if (!sub || sub.status !== 'active') { bar.style.display = 'none'; return; }
       const included = Number(sub.includedItems) || 0;
       if (!included) { bar.style.display = 'none'; return; }
-      const used = included - (Number(sub.itemsRemaining) || 0);
-      const pct = Math.min(100, Math.round((used / included) * 100));
-      const colour = pct >= 90 ? '#E53935' : pct >= 70 ? '#FB8C00' : '#5B4FBE';
+      const remaining = Number(sub.itemsRemaining) || 0;
+      const pct = Math.min(100, Math.round(((included - remaining) / included) * 100));
+      const colour = pct >= 90 ? '#E53935' : pct >= 70 ? '#FB8C00' : '#06D6A0';
+      const planName = sub.planName || 'Monthly Plan';
       bar.style.display = '';
       bar.innerHTML = `
-        <div class="sub-usage-label">
-          <span>Plan items used</span>
-          <span style="font-weight:700;color:${colour}">${used} / ${included}</span>
-        </div>
-        <div class="sub-usage-track">
-          <div class="sub-usage-fill" style="transform:scaleX(${pct / 100});background:${colour}"></div>
+        <div class="sub-remaining">
+          <div class="sub-remaining__info">
+            <div class="sub-remaining__badge" style="background:${colour}">${remaining}<span class="sub-remaining__unit"> items left</span></div>
+            <div class="sub-remaining__plan">${escapeHtml(planName)}</div>
+          </div>
         </div>`;
     } catch { }
   }
