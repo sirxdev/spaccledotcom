@@ -3,13 +3,13 @@
   background: var(--bg);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: env(safe-area-inset-bottom, 32px);
+  padding-bottom: env(safe-area-inset-bottom, 48px);
 }
 
 /* Header */
 .auth__header {
   position: relative;
-  height: 180px;
+  height: 200px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -59,9 +59,9 @@
   z-index: 1;
   height: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 0 var(--gutter);
-  padding-top: env(safe-area-inset-top, 20px);
+  padding-top: calc(env(safe-area-inset-top, 20px) + 20px);
   width: 100%;
   max-width: var(--content-max);
   margin-left: auto;
@@ -83,12 +83,12 @@
 
 /* Card */
 .auth__card {
-  margin: -8px auto 0;
+  margin: -12px auto 0;
   width: min(var(--content-max), calc(100% - (var(--gutter) * 2)));
   background: var(--surface);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  padding: 0 24px 28px;
+  padding: 20px 28px 36px;
   position: relative;
   z-index: 1;
 }
@@ -98,13 +98,13 @@
   display: flex;
   position: relative;
   border-bottom: 1.5px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .auth__tab {
   flex: 1;
-  padding: 18px 8px 16px;
-  font-size: 14px;
+  padding: 20px 8px 18px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.01em;
@@ -132,37 +132,41 @@
 }
 .auth__form.active { display: flex; }
 
+.auth__form .form-group {
+  margin-bottom: 20px;
+}
+
 .auth__greeting {
-  margin-bottom: 22px;
+  margin-bottom: 26px;
 }
 
 .auth__form-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: var(--text-1);
   letter-spacing: -0.3px;
 }
 
 .auth__form-sub {
-  margin-top: 4px;
-  font-size: 14px;
+  margin-top: 6px;
+  font-size: 15px;
   color: var(--text-3);
 }
 
 /* Forgot */
 .auth__forgot {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--primary);
   text-align: right;
-  margin-top: -10px;
-  margin-bottom: 20px;
+  margin-top: -6px;
+  margin-bottom: 24px;
   padding: 4px 0;
 }
 
 /* Terms */
 .auth__terms {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .auth__link {
@@ -175,7 +179,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 20px var(--gutter);
+  margin: 28px var(--gutter) 20px;
   color: var(--text-3);
   font-size: 13px;
 }
@@ -192,16 +196,16 @@
 .auth__social {
   display: flex;
   gap: 12px;
-  padding: 0 var(--gutter);
+  padding: 0 var(--gutter) 8px;
 }
 
 @media (orientation: landscape) and (max-height: 520px) {
   .auth__header {
-    height: 140px;
+    height: 150px;
   }
 
   .auth__card {
-    margin-top: -14px;
+    margin-top: -18px;
   }
 }
 
@@ -219,8 +223,8 @@
 .reg-steps {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
-  padding-top: 4px;
+  margin-bottom: 24px;
+  padding-top: 8px;
 }
 
 .reg-step {
@@ -295,6 +299,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  margin-top: 4px;
 }
 
 .reg-step2-nav .btn--ghost {
@@ -374,7 +379,7 @@
   right: 0;
   background: var(--surface);
   border-radius: 24px 24px 0 0;
-  padding: 12px 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
+  padding: 12px 28px calc(env(safe-area-inset-bottom, 0px) + 36px);
   transform: translateY(100%);
   transition: transform 0.42s var(--ease-spring);
   max-height: 88vh;
@@ -398,7 +403,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .forgot-header-icon {
@@ -437,7 +442,7 @@
 .forgot-progress {
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   gap: 0;
 }
 
@@ -548,13 +553,13 @@
 
 /* Role selector on registration */
 .reg-role-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .reg-role-options {
   display: flex;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .reg-role-option {

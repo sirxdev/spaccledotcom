@@ -157,77 +157,84 @@
 
     <!-- Role Select Screen -->
     <div id="page-role-select" class="page page--role-select">
+      <div class="role-select__topbar">
+        <button class="role-select__back" id="btn-role-back" aria-label="Back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <img src="img/logo-text.png" class="role-select__logo" alt="Spaccle" />
+      </div>
+
       <div class="role-select__content">
         <div class="role-select__header">
-          <h1 class="role-select__title">Who are you?</h1>
-          <p class="role-select__sub">Select how you want to use Spaccle</p>
+          <h1 class="role-select__title">Choose your path</h1>
+          <p class="role-select__sub">Select how you want to use Spaccle today.</p>
         </div>
 
         <div class="role-select__cards">
           <!-- Customer card -->
-          <button class="role-card role-card--customer" id="btn-role-customer" data-role="customer">
-            <div class="role-card__top">
-              <div class="role-card__icon" style="background: linear-gradient(135deg, #E8F4FF 0%, #D1E8FF 100%);">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="12" cy="7" r="4" stroke="#4A90E2" stroke-width="1.8"/>
-                </svg>
-              </div>
-              <span class="role-card__badge role-card__badge--customer">Most Popular</span>
+          <button class="role-card" id="btn-role-customer" data-role="customer">
+            <div class="role-card__icon" style="background: linear-gradient(135deg, #E8F4FF 0%, #D1E8FF 100%);">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#4A90E2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="7" r="4" stroke="#4A90E2" stroke-width="1.8"/>
+              </svg>
             </div>
-            <h3 class="role-card__title">Customer</h3>
-            <p class="role-card__desc">Get fresh laundry without leaving home. We pick up, clean, and deliver back to you.</p>
-            <ul class="role-card__features">
-              <li>Schedule pickups anytime</li>
-              <li>Track your order in real-time</li>
-              <li>Contactless door delivery</li>
-            </ul>
-            <div class="role-card__cta">
-              <span>Get started</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <div class="role-card__body">
+              <div class="role-card__row">
+                <h3 class="role-card__title">Customer</h3>
+                <span class="role-card__badge role-card__badge--customer">Most Popular</span>
+              </div>
+              <p class="role-card__desc">Request deliveries and track them in real-time.</p>
+              <ul class="role-card__features">
+                <li>Fast, reliable delivery</li>
+                <li>Live GPS tracking</li>
+              </ul>
+            </div>
+            <div class="role-card__check role-card__check--filled" id="check-customer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
           </button>
 
           <!-- Rider card -->
-          <button class="role-card role-card--rider" id="btn-role-rider" data-role="rider">
-            <div class="role-card__top">
-              <div class="role-card__icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <circle cx="18.5" cy="5.5" r="2.5" stroke="#06D6A0" stroke-width="1.8"/>
-                  <path d="M14 10h5l2 4" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M21 14v5" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
-                  <path d="M3 15h9M3 19h9" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
-                  <path d="M10 10H5a2 2 0 0 0-2 2v3" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <span class="role-card__badge role-card__badge--rider">Earn Money</span>
+          <button class="role-card" id="btn-role-rider" data-role="rider">
+            <div class="role-card__icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <circle cx="18.5" cy="5.5" r="2.5" stroke="#06D6A0" stroke-width="1.8"/>
+                <path d="M14 10h5l2 4" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 14v5" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M3 15h9M3 19h9" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M10 10H5a2 2 0 0 0-2 2v3" stroke="#06D6A0" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
             </div>
-            <h3 class="role-card__title">Rider</h3>
-            <p class="role-card__desc">Earn on your own schedule. Deliver laundry orders in your area and get paid fast.</p>
-            <ul class="role-card__features">
-              <li>Flexible working hours</li>
-              <li>Fast weekly payouts</li>
-              <li>In-app delivery navigation</li>
-            </ul>
-            <div class="role-card__cta">
-              <span>Start earning</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <div class="role-card__body">
+              <div class="role-card__row">
+                <h3 class="role-card__title">Rider</h3>
+                <span class="role-card__badge role-card__badge--rider">EARN MONEY</span>
+              </div>
+              <p class="role-card__desc">Deliver packages on your schedule and get paid.</p>
+              <ul class="role-card__features">
+                <li>Flexible hours</li>
+                <li>Weekly payouts</li>
+              </ul>
+            </div>
+            <div class="role-card__check role-card__check--empty" id="check-rider">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
               </svg>
             </div>
           </button>
         </div>
 
-        <div class="role-select__footer">
-          <button class="btn btn--ghost btn--text" id="btn-role-back">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Back
-          </button>
-        </div>
+        <button class="role-select__continue" id="btn-role-continue">
+          Continue
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
 
